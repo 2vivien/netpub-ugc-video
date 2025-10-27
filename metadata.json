@@ -1,0 +1,7 @@
+{
+  "name": "Netpub - Agence Vidéo UGC & Production Publicitaire",
+  "description": "Un site vitrine pour Netpub, une agence de production digitale spécialisée dans la création de vidéos de marque modernes, naturelles et engageantes, incluant du contenu UGC et des spots publicitaires 4K.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

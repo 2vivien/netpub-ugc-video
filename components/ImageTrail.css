@@ -1,0 +1,27 @@
+.content {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 1; /* Changed from 100 to 1 */
+  overflow: visible;
+}
+
+.content__img {
+  aspect-ratio: 4 / 3;
+  width: 190px; /* You can adjust this width as needed */
+  border-radius: 15px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  overflow: hidden;
+  will-change: transform, filter;
+  pointer-events: none; /* Added to prevent blocking clicks */
+}
+
+.content__img-inner {
+  background-position: 50% 50%;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+}

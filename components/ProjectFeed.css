@@ -1,0 +1,29 @@
+.project-feed-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #101010; /* Darker background */
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  z-index: 1000;
+}
+
+.close-feed-button {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  z-index: 1010; /* Must be above the feed items */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
