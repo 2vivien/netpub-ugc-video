@@ -35,15 +35,19 @@ Cette commande génère le client Prisma TypeScript basé sur votre schéma.
 ### 3. Configurer votre base de données
 
 #### Option A : Push le schéma (Développement rapide)
+
 ```bash
 npm run db:push
 ```
+
 Cette commande synchronise votre schéma avec la base de données sans créer de migrations.
 
 #### Option B : Créer des migrations (Production)
+
 ```bash
 npm run db:migrate
 ```
+
 Cette commande crée des fichiers de migration que vous pouvez versionner.
 
 ### 4. Ouvrir Prisma Studio (Optionnel)
@@ -99,15 +103,25 @@ const comment = await prisma.comment.create({
 
 ## 📊 Modèles de données
 
-Le schéma inclut trois modèles principaux :
+Le schéma inclut les modèles suivants :
+
+### Modèles principaux
 
 - **User** : Utilisateurs de l'application
 - **Project** : Projets vidéo (UGC, publicitaires, spots)
 - **Comment** : Commentaires avec support des réponses (relations parent-enfant)
+- **ProjectMedia** : Médias multiples pour chaque projet (images, vidéos, thumbnails)
+
+### Modèles pour le dashboard et chatbot
+
+- **Conversation** : Conversations du chatbot
+- **ChatMessage** : Messages individuels dans une conversation
+- **Order** : Commandes passées par les clients
+- **Appointment** : Rendez-vous planifiés
 
 ## 🔒 Sécurité
 
-- Ne commitez jamais le fichier `.env.local` 
+- Ne commitez jamais le fichier `.env.local`
 - Utilisez des mots de passe forts pour votre base de données
 - Activez les connexions SSL en production
 
@@ -116,4 +130,3 @@ Le schéma inclut trois modèles principaux :
 - [Documentation Prisma](https://www.prisma.io/docs)
 - [Prisma Client API](https://www.prisma.io/docs/reference/api-reference/prisma-client-reference)
 - [Prisma Migrate](https://www.prisma.io/docs/guides/migrate)
-
