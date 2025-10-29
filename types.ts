@@ -5,6 +5,7 @@ export enum PortfolioCategory {
   VIDEO_UGC = 'Vidéo UGC',
   VIDEO_MODE = 'Vidéo Mode',
   VIDEO_SPOT_PUBLICITAIRE = 'Spot Publicitaire 4K',
+  STRATEGY = 'Stratégie',
 }
 
 export interface Comment {

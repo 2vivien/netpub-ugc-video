@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './ProjectFeedItem.css';
 import { PortfolioProject } from '../types';
+import Comment from './Comment';
+import './Comment.css';
 
 interface ProjectFeedItemProps {
   project: PortfolioProject;
@@ -62,45 +64,45 @@ const ProjectFeedItem: React.FC<ProjectFeedItemProps> = ({ project, isActive }) 
   };
 
   const renderFooterContent = () => {
-    if (isCommenting) {
-      return (
-        <div className="inline-comment-container">
-          {commentJustSent ? (
-            <p className="confirmation-message">Commentaire envoyé !</p>
-          ) : (
-            <div className="inline-comment-input">
-              <input
-                type="text"
-                placeholder="Ajouter un commentaire..."
-                value={newComment}
-                onChange={handleCommentChange}
-                onKeyPress={(e) => e.key === 'Enter' && handleCommentSubmit()}
-                autoFocus
-              />
-              <button onClick={handleCommentSubmit}>Publier</button>
-            </div>
-          )}
-        </div>
-      );
-    }
-
     return (
       <>
-        <div className="hashtags-container">
-          {project.hashtags?.map((tag: string) => (
-            <span key={tag} className="hashtag">#{tag}</span>
+        {!isCommenting && (
+          <div className="engagement-stats">
+            <span onClick={handleLike}>
+              <div className="icon">❤️</div>
+              {likes}
+            </span>
+            <span onClick={handleCommentIconClick}>
+              <div className="icon">💬</div>
+              {comments.length}
+            </span>
+          </div>
+        )}
+        {!isCommenting && (
+          <div className="hashtags-container">
+            {project.hashtags?.map((tag: string) => (
+              <span key={tag} className="hashtag">#{tag}</span>
+            ))}
+          </div>
+        )}
+        <div className="comments-section">
+          {comments.map((comment, index) => (
+            <Comment key={index} comment={comment} />
           ))}
         </div>
-        <div className="engagement-stats">
-          <span onClick={handleLike}>
-            <div className="icon">❤️</div>
-            {likes}
-          </span>
-          <span onClick={handleCommentIconClick}>
-            <div className="icon">💬</div>
-            {comments.length}
-          </span>
-        </div>
+        {isCommenting && (
+          <div className="inline-comment-input">
+            <input
+              type="text"
+              placeholder="Ajouter un commentaire..."
+              value={newComment}
+              onChange={handleCommentChange}
+              onKeyPress={(e) => e.key === 'Enter' && handleCommentSubmit()}
+              autoFocus
+            />
+            <button onClick={handleCommentSubmit} className="send-comment-button">➤</button>
+          </div>
+        )}
       </>
     );
   }

@@ -1,0 +1,83 @@
+/* Styles dédiés pour les pages légales : design simple, fond blanc, contenus en nuances noir->gris, titres bleus */
+
+:root{
+  --card-bg: #ffffff; /* carte blanche */
+  --card-border: rgba(2,6,23,0.06);
+  --accent: #0b69ff; /* bleu principal pour titres */
+  --muted: #6b7280; /* gris secondaire */
+  --text-dark: #111111; /* texte principal très sombre */
+  --text-mid: #333333; /* texte secondaire */
+  --shadow: 0 8px 30px rgba(2,6,23,0.06);
+}
+
+.page-container.legal-page{
+  padding: 48px 20px;
+}
+
+.page-container.legal-page .article-header{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  margin-bottom: 18px;
+  /* augmente encore l'espace au-dessus du titre pour le descendre davantage */
+  padding-top: 56px;
+}
+
+.page-container.legal-page .article-header h1{
+  font-size:28px;
+  margin:32px 0 0 0; /* h1 encore plus bas */
+  color:var(--accent); /* titre en bleu */
+  font-weight:800;
+}
+
+.page-container.legal-page .article-header .subtitle{
+  color:var(--muted);
+  font-size:14px;
+}
+
+.page-container.legal-page .content-section{
+  max-width:980px;
+  margin: 0 auto;
+  background: var(--card-bg);
+  border-radius:12px;
+  padding:28px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--card-border);
+}
+
+.page-container.legal-page h2{
+  color: var(--accent); /* sous-titres en bleu */
+  margin-top:18px;
+  margin-bottom:8px;
+  font-size:18px;
+  font-weight:700;
+}
+
+.page-container.legal-page p{
+  color: var(--text-dark); /* contenu en noir/gris */
+  line-height:1.75;
+  font-size:15.5px;
+}
+
+.page-container.legal-page li{color:var(--text-mid);line-height:1.7}
+.page-container.legal-page small, .page-container.legal-page .muted{color:var(--muted)}
+.page-container.legal-page ul{padding-left:18px}
+
+.page-container.legal-page .callout{
+  margin-top:18px;
+  padding:14px 18px;
+  border-radius:12px;
+  background: #fafbfd; /* very light neutral */
+  border:1px solid rgba(2,6,23,0.04);
+  color:#374151; /* gray-700 */
+}
+
+.page-container.legal-page a{color:var(--accent);text-decoration:underline}
+.page-container.legal-page a:hover{color:#0a58d8}
+
+@media (max-width:800px){
+  .page-container.legal-page .article-header h1{font-size:22px}
+  .page-container.legal-page .article-header{padding-top:24px}
+  .page-container.legal-page .content-section{padding:20px}
+}

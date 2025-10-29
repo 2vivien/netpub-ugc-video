@@ -7,7 +7,7 @@
 }
 
 .content__img {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 9 / 16;
   width: 190px; /* You can adjust this width as needed */
   border-radius: 15px;
   position: absolute;

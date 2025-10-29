@@ -1,8 +1,9 @@
 import React from 'react';
+import "../src/assets/styles/LegalPages.css";
 
 const TermsOfService: React.FC = () => {
   return (
-    <div className="page-container">
+    <div className="page-container legal-page">
       <header className="article-header text-center">
         <h1>Conditions Générales d'Utilisation</h1>
       </header>
@@ -24,8 +25,8 @@ const TermsOfService: React.FC = () => {
         <h2>Modification des Conditions</h2>
         <p>Netpub se réserve le droit de modifier les présentes conditions d'utilisation à tout moment. Les modifications prendront effet dès leur publication sur le site. Il est de votre responsabilité de consulter régulièrement ces conditions pour prendre connaissance des éventuelles modifications.</p>
 
-        <h2>Droit Applicable et Juridiction</h2>
-        <p>Tout litige en relation avec l'utilisation du site Netpub est soumis au droit français. Il est fait attribution exclusive de juridiction aux tribunaux compétents de [Ville du siège social de Netpub].</p>
+  <h2>Droit applicable et juridiction</h2>
+  <p>Tout litige en relation avec l'utilisation du site Netpub est régi par le droit français. Les tribunaux compétents seront ceux du ressort du siège social de Netpub.</p>
       </div>
     </div>
   );

@@ -16,10 +16,10 @@ const trailMedia = [
     { url: '/images/5.png', type: 'image' }, { url: '/images/6.png', type: 'image' }, { url: '/images/7.png', type: 'image' }, { url: '/images/8.png', type: 'image' },
     { url: '/images/9.png', type: 'image' }, { url: '/images/10.png', type: 'image' }, { url: '/images/11.png', type: 'image' }, { url: '/images/12.png', type: 'image' },
     { url: '/images/13.png', type: 'image' }, { url: '/images/14.png', type: 'image' }, { url: '/images/15.png', type: 'image' }, { url: '/images/16.png', type: 'image' },
-    { url: '/public/video-mode/Design sans titre (1).mp4', type: 'video' },
-    { url: '/public/video-mode/Design sans titre (2).mp4', type: 'video' },
-    { url: '/public/video-mode/Design sans titre (3).mp4', type: 'video' },
-    { url: '/public/video-mode/Design sans titre.mp4', type: 'video' },
+    { url: '/video-mode/Design sans titre (1).mp4', type: 'video' },
+    { url: '/video-mode/Design sans titre (2).mp4', type: 'video' },
+    { url: '/video-mode/Design sans titre (3).mp4', type: 'video' },
+    { url: '/video-mode/Design sans titre.mp4', type: 'video' },
 ];
 
 const AnimatedHero = () => {

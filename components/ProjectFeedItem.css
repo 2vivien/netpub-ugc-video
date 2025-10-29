@@ -1,46 +1,86 @@
-/* Floating Card Structure */
+/* Conteneur pour le défilement et le centrage */
+.project-item-wrapper {
+  height: 100vh; /* Prend toute la hauteur de l'écran pour le défilement */
+  width: 100%;
+  scroll-snap-align: center;
+  display: flex; /* Utilise flexbox pour centrer la carte */
+  justify-content: center;
+  align-items: center;
+}
+
+/* Structure de la carte flottante, maintenant avec un ratio 9:16 */
 .project-feed-item {
-  width: 90%;
-  max-width: 480px; /* Dribbble-like width */
-  height: 85vh; /* Not full height to show the background */
-  margin: 7.5vh auto; /* Centering and spacing */
-  scroll-snap-align: center; /* Snap to the center of the viewport */
-  
+  height: 85vh; /* La carte prend 85% de la hauteur de l'écran */
+  max-height: 800px; /* Une limite pour les écrans très hauts */
+  aspect-ratio: 9 / 16; /* Force le ratio 9:16, la largeur s'adapte automatiquement */
+  max-width: 90vw; /* Empêche la carte d'être plus large que l'écran */
+
   background-color: #1c1c1c;
   border-radius: 16px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* To clip the media to the rounded corners */
+  overflow: hidden; /* Pour que le contenu ne dépasse pas les coins arrondis */
+  
+  /* Les transitions pour l'effet d'activation restent les mêmes */
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  opacity: 0.6;
+  transform: scale(0.98);
 }
 
 /* Media (video/image) container */
 .media-container {
-  flex: 1; /* Takes up all available space */
+  flex: 1;
   position: relative;
   background-color: #000;
+  max-height: calc(100% - 120px); /* Leave space for footer on mobile */
+  flex-shrink: 0;
 }
 
 .media-container video,
 .media-container img {
   width: 100%;
   height: 100%;
-  object-fit: contain; /* Cover the area, can be changed to contain if needed */
+  object-fit: contain; /* Remplira la zone, peut être rogné */
 }
 
 /* Interaction Footer */
 .item-footer {
-  padding: 15px;
+  padding: 5px 15px 0px 15px; /* Reduced bottom padding to 0 */
   background-color: #1c1c1c;
   border-top: 1px solid #333;
+  transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition */
+  opacity: 0; /* Hidden by default */
+  transform: translateY(20px); /* Start slightly below */
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto; /* Make footer scrollable on mobile too */
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+
+.project-feed-item.is-active .item-footer {
+  opacity: 1; /* Visible when active */
+  transform: translateY(0); /* Slide into place */
+}
+
+@media (min-width: 768px) {
+  .media-container {
+    max-height: calc(100% - 150px); /* Leave space for footer on desktop */
+  }
+
+  .item-footer {
+    opacity: 1; /* Always visible on desktop */
+    transform: translateY(0); /* Always in place on desktop */
+  }
 }
 
 .hashtags-container {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 15px;
+  margin-bottom: 0; /* Removed margin-bottom */
 }
 
 .hashtag {
@@ -52,8 +92,9 @@
 .engagement-stats {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 10px; /* Reduced gap */
   color: white;
+  margin-bottom: 0; /* Removed margin-bottom */
 }
 
 .engagement-stats span {
@@ -105,55 +146,45 @@
 
 
 
-.inline-comment-input {
-
+.inline-comment-input button {
+  background-color: transparent; /* Make background transparent */
+  color: #0095f6; /* Blue color for the icon */
+  border: none;
+  padding: 5px; /* Reduced padding */
+  border-radius: 50%; /* Make it circular */
+  font-weight: bold;
+  cursor: pointer;
+  margin-left: 5px; /* Reduced margin */
+  font-size: 1.2rem; /* Make icon larger */
   display: flex;
-
-  gap: 10px;
-
+  align-items: center;
+  justify-content: center;
+  width: 30px; /* Fixed width */
+  height: 30px; /* Fixed height */
 }
-
-
 
 .inline-comment-input input {
-
   flex: 1;
-
   background-color: #333;
-
   border: 1px solid #555;
-
   border-radius: 20px;
-
-  padding: 10px 15px;
-
+  padding: 8px 12px; /* Reduced padding */
   color: white;
-
+  height: 30px; /* Fixed height */
 }
 
-
-
-.inline-comment-input button {
-
-  background-color: #0095f6;
-
-  color: white;
-
-  border: none;
-
-  padding: 10px 15px;
-
-  border-radius: 20px;
-
-  font-weight: bold;
-
-  cursor: pointer;
-
+.inline-comment-input {
+  display: flex;
+  align-items: center; /* Vertically align items */
+  gap: 5px; /* Reduced gap */
+  margin-top: 0; /* Removed margin-top */
 }
 
-
-
-.confirmation-message {
+.comments-section {
+  display: flex;
+  gap: 10px; /* Added gap for spacing between comments */
+  margin-bottom: 0;
+}
 
   text-align: center;
 
@@ -188,4 +219,3 @@
   transform: scale(1);
 
 }
-

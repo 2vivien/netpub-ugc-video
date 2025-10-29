@@ -11,18 +11,19 @@ interface ProjectFeedProps {
 
 const ProjectFeed: React.FC<ProjectFeedProps> = ({ projects, initialProjectIndex, onClose }) => {
   const [activeIndex, setActiveIndex] = useState(initialProjectIndex);
-  const observer = useRef<IntersectionObserver | null>(null);
-  const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const feedContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Scroll to the initially selected project without smooth scrolling
-    const initialElement = itemRefs.current.get(initialProjectIndex);
+    const container = feedContainerRef.current;
+    if (!container) return;
+
+    // Fait défiler jusqu'à l'élément initial
+    const initialElement = container.querySelector(`[data-index="${initialProjectIndex}"]`) as HTMLElement;
     if (initialElement) {
-      initialElement.scrollIntoView({ behavior: 'auto' });
+      initialElement.scrollIntoView({ behavior: 'auto', block: 'center' });
     }
 
-    // Set up the Intersection Observer
-    observer.current = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
@@ -31,36 +32,28 @@ const ProjectFeed: React.FC<ProjectFeedProps> = ({ projects, initialProjectIndex
           }
         });
       },
-      { threshold: 0.7 } // 70% of the item must be visible
+      {
+        root: container,
+        threshold: 0.5, // 50% de l'élément doit être visible
+      }
     );
 
-    const currentObserver = observer.current;
-    itemRefs.current.forEach((ref) => {
-      currentObserver.observe(ref);
-    });
+    // Observe tous les éléments
+    const itemsToObserve = container.querySelectorAll('.project-item-wrapper');
+    itemsToObserve.forEach(item => observer.observe(item));
 
     return () => {
-      if (currentObserver) {
-        currentObserver.disconnect();
-      }
+      observer.disconnect();
     };
   }, [projects, initialProjectIndex]);
 
-  const setRef = (index: number, node: HTMLDivElement | null) => {
-    if (node) {
-      itemRefs.current.set(index, node);
-    } else {
-      itemRefs.current.delete(index);
-    }
-  };
-
   return (
-    <div className="project-feed-container">
+    <div className="project-feed-container" ref={feedContainerRef}>
       <button className="close-feed-button" onClick={onClose}>×</button>
       {projects.map((project, index) => (
         <div 
           key={project.id} 
-          ref={(node) => setRef(index, node)}
+          className="project-item-wrapper" // Conteneur pour l'observation
           data-index={index}
         >
           <ProjectFeedItem project={project} isActive={index === activeIndex} />

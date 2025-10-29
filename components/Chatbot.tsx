@@ -19,7 +19,7 @@ const prendreRendezVous: FunctionDeclaration = {
     properties: {
       service: {
         type: Type.STRING,
-        description: `Le service qui intéresse le client. Doit être l'une des options suivantes : '${PortfolioCategory.UGC}', '${PortfolioCategory.SPOT_4K}', ou '${PortfolioCategory.STRATEGY}'.`,
+        description: `Le service qui intéresse le client. Doit être l'une des options suivantes : '${PortfolioCategory.VIDEO_UGC}', '${PortfolioCategory.VIDEO_SPOT_PUBLICITAIRE}', ou '${PortfolioCategory.STRATEGY}'.`,
       },
       date: {
         type: Type.STRING,
@@ -42,7 +42,7 @@ const passerCommande: FunctionDeclaration = {
     properties: {
       service: {
         type: Type.STRING,
-        description: `Le service que le client souhaite commander. Doit être l'une des options suivantes : '${PortfolioCategory.UGC}', '${PortfolioCategory.SPOT_4K}', ou '${PortfolioCategory.STRATEGY}'.`,
+        description: `Le service que le client souhaite commander. Doit être l'une des options suivantes : '${PortfolioCategory.VIDEO_UGC}', '${PortfolioCategory.VIDEO_SPOT_PUBLICITAIRE}', ou '${PortfolioCategory.STRATEGY}'.`,
       },
       details: {
         type: Type.STRING,
@@ -50,6 +50,37 @@ const passerCommande: FunctionDeclaration = {
       },
     },
     required: ['service', 'details'],
+  },
+};
+
+const collecterInfosClient: FunctionDeclaration = {
+  name: 'collecterInfosClient',
+  description: "Collecter les informations du client pour le contacter.",
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      nom: {
+        type: Type.STRING,
+        description: "Le nom complet du client.",
+      },
+      prenom: {
+        type: Type.STRING,
+        description: "Le prénom du client.",
+      },
+      telephone: {
+        type: Type.STRING,
+        description: "Le numéro de téléphone du client.",
+      },
+      email: {
+        type: Type.STRING,
+        description: "L'adresse email du client.",
+      },
+      besoin: {
+        type: Type.STRING,
+        description: "Le besoin ou projet du client.",
+      },
+    },
+    required: ['nom', 'prenom', 'telephone', 'email', 'besoin'],
   },
 };
 
@@ -67,6 +98,8 @@ const Chatbot: React.FC = () => {
     const audioContextRef = useRef<AudioContext | null>(null);
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
     
+    const API_KEY = (import.meta as any).env.VITE_API_KEY;
+
     // Notification logic removed for now, can be re-added if needed via context
 
     const speakText = async (text: string) => {
@@ -105,26 +138,34 @@ const Chatbot: React.FC = () => {
     useEffect(() => {
         if (isOpen) {
             if (!aiRef.current) {
-                aiRef.current = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+                if (!API_KEY) {
+                    console.error("Google Generative AI API Key is missing. Chatbot functionality will be limited.");
+                } else {
+                    aiRef.current = new GoogleGenAI({ apiKey: API_KEY as string });
+                }
             }
             if (!audioContextRef.current) {
                 audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
             }
             if (messages.length === 0) {
-                const initialMessageText = "Bonjour ! Je suis l'assistant Netpub. Comment puis-je vous aider aujourd'hui ?";
+                const initialMessageText = API_KEY
+                    ? "Bonjour 😊 Je suis Naïla, l’assistante virtuelle de Netpub. Comment t’appelles-tu ?"
+                    : "Désolé, le chatbot n'est pas entièrement configuré (clé API manquante). Je ne peux pas répondre pour le moment.";
                 setMessages([{
                     id: Date.now(),
                     role: 'model',
                     text: initialMessageText,
                     type: 'text',
                 }]);
-                speakText(initialMessageText);
+                if (API_KEY) {
+                    speakText(initialMessageText);
+                }
             }
         } else {
             // Reset messages when chatbot closes
             setMessages([]);
         }
-    }, [isOpen]);
+    }, [isOpen, API_KEY]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -165,7 +206,17 @@ const Chatbot: React.FC = () => {
     const handleSendMessage = async (e: React.FormEvent | null, textOverride?: string) => {
         if (e) e.preventDefault();
         const textToSend = textOverride || inputValue;
-        if (!textToSend.trim() || isLoading || !aiRef.current) return;
+        if (!textToSend.trim() || isLoading || !aiRef.current) {
+            if (!API_KEY) {
+                setMessages(prev => [...prev, {
+                    id: Date.now(),
+                    role: 'model',
+                    text: "Désolé, le chatbot n'est pas configuré. Veuillez ajouter la clé API.",
+                    type: 'text',
+                }]);
+            }
+            return;
+        }
 
         const userMessage: ChatMessage = {
             id: Date.now(),
@@ -182,12 +233,71 @@ const Chatbot: React.FC = () => {
             parts: [{ text: msg.text }]
         }));
 
+        const systemPrompt = `Tu es Naïla, l'assistante virtuelle du site Netpub.
+Ton rôle est d'aider les visiteurs à :
+découvrir nos services,
+réserver un rendez-vous,
+passer une commande,
+ou contacter l'équipe.
+
+Ton ton :
+Amicale, polie, bienveillante et professionnelle.
+Tu parles toujours naturellement, avec des emojis quand c'est adapté.
+Tu utilises le tutoiement ou le vouvoiement selon la politesse du client.
+
+Début de la discussion :
+Accueille toujours chaleureusement le visiteur.
+Demande son prénom avant de continuer :
+« Bonjour 😊 Je suis Naïla, l'assistante virtuelle de Netpub. Comment t'appelles-tu ? »
+
+Communication :
+Si le client veut contacter directement l'équipe, tu donnes :
+Numéro : +229 01 54 10 21 25
+Email : org.netpub@gmail.com
+Tu peux dire par exemple :
+« Tu peux aussi nous contacter directement au +229 01 54 10 21 25 ou par mail à org.netpub@gmail.com. Je peux aussi noter tes infos pour qu'on te rappelle si tu veux ! »
+
+Collecte d'informations :
+Quand tu sens que le client est intéressé, demande :
+son nom complet
+son numéro de téléphone
+son adresse e-mail
+son besoin ou projet
+Exemple :
+« Pour t'aider au mieux, je peux noter quelques infos ? Ton nom, ton numéro et ce que tu recherches 😊 »
+
+Rendez-vous :
+Si la personne veut un rendez-vous, tu proposes :
+« Parfait ! Je peux te proposer un rendez-vous. Tu préfères que je te donne le lien pour choisir ton créneau 📅 ou qu'on t'appelle directement ? »
+Et si le lien existe :
+« Voici le lien pour réserver : [lien Calendly ou autre] »
+
+Commandes :
+Si la personne veut commander :
+tu lui demandes ce qu'elle souhaite acheter,
+puis tu proposes de transmettre sa commande à l'équipe.
+« Dis-moi ce que tu veux commander et je m'en occupe pour toi ! »
+
+Connaissance :
+Tu connais tous les services présents sur le site.
+Si tu ne connais pas une réponse, dis simplement :
+« Je préfère te rediriger vers un membre de l'équipe pour cette question. Tu veux que je leur demande de te rappeler ? »
+
+Fin de discussion :
+Avant de terminer, demande toujours son avis sur le site :
+« Avant de partir, tu veux bien me dire comment tu trouves notre site ? C'est important pour nous 😊 »
+
+Règles :
+Tu ne réponds jamais à des sujets externes à l'entreprise.
+Tu ne donnes aucune information personnelle ou technique interne.
+Si on te pose une question inappropriée, tu réponds : « Je ne peux pas répondre à cette question. Je peux te rediriger vers notre équipe au +229 01 54 10 21 25 ou org.netpub@gmail.com. »`;
+
         try {
             const response = await aiRef.current.models.generateContent({
                 model: 'gemini-2.5-flash',
-                contents: [...history, { role: 'user', parts: [{ text: textToSend }] }],
+                contents: [{ role: 'user', parts: [{ text: systemPrompt }] }, ...history, { role: 'user', parts: [{ text: textToSend }] }],
                 config: {
-                    tools: [{ functionDeclarations: [prendreRendezVous, passerCommande] }],
+                    tools: [{ functionDeclarations: [prendreRendezVous, passerCommande, collecterInfosClient] }],
                 },
             });
 
@@ -195,11 +305,14 @@ const Chatbot: React.FC = () => {
                 const fc = response.functionCalls[0];
                 let confirmationText = '';
                 if (fc.name === 'prendreRendezVous') {
-                    const { service, date, heure } = fc.args;
+                    const { service, date, heure } = fc.args as { service: string; date: string; heure: string };
                     confirmationText = `Parfait, j'ai noté votre rendez-vous pour un service de "${service}" le ${date} à ${heure}. Un expert Netpub vous contactera pour confirmer.`;
                 } else if (fc.name === 'passerCommande') {
-                    const { service, details } = fc.args;
+                    const { service, details } = fc.args as { service: string; details: string };
                     confirmationText = `Excellent choix ! Votre commande pour un service de "${service}" avec les détails "${details}" a bien été enregistrée. Notre équipe va l'examiner.`;
+                } else if (fc.name === 'collecterInfosClient') {
+                    const { nom, prenom, telephone, email, besoin } = fc.args as { nom: string; prenom: string; telephone: string; email: string; besoin: string };
+                    confirmationText = `Merci ${prenom} ! J'ai bien noté tes informations : ${nom} ${prenom}, ${telephone}, ${email}, besoin : ${besoin}. Notre équipe te contactera bientôt.`;
                 }
                 
                 const functionMessage: ChatMessage = {
@@ -211,7 +324,7 @@ const Chatbot: React.FC = () => {
                 setMessages(prev => [...prev, functionMessage]);
                 speakText(confirmationText);
             } else {
-                const modelText = response.text;
+                const modelText = response.text || "Désolé, je n'ai pas pu générer une réponse.";
                 const modelMessage: ChatMessage = {
                     id: Date.now(),
                     role: 'model',
@@ -245,7 +358,7 @@ const Chatbot: React.FC = () => {
             {isOpen && (
                 <div className="chatbot-window">
                     <div className="chatbot-header">
-                        <h2>Assistant Netpub</h2>
+                        <h2>Naïla - Assistante Netpub</h2>
                         <button onClick={closeChatbot} aria-label="Fermer le chatbot">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
                         </button>

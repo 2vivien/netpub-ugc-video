@@ -7,6 +7,7 @@ import { PortfolioProject } from '../types';
 import TestimonialCarousel from '../components/TestimonialCarousel';
 import StatsSection from '../components/StatsSection';
 import CallToAction from '../components/CallToAction';
+import PricingPlans from '../components/PricingPlans';
 import { Link } from 'react-router-dom';
 
 const Home: React.FC = () => {
@@ -29,6 +30,7 @@ const Home: React.FC = () => {
             </div>
             <ObliqueMasonryScroller projects={featuredProjects.slice(0, 8)} onProjectClick={handleProjectClick} aspectRatio="9:16" />
             <StatsSection />
+            <PricingPlans />
             <TestimonialCarousel />
             <CallToAction />
         </div>
