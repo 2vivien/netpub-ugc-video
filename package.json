@@ -1,5 +1,6 @@
 {
-  "name": "netpub---agence-vidéo-ugc-&-production-publicitaire",
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "netpub-agence-video-ugc-production-publicitaire",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,19 +8,42 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "server": "tsx backend/server.ts",
+    "dev:all": "concurrently \"npm run server\" \"npm run dev\"",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:seed": "tsx backend/prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "tsx backend/prisma/seed.ts"
   },
   "dependencies": {
     "@google/genai": "^1.26.0",
+    "@graphql-tools/schema": "^10.0.26",
     "@prisma/client": "^6.18.0",
     "@prisma/extension-accelerate": "^2.0.2",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.5",
     "@types/gsap": "^1.20.2",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/nodemailer": "^7.0.3",
     "@types/react-swipeable": "^4.3.0",
+    "apollo-server-express": "^3.13.0",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dompurify": "^3.3.0",
+    "express": "^4.17.1",
+    "express-rate-limit": "^8.2.1",
+    "graphql": "^16.11.0",
+    "graphql-middleware": "^6.1.35",
     "gsap": "^3.13.0",
+    "jsdom": "^27.1.0",
+    "jsonwebtoken": "^8.5.1",
     "lucide-react": "^0.548.0",
+    "nodemailer": "^7.0.10",
     "prisma": "^6.18.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -27,11 +51,16 @@
     "react-masonry-css": "^1.0.16",
     "react-router-dom": "^7.9.4",
     "react-swipeable": "^7.0.2",
-    "uuid": "^13.0.0"
+    "session-file-store": "^1.5.0",
+    "ts-node": "^10.9.2",
+    "uuid": "^13.0.0",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/node": "^22.18.12",
     "@vitejs/plugin-react": "^5.1.0",
+    "concurrently": "^9.2.1",
+    "tsx": "^4.20.6",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }

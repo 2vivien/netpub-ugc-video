@@ -27,10 +27,10 @@ const Footer: React.FC = () => {
                 <div className="footer-column">
                     <h4 className="column-heading">Réseaux sociaux</h4>
                     <ul className="footer-links">
-                        <li><a href="#" className="footer-link">Instagram</a></li>
+                        <li><a href="https://ig.me/m/netp_ub?ref=w42213878" className="footer-link">Instagram</a></li>
                         <li><a href="#" className="footer-link">TikTok</a></li>
-                        <li><a href="#" className="footer-link">Facebook</a></li>
-                        <li><a href="#" className="footer-link">LinkedIn</a></li>
+                        <li><a href="https://m.me/718880621299556?ref=w42216004" className="footer-link">Facebook</a></li>
+                        <li><a href="https://www.linkedin.com/in/netpub-agence-58b01b24a" className="footer-link">LinkedIn</a></li>
                     </ul>
                 </div>
 

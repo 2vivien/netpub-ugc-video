@@ -1,11 +1,17 @@
 /* General Dashboard Styling */
 :root {
-  --dashboard-bg: #ffffff;
-  --sidebar-bg: #f0f0f0;
-  --header-bg: #ffffff;
-  --card-bg: #ffffff;
+  --dashboard-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --sidebar-bg: rgba(255, 255, 255, 0.95);
+  --header-bg: rgba(255, 255, 255, 0.95);
+  --card-bg: rgba(255, 255, 255, 0.95);
   --text-color: #333333;
-  --border-color: #e0e0e0;
+  --border-color: rgba(255, 255, 255, 0.3);
+  --primary-color: #667eea;
+  --secondary-color: #764ba2;
+  --accent-color: #ff6b6b;
+  --success-color: #51cf66;
+  --warning-color: #ffd43b;
+  --danger-color: #ff6b6b;
 }
 
 .dashboard-layout {
@@ -22,7 +28,8 @@
 .dashboard-content-area {
   flex-grow: 1;
   padding: 20px;
-  background-color: var(--dashboard-bg);
+  background: var(--dashboard-bg);
+  min-height: 100vh;
 }
 
 /* Dashboard Sidebar */
@@ -138,33 +145,75 @@
 }
 
 .widget {
-  background-color: rgba(255, 255, 255, 0.7); /* Glassmorphism effect */
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 20px;
-  border-radius: 15px; /* More rounded corners */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 25px;
+  border-radius: 15px;
   flex: 1;
   min-width: 200px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1); /* Softer, larger shadow */
-  transition: all 0.3s ease; /* Smooth transition for hover effects */
+  box-shadow: 0 8px 32px 0 rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.widget::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.widget:hover::before {
+  left: 100%;
 }
 
 .widget:hover {
-  transform: translateY(-8px) scale(1.02); /* More pronounced lift */
-  box-shadow: 0 12px 48px 0 rgba(0, 0, 0, 0.15);
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 12px 48px 0 rgba(102, 126, 234, 0.4);
+}
+
+.widget h2::before {
+  content: '📊';
+  margin-right: 10px;
+  font-size: 1.2em;
+}
+
+.widget:nth-child(2) h2::before {
+  content: '📅';
+}
+
+.widget:nth-child(3) h2::before {
+  content: '🛒';
+}
+
+.widget:nth-child(4) h2::before {
+  content: '⚡';
 }
 
 .widget h2 {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   margin-top: 0;
-  margin-bottom: 10px;
-  color: var(--primary-color);
+  margin-bottom: 15px;
+  opacity: 0.9;
 }
 
 .widget p {
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: bold;
+  margin: 0;
+}
+
+.widget small {
+  display: block;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  opacity: 0.8;
 }
 
 /* Main Dashboard Area - Conversations */
@@ -599,6 +648,7 @@
   color: var(--text-color);
 }
 
+
 .analytics-view .most-frequent-intentions {
   /* Inherits widget styles */
 }
@@ -771,4 +821,234 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Enhanced Dashboard Styles */
+.dashboard-actions {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.action-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.action-button.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.action-button.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.action-button.secondary {
+  background: #f8f9fa;
+  color: #495057;
+  border: 1px solid #dee2e6;
+}
+
+.action-button.secondary:hover {
+  background: #e9ecef;
+}
+
+.action-button.danger {
+  background: #dc3545;
+  color: white;
+}
+
+.action-button.danger:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+}
+
+.error-message {
+  color: #dc3545;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+/* Appointments specific styles */
+.appointments-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  min-height: calc(100vh - 200px);
+}
+
+.calendar-panel {
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.appointment-card {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.appointment-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.appointment-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.appointment-card p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.appointment-status {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.status-confirmed { background: #d4edda; color: #155724; }
+.status-pending { background: #fff3cd; color: #856404; }
+.status-cancelled { background: #f8d7da; color: #721c24; }
+.status-completed { background: #d1ecf1; color: #0c5460; }
+
+.appointment-detail-panel {
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+}
+
+.detail-card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.detail-card h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.appointment-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.appointment-actions .action-button {
+  flex: 1;
+  min-width: 120px;
+}
+
+.select-appointment-message {
+  text-align: center;
+  color: #888;
+  margin-top: 50px;
+  font-style: italic;
+}
+
+/* Chat actions */
+.chat-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.chat-actions .action-button {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+}
+
+/* Client details enhancements */
+.client-appointments, .client-orders {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.client-appointments h4, .client-orders h4 {
+  margin: 0 0 10px 0;
+  color: #495057;
+}
+
+.appointment-item, .order-item {
+  padding: 10px;
+  margin-bottom: 8px;
+  background: white;
+  border-radius: 6px;
+  border-left: 3px solid #667eea;
+}
+
+.appointment-item p, .order-item p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+}
+
+.status-confirmed, .status-pending, .status-cancelled, .status-completed {
+  font-size: 0.8rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .appointments-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .conversations-view .conversations-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .widget {
+    min-width: unset;
+  }
+}
+.dashboard-section {
+  padding: 20px;
+  background: var(--dashboard-bg);
+  border-radius: 10px;
+  margin-bottom: 20px;
 }

@@ -11,7 +11,7 @@ const subtitles = [
   'Stop au contenu fade. Faites vibrer votre marque.',
 ];
 
-const trailMedia = [
+const trailMedia: { url: string; type: 'image' | 'video' }[] = [
     { url: '/images/1.png', type: 'image' }, { url: '/images/2.png', type: 'image' }, { url: '/images/3.png', type: 'image' }, { url: '/images/4.png', type: 'image' },
     { url: '/images/5.png', type: 'image' }, { url: '/images/6.png', type: 'image' }, { url: '/images/7.png', type: 'image' }, { url: '/images/8.png', type: 'image' },
     { url: '/images/9.png', type: 'image' }, { url: '/images/10.png', type: 'image' }, { url: '/images/11.png', type: 'image' }, { url: '/images/12.png', type: 'image' },
@@ -71,7 +71,7 @@ const AnimatedHero = () => {
             </p>
           </div>
           
-          <div className="hero-cta-buttons flex flex-col sm:flex-row gap-16 justify-center">
+          <div className="hero-cta-buttons flex flex-col sm:flex-row gap-4 sm:gap-8 md:gap-16 justify-center">
             <button 
               onClick={openChatbot}
               className="cta-button bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-full transition-colors duration-300"

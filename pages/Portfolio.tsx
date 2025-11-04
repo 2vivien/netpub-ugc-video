@@ -5,6 +5,7 @@ import MasonryGrid from '../components/MasonryGrid';
 import ProjectFeed from '../components/ProjectFeed';
 import TestimonialCarousel from '../components/TestimonialCarousel';
 import CallToAction from '../components/CallToAction';
+import SEO from '../components/SEO';
 
 
 
@@ -49,6 +50,11 @@ const Portfolio: React.FC = () => {
 
   return (
     <div className="page-container portfolio-page">
+      <SEO 
+        title="Portfolio - Nos Réalisations de Vidéos UGC & Publicitaires"
+        description="Explorez les réalisations de NetPub. Découvrez notre portfolio de vidéos UGC, de spots publicitaires créatifs et de contenu de marque qui captivent et convertissent."
+        keywords="portfolio, réalisations, vidéos UGC, spots publicitaires, contenu de marque, études de cas, netpub"
+      />
       <header className="article-header text-center">
         <p className="article-meta">Notre travail</p>
         <h1>Découvrez nos réalisations</h1>

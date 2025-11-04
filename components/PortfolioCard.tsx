@@ -32,7 +32,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ project, onClick, aspectR
       );
     } else {
       return (
-        <img src={project.mediaUrl} alt={project.title} className="card-media" />
+        <img src={project.mediaUrl} alt={project.title} className="card-media" loading="lazy" />
       );
     }
   };

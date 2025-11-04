@@ -2,8 +2,13 @@ import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import useOnScreen from '../hooks/useOnScreen';
 import { FiPhone, FiMail, FiMapPin, FiClock } from 'react-icons/fi';
-import { FaInstagram, FaTiktok, FaYoutube, FaBehance, FaLinkedin } from 'react-icons/fa';
+import { FaInstagram, FaTiktok, FaYoutube, FaFacebook, FaLinkedin } from 'react-icons/fa';
 import { useChatbot } from '../contexts/ChatbotContext'; // Import useChatbot
+import ThankYouModal from '../components/ThankYouModal'; // Import the new modal component
+import SEO from '../components/SEO';
+import { fetchCsrfToken } from '../utils/csrf';
+
+const GRAPHQL_ENDPOINT = '/graphql'; // Assuming your GraphQL endpoint is /graphql
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -13,26 +18,48 @@ const Contact = () => {
     service: '',
     message: '',
   });
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted, setSubmitted] = useState(false); // To show the modal
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const contactFormRef = useRef<HTMLDivElement>(null);
-  const isContactFormVisible = useOnScreen(contactFormRef, { threshold: 0.1 });
+  const isContactFormVisible = useOnScreen(contactFormRef as React.RefObject<HTMLElement>, { threshold: 0.1 });
 
   const directInfoRef = useRef<HTMLDivElement>(null);
-  const isDirectInfoVisible = useOnScreen(directInfoRef, { threshold: 0.1 });
+  const isDirectInfoVisible = useOnScreen(directInfoRef as React.RefObject<HTMLElement>, { threshold: 0.1 });
 
   const socialMarqueeRef = useRef<HTMLDivElement>(null);
-  const isSocialMarqueeVisible = useOnScreen(socialMarqueeRef, { threshold: 0.1 });
+  const isSocialMarqueeVisible = useOnScreen(socialMarqueeRef as React.RefObject<HTMLElement>, { threshold: 0.1 });
 
   const contactFooterRef = useRef<HTMLDivElement>(null);
-  const isContactFooterVisible = useOnScreen(contactFooterRef, { threshold: 0.1 });
+  const isContactFooterVisible = useOnScreen(contactFooterRef as React.RefObject<HTMLElement>, { threshold: 0.1 });
 
   const socialLinks = [
-    { icon: <FaInstagram />, name: 'Instagram', url: '#' },
-    { icon: <FaTiktok />, name: 'TikTok', url: '#' },
-    { icon: <FaYoutube />, name: 'YouTube', url: '#' },
-    { icon: <FaBehance />, name: 'Behance', url: '#' },
-    { icon: <FaLinkedin />, name: 'LinkedIn', url: '#' },
+    {
+      icon: <FaInstagram />,
+      name: 'Instagram',
+      url: 'https://ig.me/m/netp_ub?ref=w42213878'
+    },
+    {
+      icon: <FaTiktok />,
+      name: 'TikTok',
+      url: '#' // Keep existing TikTok link if no new one provided
+    },
+    {
+      icon: <FaYoutube />,
+      name: 'YouTube',
+      url: '#' // Keep existing YouTube link if no new one provided
+    },
+    {
+      icon: <FaLinkedin />,
+      name: 'LinkedIn',
+      url: 'https://www.linkedin.com/in/netpub-agence-58b01b24a'
+    },
+    {
+      icon: <FaFacebook />,
+      name: 'Facebook',
+      url: 'https://m.me/718880621299556?ref=w42216004'
+    },
   ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -40,23 +67,65 @@ const Contact = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Form data submitted:', formData);
-    setSubmitted(true);
+  const handleCloseModal = () => {
+    setSubmitted(false);
+    setFormData({
+      name: '',
+      email: '',
+      company: '',
+      service: '',
+      message: '',
+    });
   };
 
-  if (submitted) {
-    return (
-      <div className="page-container contact-page">
-        <div className="contact-thank-you text-center">
-          <h1>Merci !</h1>
-          <p className="lead">Votre message a bien été envoyé. Nous vous répondrons dans les plus brefs délais.</p>
-          <Link to="/" className="cta-button">Retour à l'accueil</Link>
-        </div>
-      </div>
-    );
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const csrf = await fetchCsrfToken();
+      if (!csrf) {
+        throw new Error('CSRF token not available');
+      }
+
+      const response = await fetch(GRAPHQL_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrf,
+        },
+        body: JSON.stringify({
+          query: `
+            mutation SendContactMessage($name: String!, $email: String!, $company: String, $service: String, $message: String!) {
+              sendContactMessage(name: $name, email: $email, company: $company, service: $service, message: $message)
+            }
+          `,
+          variables: formData,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('HTTP error:', response.status, errorText);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.data && result.data.sendContactMessage) {
+        setSubmitted(true);
+      } else {
+        console.error('Error sending contact message:', result.errors);
+        setError(result.errors ? result.errors[0].message : 'Une erreur est survenue lors de l\'envoi du message. Veuillez réessayer.');
+      }
+    } catch (err) {
+      console.error('Erreur lors de la soumission du formulaire:', err);
+      setError('Une erreur inattendue est survenue. Veuillez réessayer.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const contactDetails = [
     {
@@ -87,6 +156,11 @@ const Contact = () => {
 
   return (
     <div className="page-container contact-page">
+      <SEO 
+        title="Contactez-Nous - Démarrons Votre Projet Vidéo"
+        description="Contactez l\'agence NetPub pour discuter de votre projet de vidéo UGC ou publicitaire. Remplissez notre formulaire, appelez-nous, ou utilisez notre chatbot pour une réponse immédiate."
+        keywords="contact, devis, collaboration, projet vidéo, agence UGC, nous contacter, netpub"
+      />
 
       {/* Section Hero - On crée ensemble ? */}
       <section className="contact-hero-section">
@@ -127,7 +201,10 @@ const Contact = () => {
               <div className="form-group">
                 <textarea id="message" name="message" value={formData.message} onChange={handleChange} required rows={5} placeholder="Parlez-nous de votre projet, de vos rêves, de vos défis…"></textarea>
               </div>
-              <button type="submit" className="cta-button">Envoyer le message</button>
+              <button type="submit" className="cta-button" disabled={loading}>
+                {loading ? 'Envoi en cours...' : 'Envoyer le message'}
+              </button>
+              {error && <p className="error-message">{error}</p>}
             </form>
           </div>
         </section>
@@ -169,11 +246,21 @@ const Contact = () => {
         <button onClick={openChatbot} className="cta-button contact-footer-cta">Contactez-nous directement</button>
       </section>
 
+      <ThankYouModal
+        isOpen={submitted}
+        onClose={handleCloseModal}
+        clientName={formData.name}
+        clientEmail={formData.email}
+      />
     </div>
   );
 };
 
 export default Contact;
+
+
+
+
 
 
 

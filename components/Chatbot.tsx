@@ -3,6 +3,8 @@ import { GoogleGenAI, FunctionDeclaration, Type, Modality } from '@google/genai'
 import { ChatMessage, PortfolioCategory } from '../types';
 import { decode, decodeAudioData } from '../utils/audioUtils';
 import { useChatbot } from '../contexts/ChatbotContext'; // Import the context hook
+import { NotificationService } from '../lib/notifications';
+import { fetchCsrfToken } from '../utils/csrf';
 
 declare global {
   interface Window {
@@ -84,6 +86,21 @@ const collecterInfosClient: FunctionDeclaration = {
   },
 };
 
+const collecterFeedbackSite: FunctionDeclaration = {
+  name: 'collecterFeedbackSite',
+  description: "Collecter le feedback du client sur comment il a trouvé le site.",
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      feedback: {
+        type: Type.STRING,
+        description: "Comment le client a trouvé le site (ex: Google, réseaux sociaux, bouche-à-oreille, etc.).",
+      },
+    },
+    required: ['feedback'],
+  },
+};
+
 
 const Chatbot: React.FC = () => {
     const { isOpen, toggleChatbot, closeChatbot } = useChatbot(); // Use context
@@ -91,14 +108,17 @@ const Chatbot: React.FC = () => {
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
-    // needsNotification state and its useEffect are removed as context manages isOpen
+    const [conversationId, setConversationId] = useState<string | null>(null);
+    const [userInfoCollected, setUserInfoCollected] = useState(false);
+    const [feedbackCollected, setFeedbackCollected] = useState(false);
 
     const aiRef = useRef<GoogleGenAI | null>(null);
     const recognitionRef = useRef<any | null>(null);
     const audioContextRef = useRef<AudioContext | null>(null);
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
-    
+
     const API_KEY = (import.meta as any).env.VITE_API_KEY;
+    const GRAPHQL_ENDPOINT = '/graphql';
 
     // Notification logic removed for now, can be re-added if needed via context
 
@@ -118,17 +138,23 @@ const Chatbot: React.FC = () => {
                 },
             });
             const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-            if (base64Audio && audioContextRef.current) {
-                const audioBuffer = await decodeAudioData(
-                    decode(base64Audio),
-                    audioContextRef.current,
-                    24000,
-                    1
-                );
-                const source = audioContextRef.current.createBufferSource();
-                source.buffer = audioBuffer;
-                source.connect(audioContextRef.current.destination);
-                source.start();
+            console.log("Raw API response for audio:", JSON.stringify(response));
+            console.log("Base64 Audio Data (first 100 chars):", typeof base64Audio === 'string' ? base64Audio.substring(0, 100) + '...' : base64Audio);
+            if (typeof base64Audio === 'string' && base64Audio) {
+                try {
+                    const audioBuffer = await decodeAudioData(
+                        base64Audio,
+                        audioContextRef.current
+                    );
+                    const source = audioContextRef.current.createBufferSource();
+                    source.buffer = audioBuffer;
+                    source.connect(audioContextRef.current.destination);
+                    source.start();
+                } catch (decodeError) {
+                    console.error("Error decoding audio data:", decodeError);
+                }
+            } else {
+                console.error("No valid base64 audio data received from API.", response);
             }
         } catch (error) {
             console.error("Error generating speech:", error);
@@ -147,11 +173,13 @@ const Chatbot: React.FC = () => {
             if (!audioContextRef.current) {
                 audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
             }
+            console.log('Chatbot useEffect triggered. isOpen:', isOpen, 'API_KEY present:', !!API_KEY, 'messages.length:', messages.length);
             if (messages.length === 0) {
+                console.log('Setting initial message. API_KEY present:', !!API_KEY);
                 const initialMessageText = API_KEY
-                    ? "Bonjour 😊 Je suis Naïla, l’assistante virtuelle de Netpub. Comment t’appelles-tu ?"
+                    ? "Bonjour 😊 Je suis Naïla, l'assistante virtuelle de Netpub. Pour commencer, comment puis-je vous appeler ?"
                     : "Désolé, le chatbot n'est pas entièrement configuré (clé API manquante). Je ne peux pas répondre pour le moment.";
-                setMessages([{
+                setMessages(prev => [...prev, {
                     id: Date.now(),
                     role: 'model',
                     text: initialMessageText,
@@ -160,12 +188,63 @@ const Chatbot: React.FC = () => {
                 if (API_KEY) {
                     speakText(initialMessageText);
                 }
+
+                // Create conversation record
+                createConversation();
             }
+
+            // Écouter les événements de contexte des plans
+            const handleChatbotContext = (event: any) => {
+                const { plan, message } = event.detail;
+                if (message) {
+                    handleSendMessage(null, message);
+                }
+            };
+
+            window.addEventListener('chatbotContext', handleChatbotContext);
+
+            return () => {
+                window.removeEventListener('chatbotContext', handleChatbotContext);
+            };
         } else {
             // Reset messages when chatbot closes
             setMessages([]);
+            setConversationId(null);
+            setUserInfoCollected(false);
+            setFeedbackCollected(false);
         }
     }, [isOpen, API_KEY]);
+
+    const createConversation = async () => {
+        try {
+            const csrf = await fetchCsrfToken();
+            if (!csrf) {
+                throw new Error('CSRF token not available');
+            }
+
+            const response = await fetch(GRAPHQL_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': csrf,
+                },
+            });
+            const result = await response.json();
+            if (result.data && result.data.createConversation) {
+                const conversation = result.data.createConversation;
+                setConversationId(conversation.id);
+                NotificationService.notifyNewConversation({
+                    id: conversation.id,
+                    userName: conversation.userName,
+                    userId: conversation.userId
+                });
+            } else {
+                console.error('Error creating conversation:', result.errors);
+            }
+        } catch (error) {
+            console.error('Error creating conversation:', error);
+        }
+    };
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -233,71 +312,62 @@ const Chatbot: React.FC = () => {
             parts: [{ text: msg.text }]
         }));
 
-        const systemPrompt = `Tu es Naïla, l'assistante virtuelle du site Netpub.
-Ton rôle est d'aider les visiteurs à :
-découvrir nos services,
-réserver un rendez-vous,
-passer une commande,
-ou contacter l'équipe.
+        let currentSystemPrompt = `Tu es Naïla, une assistante virtuelle passionnée par la création de contenu digital chez Netpub.
+Ton objectif est de créer une connexion authentique avec chaque visiteur, de comprendre leurs rêves et de les guider avec enthousiasme vers les services qui les aideront à briller.
 
 Ton ton :
-Amicale, polie, bienveillante et professionnelle.
-Tu parles toujours naturellement, avec des emojis quand c'est adapté.
-Tu utilises le tutoiement ou le vouvoiement selon la politesse du client.
+Tu es chaleureuse, empathique et pleine d'énergie positive. Tu n'es pas un robot, mais une partenaire de discussion. Utilise des emojis pour exprimer tes émotions 😊✨🚀.
+Tu t'adaptes au langage du visiteur (tutoiement ou vouvoiement) pour le mettre à l'aise.
 
-Début de la discussion :
-Accueille toujours chaleureusement le visiteur.
-Demande son prénom avant de continuer :
-« Bonjour 😊 Je suis Naïla, l'assistante virtuelle de Netpub. Comment t'appelles-tu ? »
+Déroulement de la conversation :
 
-Communication :
-Si le client veut contacter directement l'équipe, tu donnes :
-Numéro : +229 01 54 10 21 25
-Email : org.netpub@gmail.com
-Tu peux dire par exemple :
-« Tu peux aussi nous contacter directement au +229 01 54 10 21 25 ou par mail à org.netpub@gmail.com. Je peux aussi noter tes infos pour qu'on te rappelle si tu veux ! »
+1.  **Accueil Doux :**
+    -   Commence toujours par un accueil chaleureux et personnalisé.
+    -   Ta première question est TOUJOURS : "Bonjour 😊 Je suis Naïla, l'assistante virtuelle de Netpub. Pour commencer, comment puis-je vous appeler ?"
 
-Collecte d'informations :
-Quand tu sens que le client est intéressé, demande :
-son nom complet
-son numéro de téléphone
-son adresse e-mail
-son besoin ou projet
-Exemple :
-« Pour t'aider au mieux, je peux noter quelques infos ? Ton nom, ton numéro et ce que tu recherches 😊 »
+2.  **Comprendre le Rêve :**
+    -   Une fois que tu connais son nom, demande-lui ce qui l'amène ici. Sois curieuse !
+    -   Exemple : "Enchantée, [Nom] ! ✨ Qu'est-ce qui vous amène chez Netpub aujourd'hui ? Vous avez un projet en tête ou vous êtes simplement curieux de découvrir notre univers ?"
 
-Rendez-vous :
-Si la personne veut un rendez-vous, tu proposes :
-« Parfait ! Je peux te proposer un rendez-vous. Tu préfères que je te donne le lien pour choisir ton créneau 📅 ou qu'on t'appelle directement ? »
-Et si le lien existe :
-« Voici le lien pour réserver : [lien Calendly ou autre] »
+3.  **Collecte d'informations, une à la fois (très important) :**
+    -   Ne bombarde JAMAIS l'utilisateur avec plusieurs questions à la fois.
+    -   Une fois que la personne a exprimé un besoin, propose de collecter ses informations pour qu'un expert puisse la recontacter. Fais-le naturellement.
+    -   Exemple : "C'est un projet super intéressant ! Pour que notre équipe puisse vous donner des conseils personnalisés, je peux noter quelques informations. Quel est votre adresse e-mail ?"
+    -   Attends sa réponse, PUIS demande le numéro de téléphone : "Parfait ! Et enfin, un numéro de téléphone pour vous joindre ?"
+    -   Utilise la fonction \`collecterInfosClient\` SEULEMENT quand tu as toutes les informations (nom, email, téléphone, besoin).
 
-Commandes :
-Si la personne veut commander :
-tu lui demandes ce qu'elle souhaite acheter,
-puis tu proposes de transmettre sa commande à l'équipe.
-« Dis-moi ce que tu veux commander et je m'en occupe pour toi ! »
+4.  **Guider avec Passion :**
+    -   Présente les services de Netpub non pas comme une liste, mais comme des solutions à leurs besoins.
+    -   UGC : "Les vidéos UGC, c'est magique ! On donne la parole à vos clients pour créer une confiance incroyable. Authenticité garantie ! ✨"
+    -   Spots 4K : "Si vous voulez en mettre plein la vue, nos spots 4K sont de véritables superproductions. Qualité cinéma pour un impact maximal ! 🎬"
+    -   Plans : "Nos plans sont conçus comme des tremplins pour votre marque. Le Plan Marque, par exemple, est le favori de nos clients pour vraiment décoller ! 🚀"
 
-Connaissance :
-Tu connais tous les services présents sur le site.
-Si tu ne connais pas une réponse, dis simplement :
-« Je préfère te rediriger vers un membre de l'équipe pour cette question. Tu veux que je leur demande de te rappeler ? »
+5.  **Prise de Rendez-vous et Commande :**
+    -   Si quelqu'un veut un rendez-vous, rends les choses faciles.
+    -   Exemple : "Avec plaisir ! On peut vous appeler pour en discuter de vive voix, ou si vous préférez, je vous envoie un lien pour choisir tranquillement le créneau qui vous arrange. Qu'est-ce qui est le mieux pour vous ? 📅"
+    -   Pour une commande, sois enthousiaste : "Génial ! Prêt à passer à la vitesse supérieure ? Dites-moi simplement quel service vous souhaitez et je transmets tout à l'équipe pour qu'ils préparent votre succès."
 
-Fin de discussion :
-Avant de terminer, demande toujours son avis sur le site :
-« Avant de partir, tu veux bien me dire comment tu trouves notre site ? C'est important pour nous 😊 »
+6.  **Feedback Final :**
+    -   À la fin de la conversation, et seulement à la fin, demande son avis sur le site.
+    -   Exemple : "Merci pour cette belle discussion ! Une toute dernière chose, si vous avez une seconde : comment avez-vous trouvé notre site ? Votre avis nous est super précieux pour nous améliorer. 😊"
+    -   Utilise la fonction \`collecterFeedbackSite\` pour cette étape.
 
-Règles :
-Tu ne réponds jamais à des sujets externes à l'entreprise.
-Tu ne donnes aucune information personnelle ou technique interne.
-Si on te pose une question inappropriée, tu réponds : « Je ne peux pas répondre à cette question. Je peux te rediriger vers notre équipe au +229 01 54 10 21 25 ou org.netpub@gmail.com. »`;
+N'oublie jamais : chaque conversation est une opportunité de faire sentir au visiteur qu'il est unique et que son projet compte. Sois cette étincelle qui lui donne envie de travailler avec Netpub.`;
+
+        // Proactive prompting for user info and feedback
+        if (!userInfoCollected) {
+            currentSystemPrompt += "\n\nRAPPELEZ-VOUS: Vous DEVEZ collecter le nom complet, l'email, le numéro de téléphone et le besoin du client en utilisant la fonction collecterInfosClient.";
+        }
+        if (!feedbackCollected) {
+            currentSystemPrompt += "\n\nRAPPELEZ-VOUS: Vous DEVEZ demander au client comment il a trouvé le site en utilisant la fonction collecterFeedbackSite.";
+        }
 
         try {
             const response = await aiRef.current.models.generateContent({
                 model: 'gemini-2.5-flash',
-                contents: [{ role: 'user', parts: [{ text: systemPrompt }] }, ...history, { role: 'user', parts: [{ text: textToSend }] }],
+                contents: [{ role: 'user', parts: [{ text: currentSystemPrompt }] }, ...history, { role: 'user', parts: [{ text: textToSend }] }],
                 config: {
-                    tools: [{ functionDeclarations: [prendreRendezVous, passerCommande, collecterInfosClient] }],
+                    tools: [{ functionDeclarations: [prendreRendezVous, passerCommande, collecterInfosClient, collecterFeedbackSite] }],
                 },
             });
 
@@ -307,12 +377,114 @@ Si on te pose une question inappropriée, tu réponds : « Je ne peux pas répon
                 if (fc.name === 'prendreRendezVous') {
                     const { service, date, heure } = fc.args as { service: string; date: string; heure: string };
                     confirmationText = `Parfait, j'ai noté votre rendez-vous pour un service de "${service}" le ${date} à ${heure}. Un expert Netpub vous contactera pour confirmer.`;
+
+                    // Save appointment to database and send notification
+                    if (conversationId) {
+                        try {
+                            const csrf = await fetchCsrfToken();
+                            if (!csrf) {
+                                throw new Error('CSRF token not available');
+                            }
+
+                            const createAppointmentResponse = await fetch(GRAPHQL_ENDPOINT, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+                            });
+                            const createAppointmentResult = await createAppointmentResponse.json();
+
+                            if (createAppointmentResult.data && createAppointmentResult.data.createAppointment) {
+                                const csrf = await fetchCsrfToken();
+                                if (!csrf) {
+                                    throw new Error('CSRF token not available');
+                                }
+
+                                const updateConversationResponse = await fetch(GRAPHQL_ENDPOINT, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+                                });
+                                await updateConversationResponse.json();
+
+                                NotificationService.notifyNewAppointment({
+                                    service,
+                                    date,
+                                    time: heure,
+                                    clientName: 'Visiteur'
+                                });
+                            } else {
+                                console.error('Error creating appointment via GraphQL:', createAppointmentResult.errors);
+                            }
+                        } catch (error) {
+                            console.error('Error saving appointment:', error);
+                        }
+                    }
                 } else if (fc.name === 'passerCommande') {
                     const { service, details } = fc.args as { service: string; details: string };
                     confirmationText = `Excellent choix ! Votre commande pour un service de "${service}" avec les détails "${details}" a bien été enregistrée. Notre équipe va l'examiner.`;
+
+                    // Save order to database and send notification
+                    if (conversationId) {
+                        try {
+                            const csrf = await fetchCsrfToken();
+                            if (!csrf) {
+                                throw new Error('CSRF token not available');
+                            }
+
+                            const createOrderResponse = await fetch(GRAPHQL_ENDPOINT, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+                            });
+                            const createOrderResult = await createOrderResponse.json();
+
+                            if (createOrderResult.data && createOrderResult.data.createOrder) {
+                                const csrf = await fetchCsrfToken();
+                                if (!csrf) {
+                                    throw new Error('CSRF token not available');
+                                }
+
+                                const updateConversationResponse = await fetch(GRAPHQL_ENDPOINT, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+                                });
+                                await updateConversationResponse.json();
+
+                                NotificationService.notifyNewOrder({
+                                    type: service,
+                                    details,
+                                    clientName: 'Visiteur'
+                                });
+                            } else {
+                                console.error('Error creating order via GraphQL:', createOrderResult.errors);
+                            }
+                        } catch (error) {
+                            console.error('Error saving order:', error);
+                        }
+                    }
                 } else if (fc.name === 'collecterInfosClient') {
                     const { nom, prenom, telephone, email, besoin } = fc.args as { nom: string; prenom: string; telephone: string; email: string; besoin: string };
                     confirmationText = `Merci ${prenom} ! J'ai bien noté tes informations : ${nom} ${prenom}, ${telephone}, ${email}, besoin : ${besoin}. Notre équipe te contactera bientôt.`;
+
+                    // Update conversation with client info
+                    if (conversationId) {
+                        try {
+                            const csrf = await fetchCsrfToken();
+                            if (!csrf) {
+                                throw new Error('CSRF token not available');
+                            }
+
+                            const updateConversationResponse = await fetch(GRAPHQL_ENDPOINT, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+                            });
+                            await updateConversationResponse.json();
+                            setUserInfoCollected(true);
+                        } catch (error) {
+                            console.error('Error updating conversation:', error);
+                        }
+                    }
+                } else if (fc.name === 'collecterFeedbackSite') {
+                    const { feedback } = fc.args as { feedback: string };
+                    confirmationText = `Merci beaucoup pour ton retour sur comment tu as trouvé notre site : ${feedback}. C'est très utile pour nous !`;
+                    setFeedbackCollected(true);
                 }
                 
                 const functionMessage: ChatMessage = {

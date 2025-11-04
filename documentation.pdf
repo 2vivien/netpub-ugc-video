@@ -1,0 +1,176 @@
+# Documentation du Projet NetPub
+
+## 1. Architecture Générale
+
+Ce projet est une application web full-stack conçue pour présenter un portfolio de vidéos et de photos, tout en fournissant un back-office pour la gestion de la relation client.
+
+### 1.1. Stack Technique
+
+*   **Frontend** :
+    *   Framework : **React** (avec Vite)
+    *   Langage : **TypeScript**
+    *   Routage : **React Router Dom**
+    *   Styling : CSS personnalisé
+*   **Backend** :
+    *   Framework : **Node.js** avec **Express**
+    *   API : **GraphQL** (avec Apollo Server)
+    *   Langage : **TypeScript** (exécuté avec `tsx`)
+    *   ORM : **Prisma**
+*   **Base de données** :
+    *   Type : **PostgreSQL**
+
+### 1.2. Structure du Projet
+
+Le projet est divisé en deux parties principales :
+
+*   **Racine du projet** : Contient le code du front-end (fichiers `App.tsx`, `pages/`, `components/`, etc.).
+*   **`/backend`** : Contient le code du back-end (serveur Express, logique GraphQL, connexion à la base de données).
+
+---
+
+## 2. Backend
+
+Le backend est construit sur Node.js et expose une API GraphQL pour la communication avec le front-end.
+
+### 2.1. Serveur Express
+
+Le fichier `backend/server.ts` configure le serveur Express avec les middlewares suivants :
+
+*   `cors` : Autorise les requêtes cross-origin.
+*   `helmet` : Ajoute des en-têtes de sécurité HTTP.
+*   `express-session` : Gère les sessions utilisateur.
+*   `express-rate-limit` : Limite le nombre de requêtes pour prévenir les attaques par force brute.
+*   **Endpoint de santé** : Un endpoint `/health` est disponible pour vérifier l'état du serveur et de la base de données.
+
+### 2.2. API GraphQL
+
+L'API est accessible via l'endpoint `/graphql`.
+
+#### Schéma GraphQL (`backend/graphql/schema.ts`)
+
+L'API expose les types de données, requêtes (queries) et mutations suivants :
+
+**Types principaux :**
+
+*   `User` : Représente un utilisateur (admin ou simple utilisateur).
+*   `Project` : Un projet du portfolio.
+*   `Comment` : Un commentaire sur un projet.
+*   `Like` : Un "j'aime" sur un projet.
+*   `Conversation`, `ChatMessage`, `Order`, `Appointment` : Modèles pour le CRM/dashboard.
+*   `DashboardStats`, `AnalyticsStats` : Données agrégées pour le tableau de bord.
+
+**Requêtes (Queries) :**
+
+*   `me`, `users` : Pour récupérer les informations des utilisateurs.
+*   `projects`, `project(id)`, `projectsByCategory(category)` : Pour lister et filtrer les projets.
+*   `comments(projectId)`, `likes(projectId)` : Pour récupérer les commentaires et les "j'aime" d'un projet.
+*   `dashboardStats`, `analyticsStats`, `conversations`, `allOrders`, `allAppointments` : Pour alimenter le tableau de bord.
+
+**Mutations :**
+
+*   `login`, `register` : Pour l'authentification des utilisateurs.
+*   `sendContactMessage` : Pour le formulaire de contact.
+*   `addComment`, `addReply` : Pour ajouter des commentaires.
+*   `addLike`, `removeLike` : Pour gérer les "j'aime".
+*   Mutations diverses pour la gestion du tableau de bord (`updateOrderStatus`, `deleteConversation`, etc.).
+
+### 2.3. Base de Données (Prisma)
+
+Le schéma de la base de données est défini dans `backend/prisma/schema.prisma`.
+
+**Modèles principaux :**
+
+*   `User` : Stocke les utilisateurs et leurs rôles.
+*   `Project` : Stocke les informations sur les projets.
+*   `Comment` : Stocke les commentaires, avec une relation parent/enfant pour les réponses. Les commentaires peuvent être anonymes.
+*   `Like` : Stocke les "j'aime", qui peuvent également être anonymes.
+*   `Conversation`, `ChatMessage`, `Order`, `Appointment` : Modèles détaillés pour le système de CRM.
+*   `ProjectMedia` : Permet d'associer plusieurs médias (images/vidéos) à un projet.
+
+### 2.4. Sécurité
+
+*   **`helmet`** : Utilisé pour sécuriser les en-têtes HTTP.
+*   **`csurf`** : Le middleware est présent mais semble désactivé dans la configuration actuelle. Le front-end tente de récupérer un jeton CSRF, ce qui suggère une intention d'utiliser cette protection.
+*   **`DOMPurify`** : Utilisé côté serveur pour nettoyer les entrées HTML (commentaires, messages de contact) et prévenir les attaques XSS.
+
+### 2.5. Gestion du Cache
+
+Aucun mécanisme de mise en cache côté serveur (comme Redis ou un cache en mémoire) n'a été identifié lors de l'analyse. Les performances reposent sur l'efficacité des requêtes à la base de données.
+
+---
+
+## 3. Frontend
+
+Le front-end est une application React moderne qui interagit avec l'API GraphQL du backend.
+
+### 3.1. Routage
+
+Le routage est géré par `react-router-dom` dans le fichier `components/AppContent.tsx`.
+
+**Routes Publiques :**
+
+*   `/` : Page d'accueil.
+*   `/services`, `/portfolio`, `/about`, `/contact` : Pages principales du site.
+*   `/legal-mentions`, `/privacy-policy`, `/terms-of-service` : Pages légales.
+*   `/admin_portal_secure_access_v2_...` : URL complexe pour la page de connexion de l'administrateur.
+
+**Routes Protégées :**
+
+*   `/dashboard/*` : Ensemble de routes pour le tableau de bord, protégées par le composant `ProtectedRoute`.
+
+### 3.2. Communication avec le Backend
+
+*   **Appels GraphQL directs** : Le front-end n'utilise **pas de client GraphQL comme Apollo Client ou `react-query`**. Les requêtes sont effectuées directement avec l'API `fetch`.
+*   **Formulaire de contact** : La page de contact (`pages/Contact.tsx`) est le principal exemple d'interaction avec l'API pour les utilisateurs non authentifiés. Elle envoie la mutation `sendContactMessage`.
+*   **Jeton CSRF** : La fonction `fetchCsrfToken` est appelée avant les mutations pour récupérer un jeton CSRF depuis l'endpoint `/csrf-token` du backend.
+
+### 3.3. Gestion de l'État
+
+*   **React Context** : L'état global est géré via des contextes React :
+    *   `AuthProvider` : Pour gérer l'état d'authentification de l'utilisateur.
+    *   `ChatbotProvider` : Pour gérer l'état et la visibilité du chatbot.
+
+### 3.4. Contenu Statique
+
+Une grande partie du contenu du site est codée en dur dans le fichier `constants.tsx`.
+
+*   **Portfolio** : Tous les projets affichés sur la page `/portfolio` proviennent de ce fichier. **Ils ne sont pas récupérés depuis la base de données via l'API.**
+*   **Services, Témoignages, etc.** : D'autres contenus, comme la liste des services et les témoignages, sont également statiques.
+
+### 3.5. Gestion du Cache
+
+Aucun mécanisme de mise en cache côté client (comme la mise en cache d'Apollo Client ou `react-query`) n'a été identifié.
+
+---
+
+## 4. Liens et Interactions Clés
+
+### 4.1. Formulaire de Contact (Dynamique)
+
+*   **Page** : `/contact`
+*   **Composant** : `pages/Contact.tsx`
+*   **Interaction** :
+    1.  L'utilisateur remplit le formulaire.
+    2.  À la soumission, le front-end appelle `fetchCsrfToken()` pour obtenir un jeton de sécurité.
+    3.  Une requête `fetch` est envoyée à l'endpoint `/graphql` avec la mutation `sendContactMessage`.
+    4.  Le backend (via `resolvers.ts`) reçoit la mutation, nettoie les données avec `DOMPurify`, et utilise `emailService` pour envoyer un email.
+
+### 4.2. Portfolio (Statique)
+
+*   **Page** : `/portfolio`
+*   **Composant** : `pages/Portfolio.tsx`
+*   **Interaction** :
+    1.  Les données des projets sont importées du fichier `constants.tsx`.
+    2.  Le filtrage par catégorie est entièrement géré côté client.
+    3.  **Il n'y a aucun lien avec le backend pour cette fonctionnalité.**
+
+    *   **Pour rendre le portfolio dynamique** : Il faudrait modifier `pages/Portfolio.tsx` pour qu'il exécute la query GraphQL `projects` et affiche les résultats provenant de la base de données.
+
+### 4.3. Espace Admin (Dynamique)
+
+*   **Pages** : `/dashboard/*`
+*   **Composants** : `pages/dashboard/*`
+*   **Interaction** :
+    1.  L'utilisateur se connecte via la page de login complexe.
+    2.  Le `ProtectedRoute` vérifie si l'utilisateur est authentifié (probablement via le `AuthContext`).
+    3.  Les pages du tableau de bord (`Overview`, `Conversations`, etc.) appellent les queries et mutations GraphQL correspondantes (ex: `dashboardStats`, `allOrders`) pour afficher et gérer les données du CRM.

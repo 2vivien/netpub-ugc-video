@@ -5,6 +5,7 @@ import useOnScreen from '../hooks/useOnScreen';
 import TestimonialCarousel from '../components/TestimonialCarousel';
 import CallToAction from '../components/CallToAction';
 import { useChatbot } from '../contexts/ChatbotContext'; // Import useChatbot
+import SEO from '../components/SEO';
 
 
 const Services: React.FC = () => {
@@ -49,6 +50,11 @@ const Services: React.FC = () => {
 
     return (
         <div className="page-container services-page">
+            <SEO 
+              title="Services - Création de Vidéos UGC, Storytelling & Montage Publicitaire"
+              description="Découvrez les services de NetPub : production de vidéos UGC authentiques, storytelling, scénarisation, montage vidéo optimisé pour les publicités, et design sonore."
+              keywords="services, production vidéo, vidéos UGC, storytelling, montage vidéo, publicité, design sonore, netpub"
+            />
 
             {/* Section NOS SERVICES */}
             <section ref={servicesRef} className={`services-new-section fade-up-section ${isServicesVisible ? 'is-visible' : ''}`}>

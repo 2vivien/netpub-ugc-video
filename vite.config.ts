@@ -8,6 +8,19 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 3000,
         host: '0.0.0.0',
+        proxy: {
+          '/graphql': {
+            target: 'http://localhost:4000',
+            changeOrigin: true,
+            ws: true,
+            logLevel: 'debug',
+          },
+          '/csrf-token': {
+            target: 'http://localhost:4000',
+            changeOrigin: true,
+            logLevel: 'debug',
+          },
+        },
       },
       plugins: [react()],
       define: {
@@ -18,6 +31,7 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
-      }
+      },
+
     };
 });

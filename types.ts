@@ -8,12 +8,23 @@ export enum PortfolioCategory {
   STRATEGY = 'Stratégie',
 }
 
+export interface User {
+  id: string;
+  name: string;
+  avatar?: string;
+}
+
 export interface Comment {
-  author: string;
-  text: string;
-  avatar: string;
-  timestamp: string;
+  id: string;
+  user: User;
+  content: string;
+  createdAt: string;
   replies?: Comment[];
+}
+
+export interface Like {
+  id: string;
+  userId: string;
 }
 
 export interface PortfolioProject {
@@ -23,7 +34,7 @@ export interface PortfolioProject {
   mediaUrl: string;
   mediaType: 'image' | 'video';
   videoUrl?: string;
-  likes?: number;
+  likes?: Like[];
   comments?: Comment[];
   hashtags?: string[];
   // Optional fields, depending on usage
@@ -38,4 +49,11 @@ export interface ChatMessage {
     role: 'user' | 'model';
     text: string;
     type?: 'text' | 'function_confirmation';
+}
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string | null;
+  role: string;
 }

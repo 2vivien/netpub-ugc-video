@@ -16,7 +16,7 @@ const ImageTrail = ({ media, className }: ImageTrailProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   
   // Activate the image trail logic using the custom hook
-  useImageTrail(containerRef, media.map(item => item.url)); // Pass only URLs to the hook
+  useImageTrail(containerRef as React.RefObject<HTMLElement>, media.map(item => item.url)); // Pass only URLs to the hook
 
   return (
     <div className={`content ${className || ''}`} ref={containerRef}>
