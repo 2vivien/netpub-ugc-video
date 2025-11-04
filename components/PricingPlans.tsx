@@ -3,7 +3,7 @@ import useScreenWidth from '../hooks/useScreenWidth';
 
 const PricingPlans: React.FC = () => {
   const screenWidth = useScreenWidth();
-  const [currentIndex, setCurrentIndex] = useState(0); // Start with Plan ÉLAN (index 0)
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const nextSlide = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % 3);
@@ -12,6 +12,147 @@ const PricingPlans: React.FC = () => {
   const prevSlide = () => {
     setCurrentIndex((prevIndex) => (prevIndex - 1 + 3) % 3);
   };
+
+  // Plan data for cleaner code
+  const plans = [
+    {
+      id: 'elan',
+      name: '🌱 Plan ÉLAN',
+      tagline: 'Pour poser les bases de votre image',
+      badge: { text: 'Débuter fort', color: 'elan' },
+      features: {
+        content: [
+          '2 vidéos UGC créées à partir de votre univers produit',
+          '3 photos produits professionnelles',
+          '1 influenceur assigné à votre marque',
+          '1 mini spot publicitaire vertical (Reel/TikTok)'
+        ],
+        strategy: [
+          'Mini audit de votre marque et de votre audience',
+          'Accompagnement sur la stratégie de contenu',
+          'Gestion optionnelle des réseaux sociaux',
+          'Optimisation de la première campagne publicitaire'
+        ]
+      },
+      advantage: 'Idéal pour les jeunes marques qui veulent lancer leur communication avec impact.',
+      idealFor: 'les e-commerçants, les entreprises locales et ceux qui débutent.'
+    },
+    {
+      id: 'marque',
+      name: '🎖️ Plan MARQUE',
+      tagline: 'Pour développer votre notoriété',
+      badge: { text: 'Croissance & expansion', color: 'marque' },
+      popular: true,
+      features: {
+        content: [
+          '5 vidéos UGC orientées conversion',
+          '6 photos produits créatives',
+          '2 influenceurs dédiés selon votre niche',
+          '1 série complète de spots publicitaires cinématiques',
+          'Vidéos verticales multi-format'
+        ],
+        strategy: [
+          'Audit complet de votre marque',
+          'Stratégie marketing sur 3 mois',
+          'Gestion publicitaire sur Meta Ads + TikTok',
+          'Suivi mensuel des performances et ajustements'
+        ]
+      },
+      advantage: 'Parfait pour les marques qui veulent accélérer avec du contenu régulier, stylé et orienté résultats.',
+      idealFor: 'les marques en pleine croissance et en essor.'
+    },
+    {
+      id: 'entreprise',
+      name: '👑 Plan ENTREPRISE',
+      tagline: 'Pour s\'imposer durablement',
+      badge: { text: 'Luxe & performance', color: 'entreprise' },
+      features: {
+        content: [
+          '10 vidéos UGC 4K premium',
+          '12 photos produits artistiques',
+          '3 influenceurs stratégiques selon votre audience',
+          '1 série complète de spots publicitaires cinématiques',
+          'Captation drone + motion design avancé'
+        ],
+        strategy: [
+          'Audit approfondi de votre marque & de vos publicités',
+          'Stratégie marketing personnalisée sur 3 mois',
+          'Gestion publicitaire multi-plateforme',
+          'Analyse comportementale de l\'audience',
+          'Suivi hebdomadaire + optimisations continues'
+        ]
+      },
+      advantage: 'Une stratégie de contenu à la hauteur des grandes marques.',
+      idealFor: 'les grandes marques et les entreprises établies.'
+    }
+  ];
+
+  const openChatbot = (planName: string) => {
+    const chatbotButton = document.querySelector('.chatbot-toggler') as HTMLElement;
+    if (chatbotButton) {
+      chatbotButton.click();
+      setTimeout(() => {
+        const event = new CustomEvent('chatbotContext', {
+          detail: { 
+            plan: planName, 
+            message: `Je suis intéressé par le ${planName}` 
+          }
+        });
+        window.dispatchEvent(event);
+      }, 500);
+    }
+  };
+
+  const PricingCard = ({ plan, isPopular = false }: { plan: any, isPopular?: boolean }) => (
+    <div className={`pricing-card ${plan.id}-card ${isPopular ? 'popular' : ''}`}>
+      <div className={`pricing-badge ${plan.badge.color}-badge`}>
+        <span>{plan.badge.text}</span>
+      </div>
+      
+      {isPopular && (
+        <div className="popular-badge">
+          <span>Populaire</span>
+        </div>
+      )}
+
+      <div className="pricing-card-content">
+        <h3>{plan.name}</h3>
+        <p className="plan-tagline">{plan.tagline}</p>
+
+        <div className="pricing-features">
+          <div className="feature-group">
+            <h4>🎬 Contenu :</h4>
+            <ul>
+              {plan.features.content.map((feature: string, index: number) => (
+                <li key={index}>{feature}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="feature-group">
+            <h4>📈 Stratégie & analyse :</h4>
+            <ul>
+              {plan.features.strategy.map((feature: string, index: number) => (
+                <li key={index}>{feature}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="pricing-advantage">
+            <p><strong>✨ Avantage clé :</strong> {plan.advantage}</p>
+            <p><strong>Idéal pour :</strong> {plan.idealFor}</p>
+          </div>
+        </div>
+
+        <button 
+          className="pricing-cta-button"
+          onClick={() => openChatbot(plan.name)}
+        >
+          Choisir ce plan
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <section className="pricing-plans-section">
@@ -26,360 +167,50 @@ const PricingPlans: React.FC = () => {
         {screenWidth >= 769 ? (
           // Desktop: Grid statique
           <div className="pricing-plans-grid">
-          {/* Plan ÉLAN */}
-          <div className="pricing-card elan-card">
-            <div className="pricing-badge elan-badge">
-              <span>Débuter fort</span>
-            </div>
-
-            <div className="pricing-card-content">
-              <h3>🌱 Plan ÉLAN</h3>
-              <p>Pour poser les bases de votre image</p>
-
-              <div className="pricing-features">
-                <div className="feature-group">
-                  <h4>🎬 Contenu :</h4>
-                  <ul>
-                    <li>2 vidéos UGC créées à partir de votre univers produit</li>
-                    <li>3 photos produits professionnelles</li>
-                    <li>1 influenceur assigné à votre marque</li>
-                    <li>1 mini spot publicitaire vertical (Reel/TikTok)</li>
-                  </ul>
-                </div>
-
-
-                <div className="feature-group">
-                  <h4>📈 Stratégie & analyse :</h4>
-                  <ul>
-                    <li>Mini audit de votre marque et de votre audience</li>
-                    <li>Accompagnement sur la stratégie de contenu</li>
-                    <li>Gestion optionnelle des réseaux sociaux (publications + visuels)</li>
-                    <li>Optimisation de la première campagne publicitaire</li>
-                  </ul>
-                </div>
-
-                <div className="pricing-advantage">
-                  <p><strong>✨ Avantage clé :</strong> Idéal pour les jeunes marques qui veulent lancer leur communication avec impact.</p>
-                  <p><strong>Idéal pour :</strong> les e-commerçants, les entreprises locales et ceux qui débutent.</p>
-                </div>
-              </div>
-
-              <button className="pricing-cta-button" onClick={() => {
-                // Ouvrir le chatbot avec le contexte du plan ÉLAN
-                const chatbotButton = document.querySelector('.chatbot-toggler') as HTMLElement;
-                if (chatbotButton) {
-                  chatbotButton.click();
-                  // Attendre un peu puis envoyer le message contextuel
-                  setTimeout(() => {
-                    const event = new CustomEvent('chatbotContext', {
-                      detail: { plan: 'ÉLAN', message: 'Je suis intéressé par le Plan ÉLAN' }
-                    });
-                    window.dispatchEvent(event);
-                  }, 500);
-                }
-              }}>Choisir ce plan</button>
-            </div>
+            {plans.map((plan, index) => (
+              <PricingCard 
+                key={plan.id} 
+                plan={plan} 
+                isPopular={plan.popular}
+              />
+            ))}
           </div>
-
-          {/* Plan MARQUE */}
-          <div className="pricing-card marque-card popular">
-            <div className="pricing-badge marque-badge">
-              <span>Croissance & expansion</span>
-            </div>
-            <div className="popular-badge">
-              <span>Populaire</span>
-            </div>
-
-            <div className="pricing-card-content">
-              <h3>🎖️ Plan MARQUE</h3>
-              <p>Pour développer votre notoriété</p>
-
-              <div className="pricing-features">
-                <div className="feature-group">
-                  <h4>🎥 Contenu :</h4>
-                  <ul>
-                    <li>5 vidéos UGC orientées conversion</li>
-                    <li>6 photos produits créatives</li>
-                    <li>2 influenceurs dédiés selon votre niche</li>
-                    <li>1 série complète de spots publicitaires cinématiques</li>
-                    <li>Vidéos verticales multi-format (TikTok, Reels, YouTube Shorts, Meta)</li>
-                  </ul>
-                </div>
-
-
-                <div className="feature-group">
-                  <h4>📈 Stratégie & analyse :</h4>
-                  <ul>
-                    <li>Audit complet de votre marque</li>
-                    <li>Stratégie marketing sur 3 mois</li>
-                    <li>Gestion publicitaire sur Meta Ads + TikTok</li>
-                    <li>Suivi mensuel des performances et ajustements</li>
-                  </ul>
-                </div>
-
-                <div className="pricing-advantage">
-                  <p><strong>✨ Avantage clé :</strong> parfait pour les marques qui veulent accélérer avec du contenu régulier, stylé et orienté résultats.</p>
-                  <p><strong>Idéal pour :</strong> les marques en pleine croissance et en essor.</p>
-                </div>
-              </div>
-
-              <button className="pricing-cta-button" onClick={() => {
-                // Ouvrir le chatbot avec le contexte du plan MARQUE
-                const chatbotButton = document.querySelector('.chatbot-toggler') as HTMLElement;
-                if (chatbotButton) {
-                  chatbotButton.click();
-                  // Attendre un peu puis envoyer le message contextuel
-                  setTimeout(() => {
-                    const event = new CustomEvent('chatbotContext', {
-                      detail: { plan: 'MARQUE', message: 'Je suis intéressé par le Plan MARQUE' }
-                    });
-                    window.dispatchEvent(event);
-                  }, 500);
-                }
-              }}>Choisir ce plan</button>
-            </div>
-          </div>
-
-          {/* Plan ENTREPRISE */}
-          <div className="pricing-card entreprise-card">
-            <div className="pricing-badge entreprise-badge">
-              <span>Luxe & performance</span>
-            </div>
-
-            <div className="pricing-card-content">
-              <h3>👑 Plan ENTREPRISE</h3>
-              <p>Pour s'imposer durablement</p>
-
-              <div className="pricing-features">
-                <div className="feature-group">
-                  <h4>🎬 Contenu :</h4>
-                  <ul>
-                    <li>10 vidéos UGC 4K premium</li>
-                    <li>12 photos produits artistiques</li>
-                    <li>3 influenceurs stratégiques selon votre audience</li>
-                    <li>1 série complète de spots publicitaires cinématiques</li>
-                    <li>Captation drone + motion design avancé</li>
-                  </ul>
-                </div>
-
-
-                <div className="feature-group">
-                  <h4>📈 Stratégie & analyse :</h4>
-                  <ul>
-                    <li>Audit approfondi de votre marque & de vos publicités</li>
-                    <li>Stratégie marketing personnalisée sur 3 mois</li>
-                    <li>Gestion publicitaire multi-plateforme (Meta, TikTok, Google)</li>
-                    <li>Analyse comportementale de l'audience</li>
-                    <li>Suivi hebdomadaire + optimisations continues</li>
-                  </ul>
-                </div>
-
-                <div className="pricing-advantage">
-                  <p><strong>✨ Avantage clé :</strong> une stratégie de contenu à la hauteur des grandes marques.</p>
-                  <p><strong>Idéal pour :</strong> les grandes marques et les entreprises établies.</p>
-                </div>
-              </div>
-
-              <button className="pricing-cta-button" onClick={() => {
-                // Ouvrir le chatbot avec le contexte du plan ENTREPRISE
-                const chatbotButton = document.querySelector('.chatbot-toggler') as HTMLElement;
-                if (chatbotButton) {
-                  chatbotButton.click();
-                  // Attendre un peu puis envoyer le message contextuel
-                  setTimeout(() => {
-                    const event = new CustomEvent('chatbotContext', {
-                      detail: { plan: 'ENTREPRISE', message: 'Je suis intéressé par le Plan ENTREPRISE' }
-                    });
-                    window.dispatchEvent(event);
-                  }, 500);
-                }
-              }}>Choisir ce plan</button>
-            </div>
-          </div>
-         </div>
         ) : (
-          // Mobile: Carousel
+          // Mobile: Carousel fonctionnel
           <div className="pricing-plans-mobile-carousel">
-            <div className="pricing-plans-grid" style={{ transform: `translateX(-${currentIndex * 100}vw)` }}>
-            {/* Plan ÉLAN */}
-            <div className="pricing-card elan-card">
-              <div className="pricing-badge elan-badge">
-                <span>Débuter fort</span>
+            <div className="carousel-wrapper">
+              <div 
+                className="pricing-cards-track"
+                style={{ 
+                  transform: `translateX(-${currentIndex * 100}%)`,
+                  transition: 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                }}
+              >
+                {plans.map((plan, index) => (
+                  <div key={plan.id} className="carousel-slide">
+                    <PricingCard 
+                      plan={plan} 
+                      isPopular={plan.popular}
+                    />
+                  </div>
+                ))}
               </div>
-
-              <div className="pricing-card-content">
-                <h3>🌱 Plan ÉLAN</h3>
-                <p>Pour poser les bases de votre image</p>
-
-                <div className="pricing-features">
-                  <div className="feature-group">
-                    <h4>🎬 Contenu :</h4>
-                    <ul>
-                      <li>2 vidéos UGC créées à partir de votre univers produit</li>
-                      <li>3 photos produits professionnelles</li>
-                      <li>1 influenceur assigné à votre marque</li>
-                      <li>1 mini spot publicitaire vertical (Reel/TikTok)</li>
-                    </ul>
-                  </div>
-
-
-                  <div className="feature-group">
-                    <h4>📈 Stratégie & analyse :</h4>
-                    <ul>
-                      <li>Mini audit de votre marque et de votre audience</li>
-                      <li>Accompagnement sur la stratégie de contenu</li>
-                      <li>Gestion optionnelle des réseaux sociaux (publications + visuels)</li>
-                      <li>Optimisation de la première campagne publicitaire</li>
-                    </ul>
-                  </div>
-
-                  <div className="pricing-advantage">
-                    <p><strong>✨ Avantage clé :</strong> Idéal pour les jeunes marques qui veulent lancer leur communication avec impact.</p>
-                    <p><strong>Idéal pour :</strong> les e-commerçants, les entreprises locales et ceux qui débutent.</p>
-                  </div>
-                </div>
-
-                <button className="pricing-cta-button" onClick={() => {
-                  // Ouvrir le chatbot avec le contexte du plan ÉLAN
-                  const chatbotButton = document.querySelector('.chatbot-toggler') as HTMLElement;
-                  if (chatbotButton) {
-                    chatbotButton.click();
-                    // Attendre un peu puis envoyer le message contextuel
-                    setTimeout(() => {
-                      const event = new CustomEvent('chatbotContext', {
-                        detail: { plan: 'ÉLAN', message: 'Je suis intéressé par le Plan ÉLAN' }
-                      });
-                      window.dispatchEvent(event);
-                    }, 500);
-                  }
-                }}>Choisir ce plan</button>
-              </div>
-            </div>
-
-            {/* Plan MARQUE */}
-            <div className="pricing-card marque-card popular">
-              <div className="pricing-badge marque-badge">
-                <span>Croissance & expansion</span>
-              </div>
-              <div className="popular-badge">
-                <span>Populaire</span>
-              </div>
-
-              <div className="pricing-card-content">
-                <h3>🎖️ Plan MARQUE</h3>
-                <p>Pour développer votre notoriété</p>
-
-                <div className="pricing-features">
-                  <div className="feature-group">
-                    <h4>🎥 Contenu :</h4>
-                    <ul>
-                      <li>5 vidéos UGC orientées conversion</li>
-                      <li>6 photos produits créatives</li>
-                      <li>2 influenceurs dédiés selon votre niche</li>
-                      <li>1 série complète de spots publicitaires cinématiques</li>
-                      <li>Vidéos verticales multi-format (TikTok, Reels, YouTube Shorts, Meta)</li>
-                    </ul>
-                  </div>
-
-
-                  <div className="feature-group">
-                    <h4>📈 Stratégie & analyse :</h4>
-                    <ul>
-                      <li>Audit complet de votre marque</li>
-                      <li>Stratégie marketing sur 3 mois</li>
-                      <li>Gestion publicitaire sur Meta Ads + TikTok</li>
-                      <li>Suivi mensuel des performances et ajustements</li>
-                    </ul>
-                  </div>
-
-                  <div className="pricing-advantage">
-                    <p><strong>✨ Avantage clé :</strong> parfait pour les marques qui veulent accélérer avec du contenu régulier, stylé et orienté résultats.</p>
-                    <p><strong>Idéal pour :</strong> les marques en pleine croissance et en essor.</p>
-                  </div>
-                </div>
-
-                <button className="pricing-cta-button" onClick={() => {
-                  // Ouvrir le chatbot avec le contexte du plan MARQUE
-                  const chatbotButton = document.querySelector('.chatbot-toggler') as HTMLElement;
-                  if (chatbotButton) {
-                    chatbotButton.click();
-                    // Attendre un peu puis envoyer le message contextuel
-                    setTimeout(() => {
-                      const event = new CustomEvent('chatbotContext', {
-                        detail: { plan: 'MARQUE', message: 'Je suis intéressé par le Plan MARQUE' }
-                      });
-                      window.dispatchEvent(event);
-                    }, 500);
-                  }
-                }}>Choisir ce plan</button>
-              </div>
-            </div>
-
-            {/* Plan ENTREPRISE */}
-            <div className="pricing-card entreprise-card">
-              <div className="pricing-badge entreprise-badge">
-                <span>Luxe & performance</span>
-              </div>
-
-              <div className="pricing-card-content">
-                <h3>👑 Plan ENTREPRISE</h3>
-                <p>Pour s'imposer durablement</p>
-
-                <div className="pricing-features">
-                  <div className="feature-group">
-                    <h4>🎬 Contenu :</h4>
-                    <ul>
-                      <li>10 vidéos UGC 4K premium</li>
-                      <li>12 photos produits artistiques</li>
-                      <li>3 influenceurs stratégiques selon votre audience</li>
-                      <li>1 série complète de spots publicitaires cinématiques</li>
-                      <li>Captation drone + motion design avancé</li>
-                    </ul>
-                  </div>
-
-
-                  <div className="feature-group">
-                    <h4>📈 Stratégie & analyse :</h4>
-                    <ul>
-                      <li>Audit approfondi de votre marque & de vos publicités</li>
-                      <li>Stratégie marketing personnalisée sur 3 mois</li>
-                      <li>Gestion publicitaire multi-plateforme (Meta, TikTok, Google)</li>
-                      <li>Analyse comportementale de l'audience</li>
-                      <li>Suivi hebdomadaire + optimisations continues</li>
-                    </ul>
-                  </div>
-
-                  <div className="pricing-advantage">
-                    <p><strong>✨ Avantage clé :</strong> une stratégie de contenu à la hauteur des grandes marques.</p>
-                    <p><strong>Idéal pour :</strong> les grandes marques et les entreprises établies.</p>
-                  </div>
-                </div>
-
-                <button className="pricing-cta-button" onClick={() => {
-                  // Ouvrir le chatbot avec le contexte du plan ENTREPRISE
-                  const chatbotButton = document.querySelector('.chatbot-toggler') as HTMLElement;
-                  if (chatbotButton) {
-                    chatbotButton.click();
-                    // Attendre un peu puis envoyer le message contextuel
-                    setTimeout(() => {
-                      const event = new CustomEvent('chatbotContext', {
-                        detail: { plan: 'ENTREPRISE', message: 'Je suis intéressé par le Plan ENTREPRISE' }
-                      });
-                      window.dispatchEvent(event);
-                    }, 500);
-                  }
-                }}>Choisir ce plan</button>
-              </div>
-            </div>
             </div>
 
             {/* Navigation buttons for mobile carousel */}
             <div className="carousel-navigation">
-              <button className="carousel-nav-btn prev" onClick={prevSlide} aria-label="Plan précédent">
-                ‹
+              <button 
+                className="carousel-nav-btn prev" 
+                onClick={prevSlide}
+                aria-label="Plan précédent"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </button>
+              
               <div className="carousel-indicators">
-                {[0, 1, 2].map((index) => (
+                {plans.map((_, index) => (
                   <button
                     key={index}
                     className={`indicator ${index === currentIndex ? 'active' : ''}`}
@@ -388,8 +219,15 @@ const PricingPlans: React.FC = () => {
                   />
                 ))}
               </div>
-              <button className="carousel-nav-btn next" onClick={nextSlide} aria-label="Plan suivant">
-                ›
+              
+              <button 
+                className="carousel-nav-btn next" 
+                onClick={nextSlide}
+                aria-label="Plan suivant"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </button>
             </div>
           </div>

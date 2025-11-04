@@ -82,18 +82,35 @@
 }
 
 /* Mobile adjustments */
+
 @media (max-width: 768px) {
+
     .add-comment-form {
-        padding: 0 8px; /* Add some horizontal padding */
+
+        padding: 0 16px; /* Add more horizontal padding */
+
+        margin-bottom: 16px; /* Add bottom margin */
+
     }
+
+
 
     .add-comment-form input {
+
         padding: 8px 12px;
+
         font-size: 0.8rem;
+
     }
 
+
+
     .add-comment-form button {
+
         width: 32px;
+
         height: 32px;
+
     }
+
 }

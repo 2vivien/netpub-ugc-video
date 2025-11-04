@@ -46,9 +46,9 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ project, onClick, aspectR
         <div className="card-footer">
           <div className="project-stats">
             <Heart size={16} />
-            <span>{project.likes}</span>
+            <span>{project.likeCount || (Array.isArray(project.likes) ? project.likes.length : 0)}</span>
             <MessageCircle size={16} />
-            <span>{project.comments?.length || 0}</span>
+            <span>{project.commentCount || project.comments?.length || 0}</span>
           </div>
           <div className="project-tags">
             {project.tags?.map(tag => (

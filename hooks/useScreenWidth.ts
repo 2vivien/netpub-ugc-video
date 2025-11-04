@@ -1,19 +1,26 @@
 import { useState, useEffect } from 'react';
 
 const useScreenWidth = () => {
-    const [width, setWidth] = useState(window.innerWidth);
+    // Initialise avec 0 au lieu de window.innerWidth
+    const [width, setWidth] = useState(0);
 
     useEffect(() => {
-        const handleResize = () => {
-            setWidth(window.innerWidth);
-        };
+        // Vérifie si on est côté client
+        if (typeof window !== 'undefined') {
+            const handleResize = () => {
+                setWidth(window.innerWidth);
+            };
 
-        window.addEventListener('resize', handleResize);
+            // Initialise la valeur
+            handleResize();
 
-        // Cleanup listener on component unmount
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        };
+            window.addEventListener('resize', handleResize);
+
+            // Cleanup listener on component unmount
+            return () => {
+                window.removeEventListener('resize', handleResize);
+            };
+        }
     }, []);
 
     return width;

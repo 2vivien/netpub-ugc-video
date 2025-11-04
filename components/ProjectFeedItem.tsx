@@ -15,8 +15,15 @@ interface ProjectFeedItemProps {
 const ProjectFeedItem: React.FC<ProjectFeedItemProps> = ({ project, isActive }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [likes, setLikes] = useState<Like[]>(project.likes || []);
+  const [likeCount, setLikeCount] = useState(project.likeCount || (project.likes || []).length);
+  const [commentCount, setCommentCount] = useState(project.commentCount || (project.comments || []).length);
+
+  const onCommentAdded = () => {
+    setCommentCount(commentCount + 1);
+  };
   const [userId, setUserId] = useState<string | null>(null);
   const [showComments, setShowComments] = useState(false);
+  const [isCommenting, setIsCommenting] = useState(false);
 
   useEffect(() => {
     let id = localStorage.getItem('viewerId');
@@ -47,7 +54,10 @@ const ProjectFeedItem: React.FC<ProjectFeedItemProps> = ({ project, isActive }) 
 
     if (existingLike) {
       // Optimistically remove the like
+      const originalLikes = likes;
+      const originalLikeCount = likeCount;
       setLikes(Array.isArray(likes) ? likes.filter(like => like.anonymousId !== userId) : []);
+      setLikeCount(likeCount - 1);
       try {
         const csrf = await fetchCsrfToken();
         if (!csrf) {
@@ -67,12 +77,16 @@ const ProjectFeedItem: React.FC<ProjectFeedItemProps> = ({ project, isActive }) 
           }),
         });
       } catch (error) {
-        setLikes(likes); // Revert on error
+        setLikes(originalLikes); // Revert on error
+        setLikeCount(originalLikeCount);
       }
     } else {
       // Optimistically add the like
       const newLike = { id: Date.now().toString(), anonymousId: userId };
+      const originalLikes = likes;
+      const originalLikeCount = likeCount;
       setLikes(Array.isArray(likes) ? [...likes, newLike] : [newLike]);
+      setLikeCount(likeCount + 1);
       try {
         const csrf = await fetchCsrfToken();
         if (!csrf) {
@@ -96,9 +110,16 @@ const ProjectFeedItem: React.FC<ProjectFeedItemProps> = ({ project, isActive }) 
         });
       } catch (error) {
         console.error('Error adding like:', error);
-        setLikes(likes); // Revert on error
+        setLikes(originalLikes); // Revert on error
+        setLikeCount(originalLikeCount);
       }
     }
+  };
+
+  // MODIFICATION IMPORTANTE : Gère le clic sur l'icône commentaire
+  const handleCommentClick = () => {
+    setShowComments(!showComments);
+    setIsCommenting(!showComments); // Active le mode commentaire immédiatement
   };
 
   const renderFooterContent = () => {
@@ -122,17 +143,23 @@ const ProjectFeedItem: React.FC<ProjectFeedItemProps> = ({ project, isActive }) 
           <button onClick={handleLike} className="action-button like-button">
             <HeartIcon filled={isLikedByViewer} />
           </button>
-          <span className="likes-count">{Array.isArray(likes) ? likes.length : 0}</span>
-          <button onClick={() => setShowComments(!showComments)} className="action-button comment-button">
+          <span className="likes-count">{likeCount}</span>
+          {/* MODIFICATION : Utilise la nouvelle fonction */}
+          <button onClick={handleCommentClick} className="action-button comment-button">
             <CommentIcon />
           </button>
+          <span className="comments-count">{commentCount}</span>
         </div>
-        <div className="hashtags-container">
-          {project.hashtags?.map((tag: string) => (
-            <span key={tag} className="hashtag">#{tag}</span>
-          ))}
+        {!isCommenting && (
+          <div className="hashtags-container">
+            {project.hashtags?.map((tag: string) => (
+              <span key={tag} className="hashtag">#{tag}</span>
+            ))}
+          </div>
+        )}
+        <div>
+          {showComments && <CommentThread project={project} setIsCommenting={setIsCommenting} onCommentAdded={onCommentAdded} />}
         </div>
-        {showComments && <CommentThread project={project} />}
       </>
     );
   }
@@ -153,7 +180,8 @@ const ProjectFeedItem: React.FC<ProjectFeedItemProps> = ({ project, isActive }) 
         )}
       </div>
 
-      <div className="item-footer">
+      {/* MODIFICATION : Ajoute showComments à la classe */}
+      <div className={`item-footer ${isCommenting ? 'is-commenting' : ''} ${showComments ? 'comments-visible' : ''}`}>
         {renderFooterContent()}
       </div>
     </div>

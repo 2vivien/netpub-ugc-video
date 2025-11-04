@@ -13,8 +13,7 @@ const MasonryGrid: React.FC<MasonryGridProps> = ({ projects, onProjectClick }) =
   const breakpointColumnsObj = {
     default: 4,
     1100: 3,
-    700: 2,
-    500: 1
+    767: 2
   };
 
   return (

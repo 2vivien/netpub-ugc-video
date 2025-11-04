@@ -24,7 +24,8 @@ export interface Comment {
 
 export interface Like {
   id: string;
-  userId: string;
+  userId?: string;
+  anonymousId?: string;
 }
 
 export interface PortfolioProject {
@@ -36,6 +37,8 @@ export interface PortfolioProject {
   videoUrl?: string;
   likes?: Like[];
   comments?: Comment[];
+  likeCount?: number;
+  commentCount?: number;
   hashtags?: string[];
   // Optional fields, depending on usage
   client?: string;

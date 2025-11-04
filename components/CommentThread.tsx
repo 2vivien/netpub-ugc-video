@@ -9,13 +9,16 @@ const GRAPHQL_ENDPOINT = '/graphql';
 
 interface CommentThreadProps {
   project: PortfolioProject;
+  setIsCommenting: (isCommenting: boolean) => void;
+  onCommentAdded: () => void;
 }
 
-const CommentThread: React.FC<CommentThreadProps> = ({ project }) => {
+const CommentThread: React.FC<CommentThreadProps> = ({ project, setIsCommenting, onCommentAdded }) => {
   const [comments, setComments] = useState<CommentType[]>(project.comments || []);
   const [newComment, setNewComment] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     let id = localStorage.getItem('viewerId');
@@ -27,9 +30,9 @@ const CommentThread: React.FC<CommentThreadProps> = ({ project }) => {
   }, []);
 
   const handleAddComment = async () => {
-    if (!newComment.trim() || !userId) return;
+    if (!newComment.trim() || !userId || isSubmitting) return;
 
-    // Optimistic update is tricky with confirmation messages, so we'll update after success.
+    setIsSubmitting(true);
     try {
       const csrf = await fetchCsrfToken();
       if (!csrf) {
@@ -37,7 +40,6 @@ const CommentThread: React.FC<CommentThreadProps> = ({ project }) => {
       }
 
       const variables = { projectId: project.id, content: newComment, anonymousId: userId };
-      console.log('Sending comment variables:', variables);
 
       const response = await fetch(GRAPHQL_ENDPOINT, {
         method: 'POST',
@@ -64,12 +66,18 @@ const CommentThread: React.FC<CommentThreadProps> = ({ project }) => {
         setComments([...comments, result.data.addComment]);
         setNewComment('');
         setIsSubmitted(true);
+        onCommentAdded();
+        setTimeout(() => {
+          setIsSubmitted(false);
+        }, 2000); // Hide message after 2 seconds
       } else {
         throw new Error(result.errors?.[0]?.message || 'Failed to add comment');
       }
     } catch (error) {
       console.error('Error adding comment:', error);
       // Optionally show an error message to the user
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -89,10 +97,12 @@ const CommentThread: React.FC<CommentThreadProps> = ({ project }) => {
           <input
             type="text"
             value={newComment}
+            onFocus={() => setIsCommenting(true)}
+            onBlur={() => setIsCommenting(false)}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Laissez un commentaire..."
           />
-          <button onClick={handleAddComment}>
+          <button onClick={handleAddComment} disabled={!userId || isSubmitting}>
             <svg fill="white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24">
               <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
             </svg>

@@ -1,86 +1,139 @@
 /* Conteneur pour le défilement et le centrage */
 .project-item-wrapper {
-  height: 100vh; /* Prend toute la hauteur de l'écran pour le défilement */
+  height: 100vh;
   width: 100%;
   scroll-snap-align: center;
-  display: flex; /* Utilise flexbox pour centrer la carte */
+  display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* Structure de la carte flottante, maintenant avec un ratio 9:16 */
+/* Structure de la carte flottante */
 .project-feed-item {
-  height: 85vh; /* La carte prend 85% de la hauteur de l'écran */
-  max-height: 800px; /* Une limite pour les écrans très hauts */
-  aspect-ratio: 9 / 16; /* Force le ratio 9:16, la largeur s'adapte automatiquement */
-  max-width: 90vw; /* Empêche la carte d'être plus large que l'écran */
-
+  height: 85vh;
+  max-height: 800px;
+  aspect-ratio: 9 / 16;
+  max-width: 90vw;
   background-color: #1c1c1c;
   border-radius: 16px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Pour que le contenu ne dépasse pas les coins arrondis */
-  
-  /* Les transitions pour l'effet d'activation restent les mêmes */
+  overflow: hidden;
   transition: opacity 0.5s ease, transform 0.5s ease;
   opacity: 0.6;
   transform: scale(0.98);
 }
 
-/* Media (video/image) container */
+.project-feed-item.is-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Media container */
 .media-container {
   flex: 1;
   position: relative;
   background-color: #000;
-  max-height: calc(100% - 120px); /* Leave space for footer on mobile */
+  max-height: calc(100% - 120px);
   flex-shrink: 0;
+  transition: max-height 0.3s ease;
 }
 
 .media-container video,
 .media-container img {
   width: 100%;
   height: 100%;
-  object-fit: contain; /* Remplira la zone, peut être rogné */
+  object-fit: contain;
 }
 
-/* Interaction Footer */
+/* Footer principal */
 .item-footer {
-  padding: 5px 15px 0px 15px; /* Reduced bottom padding to 0 */
+  padding: 8px 15px 8px 15px;
   background-color: #1c1c1c;
   border-top: 1px solid #333;
-  transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition */
-  opacity: 0; /* Hidden by default */
-  transform: translateY(20px); /* Start slightly below */
+  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
-  overflow-y: auto; /* Make footer scrollable on mobile too */
   flex-grow: 0;
   flex-shrink: 0;
+  min-height: 60px;
 }
 
 .project-feed-item.is-active .item-footer {
-  opacity: 1; /* Visible when active */
-  transform: translateY(0); /* Slide into place */
+  opacity: 1;
+  transform: translateY(0);
 }
 
-@media (min-width: 768px) {
-  .media-container {
-    max-height: calc(100% - 150px); /* Leave space for footer on desktop */
-  }
-
-  .item-footer {
-    opacity: 1; /* Always visible on desktop */
-    transform: translateY(0); /* Always in place on desktop */
-  }
+/* MODE COMMENTAIRE - Fonctionne dès le clic sur l'icône */
+.item-footer.comments-visible {
+  padding: 8px 15px 12px 15px;
+  min-height: 100px;
 }
 
+/* Cache les hashtags quand les commentaires sont visibles */
+.item-footer.comments-visible .hashtags-container {
+  display: none;
+}
+
+/* Réduit l'espace media quand les commentaires sont visibles */
+.item-footer.comments-visible ~ .media-container {
+  max-height: calc(100% - 100px);
+}
+
+/* Actions */
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.action-button {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.action-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.action-button svg {
+  width: 24px;
+  height: 24px;
+}
+
+.like-button .icon-filled {
+  color: #ff3040;
+}
+
+.likes-count {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.comments-count {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Hashtags */
 .hashtags-container {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 0; /* Removed margin-bottom */
+  margin: 8px 0;
 }
 
 .hashtag {
@@ -89,68 +142,53 @@
   color: #aaa;
 }
 
-.engagement-stats {
-  display: flex;
-  align-items: center;
-  gap: 10px; /* Reduced gap */
-  color: white;
-  margin-bottom: 0; /* Removed margin-bottom */
+/* Section commentaires */
+.comments-section {
+  margin-top: 8px;
 }
 
-.engagement-stats span {
+.inline-comment-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inline-comment-input {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-top: 8px;
+}
+
+.inline-comment-input input {
+  flex: 1;
+  background-color: #333;
+  border: 1px solid #555;
+  border-radius: 20px;
+  padding: 10px 14px;
+  color: white;
   font-size: 0.9rem;
+  height: 36px;
+}
+
+.inline-comment-input button {
+  background-color: transparent;
+  color: #0095f6;
+  border: none;
+  padding: 6px;
+  border-radius: 50%;
+  font-weight: bold;
   cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
 }
 
-.engagement-stats .icon {
-  font-size: 1.5rem;
-}
-
-/* New styles for a more beautiful UI */
-.item-actions {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 8px 0;
-}
-
-.action-button {
-    background: transparent;
-    border: none;
-    color: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px;
-    border-radius: 50%;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.action-button:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    transform: scale(1.1);
-}
-
-.action-button svg {
-    width: 24px;
-    height: 24px;
-}
-
-.like-button .icon-filled {
-    color: #ff3040;
-}
-
-.likes-count {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #fff;
-}
-
-/* Heart animation remains the same */
+/* Heart animation */
 .heart-animation {
   position: absolute;
   top: 50%;
@@ -169,84 +207,108 @@
   100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
 }
 
-/* Comments Panel (slides over everything) */
+/* ===== VERSION MOBILE ===== */
+@media (max-width: 767px) {
+  .item-footer {
+    padding: 6px 12px 8px 12px;
+    min-height: 50px;
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+  }
 
-/* Removed: .comments-panel, .comments-header, .comments-list, .comment-input (old) */
+  /* Mode commentaire mobile optimisé */
+  .item-footer.comments-visible {
+    padding: 6px 12px 10px 12px;
+    min-height: 80px;
+  }
 
+  .item-footer.comments-visible ~ .media-container {
+    max-height: calc(100% - 90px);
+  }
 
+  .item-actions {
+    gap: 12px;
+    padding: 4px 0;
+  }
 
-.inline-comment-container {
+  .action-button {
+    padding: 6px;
+    gap: 6px;
+  }
 
-  display: flex;
+  .action-button svg {
+    width: 20px;
+    height: 20px;
+  }
 
-  flex-direction: column;
+  .hashtags-container {
+    gap: 6px;
+    margin: 6px 0;
+  }
 
-  gap: 10px;
+  .hashtag {
+    font-size: 0.75rem;
+  }
 
+  .inline-comment-input {
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .inline-comment-input input {
+    padding: 8px 12px;
+    height: 32px;
+    font-size: 0.85rem;
+  }
+
+  .inline-comment-input button {
+    width: 30px;
+    height: 30px;
+    font-size: 1.1rem;
+  }
 }
 
+/* ===== VERSION DESKTOP ===== */
+@media (min-width: 768px) {
+  .media-container {
+    max-height: calc(100% - 150px);
+  }
 
+  .item-footer {
+    opacity: 1;
+    transform: translateY(0);
+    padding: 10px 20px;
+    min-height: 80px;
+  }
 
-.inline-comment-input button {
-  background-color: transparent; /* Make background transparent */
-  color: #0095f6; /* Blue color for the icon */
-  border: none;
-  padding: 5px; /* Reduced padding */
-  border-radius: 50%; /* Make it circular */
-  font-weight: bold;
-  cursor: pointer;
-  margin-left: 5px; /* Reduced margin */
-  font-size: 1.2rem; /* Make icon larger */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px; /* Fixed width */
-  height: 30px; /* Fixed height */
+  /* Sur desktop, on garde les hashtags même quand les commentaires sont visibles */
+  .item-footer.comments-visible .hashtags-container {
+    display: flex;
+  }
 }
 
-.inline-comment-input input {
-  flex: 1;
-  background-color: #333;
-  border: 1px solid #555;
-  border-radius: 20px;
-  padding: 8px 12px; /* Reduced padding */
-  color: white;
-  height: 30px; /* Fixed height */
-}
-
-.inline-comment-input {
-  display: flex;
-  align-items: center; /* Vertically align items */
-  gap: 5px; /* Reduced gap */
-  margin-top: 0; /* Removed margin-top */
-}
-
-.comments-section {
-  display: flex;
-  gap: 10px; /* Added gap for spacing between comments */
-  margin-bottom: 0;
-}
-
-
-
-/* Active State for Fade/Scale Effect */
-
-.project-feed-item {
-
-  transition: opacity 0.5s ease, transform 0.5s ease;
-
-  opacity: 0.6;
-
-  transform: scale(0.98);
-
-}
-
-
-
-.project-feed-item.is-active {
-
-  opacity: 1;
-
-  transform: scale(1);
-
+/* Optimisation pour très petits écrans */
+@media (max-width: 360px) {
+  .project-feed-item {
+    height: 80vh;
+    max-height: 600px;
+  }
+  
+  .media-container {
+    max-height: calc(100% - 100px);
+  }
+  
+  .item-footer.comments-visible ~ .media-container {
+    max-height: calc(100% - 80px);
+  }
+  
+  .item-footer {
+    padding: 4px 10px 6px 10px;
+    min-height: 45px;
+  }
+  
+  .item-footer.comments-visible {
+    min-height: 70px;
+    padding: 4px 10px 8px 10px;
+  }
 }
