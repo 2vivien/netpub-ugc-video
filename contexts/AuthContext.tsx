@@ -74,6 +74,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           'Content-Type': 'application/json',
           'X-CSRF-Token': csrf,
         },
+        body: JSON.stringify({
+          query: `
+            mutation Login($email: String!, $password: String!) {
+              login(email: $email, password: $password) {
+                token
+                user {
+                  id
+                  email
+                  name
+                  role
+                }
+              }
+            }
+          `,
+          variables: {
+            email,
+            password,
+          },
+        }),
       });
 
       const result = await response.json();

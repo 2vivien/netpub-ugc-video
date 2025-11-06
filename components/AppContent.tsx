@@ -53,7 +53,7 @@ const AppContent: React.FC = () => {
           <Route path="/legal-mentions" element={<LegalMentions />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
-          <Route path="/admin_portal_secure_access_v2_@_NetPub_Ag3ncy_#_XyZ_789_!_AbC_123_$_DeF_456_%_GhI_789_^_JkL_123_&_MnP_456_*_QrS_789_(_TuV_123_)_WxY_456_-_ZaB_789_=_CdE_123_+_FgH_456_~_IjK_789_" element={<Login />} />
+          <Route path="/admin-login" element={<Login />} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
             <Route index element={<Overview />} />
             <Route path="conversations" element={<Conversations />} />

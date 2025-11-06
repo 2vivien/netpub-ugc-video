@@ -130,9 +130,15 @@ const Contact = () => {
   const contactDetails = [
     {
       icon: FiPhone,
-      label: 'Appelez-nous',
-      value: '+33 6 45 78 90 12',
-      href: 'tel:+33645789012',
+      label: 'Appelez-nous (Europe)',
+      value: '+33 7 65 87 17 49',
+      href: 'tel:+33765871749',
+    },
+    {
+      icon: FiPhone,
+      label: 'Appelez-nous (Afrique)',
+      value: '+229 01 54 10 21 25',
+      href: 'tel:+2290154102125',
     },
     {
       icon: FiMail,

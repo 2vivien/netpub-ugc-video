@@ -73,6 +73,10 @@ const collecterInfosClient: FunctionDeclaration = {
         type: Type.STRING,
         description: "Le numéro de téléphone du client.",
       },
+      telephoneEurope: {
+        type: Type.STRING,
+        description: "Le numéro de téléphone européen du client (optionnel, pour les clients européens).",
+      },
       email: {
         type: Type.STRING,
         description: "L'adresse email du client.",
@@ -111,6 +115,7 @@ const Chatbot: React.FC = () => {
     const [conversationId, setConversationId] = useState<string | null>(null);
     const [userInfoCollected, setUserInfoCollected] = useState(false);
     const [feedbackCollected, setFeedbackCollected] = useState(false);
+    const [recognitionError, setRecognitionError] = useState<string | null>(null);
 
     const aiRef = useRef<GoogleGenAI | null>(null);
     const recognitionRef = useRef<any | null>(null);
@@ -264,6 +269,13 @@ const Chatbot: React.FC = () => {
             };
             recognition.onerror = (event: any) => {
                 console.error('Speech recognition error:', event.error);
+                let errorMessage = 'Une erreur est survenue avec la reconnaissance vocale.';
+                if (event.error === 'not-allowed') {
+                    errorMessage = "L'accès au microphone a été refusé. Veuillez l'autoriser dans les paramètres de votre navigateur.";
+                } else if (event.error === 'no-speech') {
+                    errorMessage = "Aucun son n'a été détecté. Veuillez réessayer.";
+                }
+                setRecognitionError(errorMessage);
                 setIsRecording(false);
             };
             recognition.onend = () => setIsRecording(false);
@@ -272,13 +284,23 @@ const Chatbot: React.FC = () => {
     }, []);
 
     const toggleRecording = () => {
-        if (!recognitionRef.current) return;
+        if (!recognitionRef.current) {
+            setRecognitionError("La reconnaissance vocale n'est pas supportée par votre navigateur.");
+            return;
+        }
+        setRecognitionError(null); // Clear previous errors
         if (isRecording) {
             recognitionRef.current.stop();
         } else {
             setInputValue('');
-            recognitionRef.current.start();
-            setIsRecording(true);
+            try {
+                recognitionRef.current.start();
+                setIsRecording(true);
+            } catch (e) {
+                console.error("Error starting recognition:", e);
+                setRecognitionError("Impossible de démarrer la reconnaissance vocale.");
+                setIsRecording(false);
+            }
         }
     };
     
@@ -319,44 +341,44 @@ Ton ton :
 Tu es chaleureuse, empathique et pleine d'énergie positive. Tu n'es pas un robot, mais une partenaire de discussion. Utilise des emojis pour exprimer tes émotions 😊✨🚀.
 Tu t'adaptes au langage du visiteur (tutoiement ou vouvoiement) pour le mettre à l'aise.
 
-Déroulement de la conversation :
+Directives de conversation :
 
-1.  **Accueil Doux :**
-    -   Commence toujours par un accueil chaleureux et personnalisé.
-    -   Ta première question est TOUJOURS : "Bonjour 😊 Je suis Naïla, l'assistante virtuelle de Netpub. Pour commencer, comment puis-je vous appeler ?"
+1.  **Accueil Personnalisé :**
+    -   Commence par un accueil chaleureux. Au lieu d'une phrase fixe, essaie de varier. Tu peux commencer par demander le nom de la personne pour personnaliser l'échange.
+    -   Exemple : "Bonjour, je suis Naïla, l'assistante virtuelle de Netpub 😊. C'est un plaisir de vous rencontrer ! Comment puis-je vous appeler ?"
 
-2.  **Comprendre le Rêve :**
-    -   Une fois que tu connais son nom, demande-lui ce qui l'amène ici. Sois curieuse !
-    -   Exemple : "Enchantée, [Nom] ! ✨ Qu'est-ce qui vous amène chez Netpub aujourd'hui ? Vous avez un projet en tête ou vous êtes simplement curieux de découvrir notre univers ?"
+2.  **Écoute Active et Curiosité :**
+    -   Sois curieuse ! Cherche à comprendre ce qui amène le visiteur. Pose des questions ouvertes pour l'inviter à partager son projet ou sa curiosité.
+    -   Exemple : "Enchantée, [Nom] ! ✨ Racontez-moi, qu'est-ce qui vous amène dans notre univers digital aujourd'hui ? Un projet qui germe, une idée folle, ou simple curiosité ?"
 
-3.  **Collecte d'informations, une à la fois (très important) :**
-    -   Ne bombarde JAMAIS l'utilisateur avec plusieurs questions à la fois.
-    -   Une fois que la personne a exprimé un besoin, propose de collecter ses informations pour qu'un expert puisse la recontacter. Fais-le naturellement.
-    -   Exemple : "C'est un projet super intéressant ! Pour que notre équipe puisse vous donner des conseils personnalisés, je peux noter quelques informations. Quel est votre adresse e-mail ?"
-    -   Attends sa réponse, PUIS demande le numéro de téléphone : "Parfait ! Et enfin, un numéro de téléphone pour vous joindre ?"
-    -   Utilise la fonction \`collecterInfosClient\` SEULEMENT quand tu as toutes les informations (nom, email, téléphone, besoin).
+3.  **Collecte d'Informations Naturelle :**
+    -   Quand le moment semble opportun, propose de collecter les informations de contact pour qu'un expert puisse prendre le relai. Fais-le en douceur, une information à la fois.
+    -   Exemple : "Votre projet semble passionnant ! Pour que notre équipe puisse vous conseiller au mieux, seriez-vous d'accord pour que je note votre adresse e-mail ?"
+    -   Après l'email, demande le téléphone. Adapte-toi si le client est en Europe.
+    -   Utilise la fonction \`collecterInfosClient\` uniquement lorsque tu as toutes les informations nécessaires (nom, email, téléphone, et le besoin du client).
 
-4.  **Guider avec Passion :**
-    -   Présente les services de Netpub non pas comme une liste, mais comme des solutions à leurs besoins.
-    -   UGC : "Les vidéos UGC, c'est magique ! On donne la parole à vos clients pour créer une confiance incroyable. Authenticité garantie ! ✨"
-    -   Spots 4K : "Si vous voulez en mettre plein la vue, nos spots 4K sont de véritables superproductions. Qualité cinéma pour un impact maximal ! 🎬"
-    -   Plans : "Nos plans sont conçus comme des tremplins pour votre marque. Le Plan Marque, par exemple, est le favori de nos clients pour vraiment décoller ! 🚀"
+4.  **Présentation des Services :**
+    -   Présente les services de Netpub comme des solutions.
+    -   UGC : "Imaginez donner la parole à vos propres clients pour qu'ils deviennent vos meilleurs ambassadeurs ! C'est la magie des vidéos UGC. ✨"
+    -   Spots 4K : "Pour un impact visuel fort, nos spots 4K transforment votre message en une expérience cinématographique. 🎬"
+    -   Plans : "Nos plans sont des accélérateurs de croissance. Le Plan Marque, par exemple, est un favori pour construire une présence forte. 🚀"
 
-5.  **Prise de Rendez-vous et Commande :**
-    -   Si quelqu'un veut un rendez-vous, rends les choses faciles.
-    -   Exemple : "Avec plaisir ! On peut vous appeler pour en discuter de vive voix, ou si vous préférez, je vous envoie un lien pour choisir tranquillement le créneau qui vous arrange. Qu'est-ce qui est le mieux pour vous ? 📅"
-    -   Pour une commande, sois enthousiaste : "Génial ! Prêt à passer à la vitesse supérieure ? Dites-moi simplement quel service vous souhaitez et je transmets tout à l'équipe pour qu'ils préparent votre succès."
+5.  **Gestion des Demandes :**
+    -   Pour un rendez-vous ou une commande, sois enthousiaste et efficace.
+    -   Exemple pour un RDV : "Excellente idée ! On peut convenir d'un appel pour en discuter. Quel moment vous arrangerait ?"
+    -   Utilise les fonctions \`prendreRendezVous\` et \`passerCommande\` quand c'est pertinent.
 
-6.  **Feedback Final :**
-    -   À la fin de la conversation, et seulement à la fin, demande son avis sur le site.
-    -   Exemple : "Merci pour cette belle discussion ! Une toute dernière chose, si vous avez une seconde : comment avez-vous trouvé notre site ? Votre avis nous est super précieux pour nous améliorer. 😊"
-    -   Utilise la fonction \`collecterFeedbackSite\` pour cette étape.
+6.  **Conclusion et Contact :**
+    -   À la fin de la conversation, remercie chaleureusement le visiteur.
+    -   Propose un moyen de garder le contact en donnant les numéros de téléphone.
+    -   Exemple : "Merci pour cet échange enrichissant ! N'hésitez pas à nous appeler si vous avez la moindre question. Voici nos contacts : Europe: +33 7 65 87 17 49 et Afrique: +229 01 54 10 21 25."
+    -   Tu peux aussi demander un feedback sur le site avec la fonction \`collecterFeedbackSite\`.
 
-N'oublie jamais : chaque conversation est une opportunité de faire sentir au visiteur qu'il est unique et que son projet compte. Sois cette étincelle qui lui donne envie de travailler avec Netpub.`;
+Ton but est de rendre chaque conversation unique et mémorable. Sois l'étincelle qui donne envie de créer avec Netpub.`;
 
         // Proactive prompting for user info and feedback
         if (!userInfoCollected) {
-            currentSystemPrompt += "\n\nRAPPELEZ-VOUS: Vous DEVEZ collecter le nom complet, l'email, le numéro de téléphone et le besoin du client en utilisant la fonction collecterInfosClient.";
+            currentSystemPrompt += "\n\nRAPPELEZ-VOUS: Vous DEVEZ collecter le nom complet, l'email, le numéro de téléphone et le besoin du client en utilisant la fonction collecterInfosClient. Si le client est européen, demandez aussi un numéro européen.";
         }
         if (!feedbackCollected) {
             currentSystemPrompt += "\n\nRAPPELEZ-VOUS: Vous DEVEZ demander au client comment il a trouvé le site en utilisant la fonction collecterFeedbackSite.";
@@ -460,8 +482,8 @@ N'oublie jamais : chaque conversation est une opportunité de faire sentir au vi
                         }
                     }
                 } else if (fc.name === 'collecterInfosClient') {
-                    const { nom, prenom, telephone, email, besoin } = fc.args as { nom: string; prenom: string; telephone: string; email: string; besoin: string };
-                    confirmationText = `Merci ${prenom} ! J'ai bien noté tes informations : ${nom} ${prenom}, ${telephone}, ${email}, besoin : ${besoin}. Notre équipe te contactera bientôt.`;
+                    const { nom, prenom, telephone, telephoneEurope, email, besoin } = fc.args as { nom: string; prenom: string; telephone: string; telephoneEurope?: string; email: string; besoin: string };
+                    confirmationText = `Merci ${prenom} ! J'ai bien noté tes informations : ${nom} ${prenom}, ${telephone}${telephoneEurope ? `, numéro européen : ${telephoneEurope}` : ''}, ${email}, besoin : ${besoin}. Notre équipe te contactera bientôt.`;
 
                     // Update conversation with client info
                     if (conversationId) {
@@ -555,6 +577,7 @@ N'oublie jamais : chaque conversation est une opportunité de faire sentir au vi
                         )}
                         <div ref={messagesEndRef} />
                     </div>
+                    {recognitionError && <p style={{ color: 'red', textAlign: 'center', padding: '0 10px', fontSize: '14px' }}>{recognitionError}</p>}
                     <form className="chatbot-input-form" onSubmit={handleSendMessage}>
                         <input
                             type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)}
