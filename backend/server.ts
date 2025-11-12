@@ -18,7 +18,7 @@ import helmet from 'helmet';
 import session from 'express-session';
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT) : 4000;
 
 // Logs et diagnostics
 console.log('🚀 Démarrage du serveur backend NetPub...');
@@ -143,6 +143,19 @@ async function startServer() {
     app.listen(PORT, () => {
       console.log(`🚀 Serveur prêt à l'adresse http://localhost:${PORT}${server.graphqlPath}`);
       console.log(`🏥 Endpoint de santé disponible sur http://localhost:${PORT}/health`);
+    }).on('error', (err: any) => {
+      if (err.code === 'EADDRINUSE') {
+        console.log(`Port ${PORT} is already in use, trying ${PORT + 1}...`);
+        setTimeout(() => {
+          app.listen(PORT + 1, () => {
+            console.log(`🚀 Serveur prêt à l'adresse http://localhost:${PORT + 1}${server.graphqlPath}`);
+            console.log(`🏥 Endpoint de santé disponible sur http://localhost:${PORT + 1}/health`);
+          });
+        }, 1000);
+      } else {
+        console.error('❌ Erreur lors du démarrage du serveur:', err);
+        process.exit(1);
+      }
     });
   } catch (error) {
     console.error('❌ Erreur lors du démarrage du serveur:', error);
