@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
-dotenv.config({ path: './.env.local' });
-dotenv.config({ path: './.env' });
+dotenv.config({ path: '../.env.local' });
+dotenv.config({ path: '../.env' });
 import express from 'express';
 import cors from 'cors';
 import { ApolloServer } from 'apollo-server-express';
@@ -27,7 +27,8 @@ console.log(`🔌 Port: ${PORT}`);
 
 // Middleware avec logs
 app.use(cors());
-app.use(helmet(SecurityUtils.getSecurityHeaders()));
+// Use helmet with default security headers
+app.use(helmet());
 
 // Configure session middleware
 app.use(session({
@@ -47,12 +48,15 @@ app.use((req, res, next) => {
 
 // Make CSRF token available to the frontend
 import { csrfApolloMiddleware, csrfProtection } from './lib/csrfMiddleware.js';
-// ...
-app.get('/csrf-token', (req, res) => {
-  res.json({ csrfToken: 'CSRF_DISABLED' }); // Return a dummy token since CSRF is disabled
-});
+app.use(csrfProtection);
 
-
+if (process.env.NODE_ENV !== 'test') {
+  app.use(csrfApolloMiddleware);
+} else {
+  app.get('/csrf-token', (req, res) => {
+    res.json({ csrfToken: 'CSRF_DISABLED' }); // Return a dummy token since CSRF is disabled
+  });
+}
 
 // Middleware de logging des requêtes
 app.use((req, res, next) => {
