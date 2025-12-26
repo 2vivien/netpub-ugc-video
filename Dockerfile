@@ -26,14 +26,14 @@ FROM base AS deps
 COPY package*.json ./
 
 # Install dependencies with integrity checks
-RUN npm ci --only=production --ignore-scripts && \
+RUN npm ci --omit=dev --legacy-peer-deps --ignore-scripts && \
     npm cache clean --force
 
 # Store production dependencies
 RUN cp -R node_modules /prod_node_modules
 
 # Install all dependencies for build
-RUN npm ci --ignore-scripts
+RUN npm ci --legacy-peer-deps --ignore-scripts
 
 # ====================================
 # Build stage for backend
@@ -46,7 +46,7 @@ WORKDIR /app
 COPY backend/package*.json ./backend/
 
 # Install backend dependencies
-RUN cd backend && npm install
+RUN cd backend && npm install --legacy-peer-deps
 
 # Copy dependencies
 COPY --from=deps /app/node_modules ./node_modules
