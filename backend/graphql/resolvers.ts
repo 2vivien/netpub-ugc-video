@@ -317,15 +317,15 @@ export const resolvers = {
           <h2>Rapport Global NetPub</h2>
           <h3>Conversations (${conversations.length})</h3>
           <ul>
-            ${conversations.map(c => `<li>${c.clientName || 'Anonyme'} (${c.clientEmail || 'N/A'}) - ${c.messages.length} messages</li>`).join('')}
+            ${conversations.map((c: any) => `<li>${c.clientName || 'Anonyme'} (${c.clientEmail || 'N/A'}) - ${c.messages.length} messages</li>`).join('')}
           </ul>
           <h3>Commandes (${orders.length})</h3>
           <ul>
-            ${orders.map(o => `<li>${o.clientName} - ${o.type} - ${o.status}</li>`).join('')}
+            ${orders.map((o: any) => `<li>${o.clientName} - ${o.type} - ${o.status}</li>`).join('')}
           </ul>
           <h3>Rendez-vous (${appointments.length})</h3>
           <ul>
-            ${appointments.map(a => `<li>${a.clientName} - ${a.service} - ${a.date.toLocaleDateString()} ${a.time}</li>`).join('')}
+            ${appointments.map((a: any) => `<li>${a.clientName} - ${a.service} - ${a.date.toLocaleDateString()} ${a.time}</li>`).join('')}
           </ul>
         `;
 
