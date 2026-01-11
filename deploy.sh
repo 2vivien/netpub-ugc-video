@@ -8,7 +8,7 @@ set -e
 
 ENVIRONMENT=${1:-production}
 CONFIG_REPO="https://github.com/digitaleflex/netpub-config.git"
-APP_IMAGE="eflexcloud/netpub-ugc-video:v1.1.0"
+APP_IMAGE="eflexcloud/netpub-ugc-video:v1.2.0"
 
 echo "🚀 Déploiement NetPub UGC Video - $ENVIRONMENT"
 echo "==============================================="
