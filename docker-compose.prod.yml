@@ -1,0 +1,40 @@
+services:
+  app:
+    # En Production : On utilise l'image pré-compilée par GitHub Actions
+    image: eflexcloud/netpub-ugc-video:latest
+    restart: always
+    env_file:
+      - .env.production
+    volumes:
+      - uploads:/app/uploads:rw
+      - logs:/app/logs:rw
+    # Pas de 'build' ici pour économiser le CPU du serveur
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - proxy
+      - netpub-internal
+    labels:
+      - "traefik.enable=true"
+      # Configuration simplifiée pour la prod
+      - "traefik.http.routers.netpub-front.rule=Host(`netpub.eurinhash.com`)"
+      - "traefik.http.routers.netpub-front.tls.certresolver=letsencrypt"
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    networks:
+      - netpub-internal
+
+volumes:
+  redis_data:
+  uploads:
+  logs:
+
+networks:
+  proxy:
+    external: true
+  netpub-internal:
+    driver: bridge
