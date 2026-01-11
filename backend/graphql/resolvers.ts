@@ -79,12 +79,13 @@ export const resolvers = {
 
     createAdminUser: () => AuthService.createAdminUser(),
 
-    createConversation: async () => {
+    createConversation: async (_: any, __: any, context: any) => {
       try {
+        const user = context.user;
         const conversation = await prisma.conversation.create({
           data: {
-            userId: null,
-            userName: null,
+            userId: user ? user.id : null,
+            userName: user ? user.name : null,
           }
         });
         return conversation;
