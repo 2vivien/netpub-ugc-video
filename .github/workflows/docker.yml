@@ -4,7 +4,7 @@ on:
   push:
     branches: [main, staging]
     tags:
-      - 'v*'
+      - "v*"
   pull_request:
     branches: [main, staging]
 
@@ -37,6 +37,8 @@ jobs:
 
       - name: Build frontend
         run: npm run build
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
 
   build-and-push:
     runs-on: ubuntu-latest
@@ -74,3 +76,5 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

@@ -1,0 +1,38 @@
+name: Verify Deployment
+
+on:
+    workflow_run:
+        workflows: ["Deploy to VPS"]
+        types:
+            - completed
+
+jobs:
+    verify:
+        runs-on: ubuntu-latest
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        steps:
+            - name: Wait for server restart
+              run: sleep 60
+              shell: bash
+
+            - name: Verify Backend Health
+              run: |
+                  echo "Health Checking Backend..."
+                  response=$(curl --write-out "%{http_code}" --silent --output /dev/null https://netpub.eurinhash.com/health)
+                  if [ "$response" -eq 200 ]; then
+                    echo "✅ Backend is healthy (200 OK)"
+                  else
+                    echo "❌ Backend failed with status $response"
+                    exit 1
+                  fi
+
+            - name: Verify Frontend Accessibility
+              run: |
+                  echo "Health Checking Frontend..."
+                  response=$(curl --write-out "%{http_code}" --silent --output /dev/null https://netpub.eurinhash.com)
+                  if [ "$response" -eq 200 ]; then
+                    echo "✅ Frontend is accessible (200 OK)"
+                  else
+                    echo "❌ Frontend failed with status $response"
+                    exit 1
+                  fi

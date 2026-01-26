@@ -1,0 +1,91 @@
+# Dépendances
+# Dépendances
+**/node_modules
+npm-debug.log
+yarn-error.log
+# Note: package-lock.json est nécessaire pour npm ci, ne pas l'ignorer
+yarn.lock
+pnpm-lock.yaml
+
+# Build
+dist
+build
+.next
+out
+
+# Cache
+.cache
+.parcel-cache
+.eslintcache
+*.tsbuildinfo
+
+# Environnement
+.env
+.env.local
+.env.*.local
+.env.production
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+docs/
+README.md
+CHANGELOG.md
+LICENSE
+*.md
+**/*.md
+
+# Tests
+test
+tests
+__tests__
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+coverage
+.nyc_output
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+azure-pipelines.yml
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Logs
+logs
+*.log
+
+# Uploads (ne pas inclure dans l'image)
+uploads
+temp
+
+# Media/Assets lourds
+**/*.mp4
+**/*.mov
+**/*.avi
+**/*.webm
+backend/public/Video
+
+# Whitelist specific small videos
+!public/Video/video-mode/grok-video-a0b3ee2f-2993-4694-8c65-dd6638e858a5.mp4
+!public/Video/vidéo-ugc/ac71f3df-b854-4985-9238-239bde3a07ee.mp4

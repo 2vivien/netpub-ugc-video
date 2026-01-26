@@ -4,13 +4,12 @@
 # ====================================
 # Base stage - Common dependencies
 # ====================================
-FROM node:20-alpine AS base
+FROM node:25-alpine AS base
 
 # Install essential tools and security updates
 RUN apk update && \
     apk upgrade && \
     apk add --no-cache \
-    dumb-init \
     tini \
     curl && \
     rm -rf /var/cache/apk/*
@@ -33,7 +32,8 @@ RUN npm ci --omit=dev --legacy-peer-deps --ignore-scripts && \
 RUN cp -R node_modules /prod_node_modules
 
 # Install all dependencies for build
-RUN npm ci --legacy-peer-deps --ignore-scripts
+RUN npm ci --legacy-peer-deps --ignore-scripts && \
+    npm cache clean --force
 
 # ====================================
 # Build stage for backend
@@ -91,14 +91,10 @@ COPY index.html ./
 RUN npm run build && \
     test -d dist || (echo "Frontend build failed" && exit 1)
 
-# Optimize build output
-RUN find dist -type f -name "*.js" -exec gzip -k {} \; || true
-RUN find dist -type f -name "*.css" -exec gzip -k {} \; || true
-
 # ====================================
 # Production stage
 # ====================================
-FROM node:20-alpine AS production
+FROM node:25-alpine AS production
 
 # Set production environment
 ENV NODE_ENV=production \
@@ -111,7 +107,6 @@ WORKDIR /app
 RUN apk update && \
     apk upgrade && \
     apk add --no-cache \
-    dumb-init \
     tini \
     curl \
     ca-certificates && \
@@ -127,8 +122,13 @@ COPY package*.json ./
 COPY --from=backend-build /app/prisma ./prisma/
 COPY --from=backend-build /app/node_modules/.prisma ./node_modules/.prisma
 
+# Copy backend production dependencies and build artifacts
+COPY backend/package*.json ./backend/
+RUN cd backend && npm ci --omit=dev --legacy-peer-deps && \
+    npm cache clean --force
+
 # Copy backend build
-COPY --from=backend-build /app/backend ./backend
+COPY --from=backend-build /app/backend/dist ./backend/dist
 COPY --from=backend-build /app/types ./types
 
 # Copy frontend build
