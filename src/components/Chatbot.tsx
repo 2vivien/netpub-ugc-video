@@ -186,8 +186,9 @@ const Chatbot: React.FC = () => {
         if (!aiRef.current || !audioContextRef.current || !text) return;
         stopSpeaking(); 
         try {
-            // Correct SDK usage for TTS
+            // Correct usage according to @google/genai documentation
             const model = aiRef.current.getGenerativeModel({ model: "gemini-2.0-pro-preview-tts" });
+            
             const result = await model.generateContent({
                 contents: [{ role: 'user', parts: [{ text: text }] }],
                 generationConfig: {
@@ -197,7 +198,7 @@ const Chatbot: React.FC = () => {
                             prebuiltVoiceConfig: { voiceName: 'Kore' },
                         },
                     },
-                } as any,
+                },
             });
             
             const parts = result.response.candidates?.[0]?.content?.parts || [];
@@ -311,6 +312,7 @@ const Chatbot: React.FC = () => {
         3. Une question à la fois.`;
 
         try {
+            // Correct usage: instance.getGenerativeModel
             const model = aiRef.current.getGenerativeModel({ 
                 model: 'gemini-2.0-flash-lite',
                 systemInstruction: systemPrompt,
