@@ -27,7 +27,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Ensure critical variables are present
 if (!process.env.JWT_SECRET) {
-    
+    console.warn('JWT_SECRET is not set. Authentication will fail.');
 }
 
 const PORT = process.env.PORT || 4000;
@@ -109,8 +109,8 @@ async function startApolloServer() {
                 try {
                     const bearerToken = token.replace('Bearer ', '');
                     user = AuthService.verifyToken(bearerToken);
-                } catch (e) {
-                    
+                } catch {
+                    // Ignore invalid tokens
                 }
             }
             return { req, res, prisma, user };
@@ -145,5 +145,5 @@ async function startApolloServer() {
 }
 
 startApolloServer().catch(err => {
-    
+    console.error('Failed to start server:', err);
 });

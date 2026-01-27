@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { PortfolioProject } from '../types';
 import { X, Play, Pause, Volume2, VolumeX } from 'lucide-react';
 import './PortfolioCard.css';

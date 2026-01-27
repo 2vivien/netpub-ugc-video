@@ -14,7 +14,7 @@ export class NotificationService {
       if (notification.recipientEmail) {
         await this.sendEmailNotification(notification);
       }
-    } catch (_error) {
+    } catch {
       // silent fail
     }
   }
@@ -22,7 +22,7 @@ export class NotificationService {
   static async sendEmailNotification(_notification: NotificationData): Promise<void> {
     try {
       // Email sending logic would go here
-    } catch (_error) {
+    } catch {
       // silent fail
     }
   }
@@ -77,7 +77,7 @@ export class NotificationService {
   static async getRecentNotifications(_limit: number = 10): Promise<unknown[]> {
     try {
       return [];
-    } catch (_error) {
+    } catch {
       return [];
     }
   }

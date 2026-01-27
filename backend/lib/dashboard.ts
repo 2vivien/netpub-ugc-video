@@ -112,7 +112,7 @@ export class DashboardService {
         ordersTrend,
         engagementTrend
       };
-    } catch (_error) {
+    } catch {
       throw new Error('Failed to get dashboard statistics');
     }
   }
@@ -183,7 +183,7 @@ export class DashboardService {
         systemStatus: 'Opérationnel',
         efficiencyScore: Math.round(efficiencyScore * 10) / 10
       };
-    } catch (_error) {
+    } catch {
       throw new Error('Failed to get analytics statistics');
     }
   }
@@ -211,7 +211,7 @@ export class DashboardService {
         prisma.order.count({ where }),
       ]);
       return { orders, totalCount };
-    } catch (_error) {
+    } catch {
       throw new Error('Failed to get all orders');
     }
   }
@@ -239,7 +239,7 @@ export class DashboardService {
         prisma.appointment.count({ where }),
       ]);
       return { appointments, totalCount };
-    } catch (_error) {
+    } catch {
       throw new Error('Failed to get all appointments');
     }
   }
@@ -268,7 +268,7 @@ export class DashboardService {
         ...conv,
         messages: [...conv.messages].reverse(),
       }));
-    } catch (_error) {
+    } catch {
       return [];
     }
   }
@@ -291,7 +291,7 @@ export class DashboardService {
       });
 
       return conversation;
-    } catch (_error) {
+    } catch {
       return null;
     }
   }
@@ -303,7 +303,7 @@ export class DashboardService {
         data: { status },
       });
       return true;
-    } catch (_error) {
+    } catch {
       return false;
     }
   }
@@ -315,7 +315,7 @@ export class DashboardService {
         data: { status },
       });
       return true;
-    } catch (_error) {
+    } catch {
       return false;
     }
   }
@@ -323,7 +323,7 @@ export class DashboardService {
   static async resetChatbotModel(): Promise<boolean> {
     try {
       return true;
-    } catch (_error) {
+    } catch {
       return false;
     }
   }
@@ -334,7 +334,7 @@ export class DashboardService {
         where: { id: conversationId },
       });
       return true;
-    } catch (_error) {
+    } catch {
       return false;
     }
   }
@@ -349,7 +349,7 @@ export class DashboardService {
         },
       });
       return true;
-    } catch (_error) {
+    } catch {
       return false;
     }
   }
@@ -370,7 +370,7 @@ export class DashboardService {
       });
 
       return message;
-    } catch (_error) {
+    } catch {
       throw new Error('Failed to save chat message');
     }
   }

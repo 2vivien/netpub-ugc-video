@@ -1,7 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import useOnScreen from '../hooks/useOnScreen';
-import { FiPhone, FiMail, FiMapPin, FiClock } from 'react-icons/fi';
 import { FaInstagram, FaTiktok, FaYoutube, FaFacebook, FaLinkedin } from 'react-icons/fa';
 import { useChatbot } from '../contexts/ChatbotContext'; // Import useChatbot
 import ThankYouModal from '../components/ThankYouModal'; // Import the new modal component
@@ -107,8 +105,6 @@ const Contact = () => {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -125,47 +121,14 @@ const Contact = () => {
           message: '',
         });
       } else {
-        
         setError(result.errors ? result.errors[0].message : 'Une erreur est survenue lors de l\'envoi du message. Veuillez réessayer.');
       }
-    } catch (err) {
-      
+    } catch {
       setError('Une erreur inattendue est survenue. Veuillez réessayer.');
     } finally {
       setLoading(false);
     }
   };
-
-  const contactDetails = [
-    {
-      icon: FiPhone,
-      label: 'Appelez-nous (Europe)',
-      value: '+33 7 65 87 17 49',
-      href: 'tel:+33765871749',
-    },
-    {
-      icon: FiPhone,
-      label: 'Appelez-nous (Afrique)',
-      value: '+229 01 54 10 21 25',
-      href: 'tel:+2290154102125',
-    },
-    {
-      icon: FiMail,
-      label: 'Écrivez-nous',
-      value: 'org.netpub@gmail.com',
-      href: 'mailto:org.netpub@gmail.com',
-    },
-    {
-      icon: FiMapPin,
-      label: 'Basés à',
-      value: 'Paris & Cotonou',
-    },
-    {
-      icon: FiClock,
-      label: 'Disponibles',
-      value: 'Lun – Sam, 9h → 19h',
-    },
-  ];
 
   const { openChatbot } = useChatbot(); // Get openChatbot from context
 

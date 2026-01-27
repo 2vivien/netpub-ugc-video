@@ -115,7 +115,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             } else {
                 setError(result.errors?.[0]?.message || 'Failed to fetch dashboard data');
             }
-        } catch (err) {
+        } catch {
             setError('Connection error precisely while fetching dashboard data');
         } finally {
             setLoading(false);

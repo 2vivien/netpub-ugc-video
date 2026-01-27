@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { useChatbot } from '../contexts/ChatbotContext'; // Import useChatbot
 
 const CallToAction: React.FC = () => {

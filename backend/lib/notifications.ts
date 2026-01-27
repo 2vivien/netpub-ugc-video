@@ -1,5 +1,3 @@
-import { prisma } from './prisma.js';
-
 export interface NotificationData {
   type: 'appointment' | 'order' | 'contact' | 'conversation';
   title: string;
@@ -35,27 +33,21 @@ export interface ConversationNotificationData {
 export class NotificationService {
   static async createNotification(notification: NotificationData): Promise<void> {
     try {
-      // Store notification in database (you might want to add a notifications table)
-      
-
-      // Send email notification if recipient specified
+      // Store notification in database
       if (notification.recipientEmail) {
         await this.sendEmailNotification(notification);
       }
-
-      // You could also implement push notifications, SMS, etc.
-    } catch (_error) {
-      
+    } catch (err) {
+      console.error('Notification creation failed:', err);
     }
   }
 
   static async sendEmailNotification(notification: NotificationData): Promise<void> {
     try {
       // This would integrate with your email service
-      // For now, we'll just log it
-      
-    } catch (_error) {
-      
+      console.log('Sending email notification to:', notification.recipientEmail);
+    } catch (err) {
+      console.error('Email notification failed:', err);
     }
   }
 
@@ -112,7 +104,7 @@ export class NotificationService {
       // This would query a notifications table
       // For now, return empty array
       return [];
-    } catch (_error) {
+    } catch {
       
       return [];
     }

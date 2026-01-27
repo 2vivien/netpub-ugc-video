@@ -9,7 +9,7 @@ import {
   Zap,
   ExternalLink
 } from 'lucide-react';
-import { Card, Table, Badge, Button, EmptyState } from '../../components/ui';
+import { Card, Button, EmptyState } from '../../components/ui';
 import { useDashboard } from '../../contexts/DashboardContext';
 
 const Learning: React.FC = () => {

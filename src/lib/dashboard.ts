@@ -18,7 +18,7 @@ async function graphqlRequest(query: string, variables: Record<string, unknown> 
   try {
     const csrf = await fetchCsrfToken();
     if (csrf) headers['X-CSRF-Token'] = csrf;
-  } catch (e) {
+  } catch {
     // Ignore CSRF fetch error for now if it fails, or log it
     
   }
@@ -107,7 +107,7 @@ export class DashboardService {
           appointmentCount: conv.appointments?.length || 0
         }))
       };
-    } catch (_error) {
+    } catch {
       
       return {
         totalProjects: 0,
@@ -144,7 +144,7 @@ export class DashboardService {
     try {
       const data = await graphqlRequest(query);
       return data.conversations;
-    } catch (_error) {
+    } catch {
       
       return [];
     }
@@ -172,7 +172,7 @@ export class DashboardService {
     try {
       const data = await graphqlRequest(query);
       return data.allAppointments.appointments;
-    } catch (_error) {
+    } catch {
       
       return [];
     }
@@ -199,7 +199,7 @@ export class DashboardService {
     try {
       const data = await graphqlRequest(query);
       return data.allOrders.orders;
-    } catch (_error) {
+    } catch {
       
       return [];
     }

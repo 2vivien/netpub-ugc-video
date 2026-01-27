@@ -116,7 +116,8 @@ export class SecurityUtils {
   }
 
   // Log security events
-  static logSecurityEvent(_event: string, _details: Record<string, unknown>): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static logSecurityEvent(event: string, details: Record<string, unknown>): void {
     // const timestamp = new Date().toISOString();
     
 
@@ -188,7 +189,7 @@ export class PerformanceUtils {
       // This would check database connectivity
       // For now, return true
       return true;
-    } catch (_error) {
+    } catch {
       
       return false;
     }
@@ -197,7 +198,8 @@ export class PerformanceUtils {
 
 // Monitoring and analytics
 export class MonitoringUtils {
-  static startTimer(_label: string): () => number {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static startTimer(label: string): () => number {
     const start = process.hrtime.bigint();
     return () => {
       const end = process.hrtime.bigint();
@@ -207,19 +209,22 @@ export class MonitoringUtils {
     };
   }
 
-  static trackApiCall(_endpoint: string, _method: string, _duration: number, _statusCode: number): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static trackApiCall(endpoint: string, method: string, duration: number, statusCode: number): void {
     
 
     // In production, send to monitoring service like DataDog, New Relic, etc.
   }
 
-  static trackError(_error: Error, _context?: Record<string, unknown>): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static trackError(error: Error, context?: Record<string, unknown>): void {
     
 
     // In production, send to error tracking service like Sentry, Rollbar, etc.
   }
 
-  static trackUserAction(_userId: string, _action: string, _details?: Record<string, unknown>): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static trackUserAction(userId: string, action: string, details?: Record<string, unknown>): void {
     
 
     // In production, send to analytics service

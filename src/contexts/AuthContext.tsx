@@ -48,7 +48,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setUser(null);
           setIsAuthenticated(false);
         }
-      } catch (error) {
+      } catch {
         
         localStorage.removeItem('auth_token');
         setUser(null);
@@ -107,7 +107,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const errorMessage = result.errors?.[0]?.message || 'Login failed';
         throw new Error(errorMessage);
       }
-    } catch (error) {
+    } catch {
       
       return false;
     }

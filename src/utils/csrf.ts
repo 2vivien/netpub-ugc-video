@@ -20,9 +20,7 @@ export const fetchCsrfToken = async (maxRetries = 5, retryDelayMs = 1000): Promi
       if (!response.ok) {
         // Retry on 5xx errors which often happen during startup/proxying
         if (response.status >= 500 && i < maxRetries - 1) {
-          if (i >= 2) {
-            
-          }
+          // Silent retry for 5xx errors during startup
           await new Promise(resolve => setTimeout(resolve, retryDelayMs));
           continue;
         }
@@ -35,9 +33,7 @@ export const fetchCsrfToken = async (maxRetries = 5, retryDelayMs = 1000): Promi
     } catch (error) {
       // Retry on network errors (like TypeError: Failed to fetch) during startup
       if (i < maxRetries - 1) {
-        if (i >= 2) {
-          
-        }
+        // Silent retry for network errors
         await new Promise(resolve => setTimeout(resolve, retryDelayMs));
         continue;
       }

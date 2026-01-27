@@ -49,13 +49,14 @@ const InfluencerCard: React.FC<InfluencerCardProps> = ({ project, onMediaClick }
             { threshold: 0.5 } // Trigger when 50% is out of view
         );
 
-        if (cardRef.current) {
-            observer.observe(cardRef.current);
+        const currentCard = cardRef.current;
+        if (currentCard) {
+            observer.observe(currentCard);
         }
 
         return () => {
-            if (cardRef.current) {
-                observer.unobserve(cardRef.current);
+            if (currentCard) {
+                observer.unobserve(currentCard);
             }
         };
     }, []);

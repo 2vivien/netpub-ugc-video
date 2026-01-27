@@ -3,16 +3,15 @@ import './dashboard.css';
 import { fetchCsrfToken } from '../../utils/csrf';
 import {
   Calendar as CalendarIcon,
-  Clock,
   User,
   CheckCircle,
-  XCircle,
   AlertCircle,
   ChevronLeft,
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  TrendingUp
 } from 'lucide-react';
-import { Card, StatCard, Badge, Button, EmptyState } from '../../components/ui';
+import { StatCard, Badge, Button, EmptyState } from '../../components/ui';
 import { useDashboard } from '../../contexts/DashboardContext';
 
 interface Appointment {
@@ -50,7 +49,6 @@ const Appointments: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [loading, setLoading] = useState(true);
-  const [_error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterDate, setFilterDate] = useState<string>('');
   const [totalAppointments, setTotalAppointments] = useState(0);
@@ -77,7 +75,7 @@ const Appointments: React.FC = () => {
         setAppointments(result.data.allAppointments.appointments);
         setTotalAppointments(result.data.allAppointments.totalCount);
       }
-    } catch (err) {
+    } catch {
       setError('Erreur de chargement');
     } finally {
       setLoading(false);
@@ -99,7 +97,7 @@ const Appointments: React.FC = () => {
       });
       loadAppointments();
       refreshStats(); // Update global context counts
-    } catch (error) {
+    } catch {
       alert('Erreur lors de la mise à jour');
     }
   };
@@ -219,4 +217,3 @@ const Appointments: React.FC = () => {
 };
 
 export default Appointments;
-import { TrendingUp } from 'lucide-react';

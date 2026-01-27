@@ -6,18 +6,15 @@ import {
   User,
   Calendar,
   ShoppingCart,
-  Phone,
   Trash2,
-  Clock,
   Send,
   Activity,
   Search,
-  CheckCircle,
   MoreVertical,
   ChevronRight,
   Info
 } from 'lucide-react';
-import { Card, Badge, Button, EmptyState } from '../../components/ui';
+import { Badge, Button, EmptyState } from '../../components/ui';
 
 interface ChatMessage {
   id: string;
@@ -107,7 +104,6 @@ const Conversations: React.FC = () => {
   const [conversations, setConversations] = useState<ConversationWithDetails[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<ConversationWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
-  const [_error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   const formatTimestamp = (timestamp: Date | string) => {
@@ -141,7 +137,7 @@ const Conversations: React.FC = () => {
         } else {
           setError(result.errors ? result.errors[0].message : 'Erreur lors du chargement');
         }
-      } catch (err) {
+      } catch {
         setError('Erreur lors du chargement');
       } finally {
         setLoading(false);
@@ -168,7 +164,7 @@ const Conversations: React.FC = () => {
         setConversations(prev => prev.filter(c => c.id !== conversationId));
         setSelectedConversation(null);
       }
-    } catch (error) {
+    } catch {
       alert('Erreur lors de la suppression.');
     }
   };

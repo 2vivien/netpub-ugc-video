@@ -2,19 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import './dashboard.css';
 import { fetchCsrfToken } from '../../utils/csrf';
 import {
-  Filter,
-  Calendar as CalendarIcon,
   Search,
   ChevronLeft,
   ChevronRight,
   ShoppingCart,
-  CheckCircle,
-  Clock,
-  Settings,
-  XCircle,
   ExternalLink
 } from 'lucide-react';
-import { Card, Table, TableRow, TableCell, Badge, Button, EmptyState } from '../../components/ui';
+import { Card, Table, TableRow, TableCell, Button, EmptyState } from '../../components/ui';
 import { useDashboard } from '../../contexts/DashboardContext';
 
 interface Order {
@@ -45,10 +39,9 @@ const GRAPHQL_ENDPOINT = '/graphql';
 const ORDERS_PER_PAGE = 10;
 
 const Orders: React.FC = () => {
-  const { overviewStats, refreshStats } = useDashboard();
+  const { refreshStats } = useDashboard();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [_error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterDate, setFilterDate] = useState<string>('');
   const [totalOrders, setTotalOrders] = useState(0);
@@ -110,7 +103,7 @@ const Orders: React.FC = () => {
       });
       loadOrders();
       refreshStats();
-    } catch (error) {
+    } catch {
       alert('Erreur lors de la mise à jour');
     }
   };

@@ -1,4 +1,4 @@
-import { PortfolioCategory, PortfolioProject, Comment } from './types';
+import { PortfolioCategory, PortfolioProject } from './types';
 
 export const portfolioProjects: PortfolioProject[] = [
 

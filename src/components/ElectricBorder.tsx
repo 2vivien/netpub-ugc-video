@@ -74,7 +74,7 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
           try {
             anim.beginElement();
           } catch {
-            
+            // Element might not be ready
           }
         }
       });

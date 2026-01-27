@@ -15,7 +15,7 @@ const TestimonialCarousel = lazy(() => import('../components/TestimonialCarousel
 const CallToAction = lazy(() => import('../components/CallToAction'));
 
 const Home: React.FC = () => {
-  const handleProjectClick = (_project: PortfolioProject) => {
+  const handleProjectClick = () => {
     // Future implementation: handle project click, e.g., open a modal or navigate to a project page
   };
 

@@ -46,7 +46,7 @@ export class AuthService {
         name: decoded.name,
         role: decoded.role
       };
-    } catch (_error) {
+    } catch {
       return null;
     }
   }
@@ -76,7 +76,7 @@ export class AuthService {
         name: adminUser.name || null,
         role: adminUser.role
       };
-    } catch (_error) {
+    } catch {
       return null;
     }
   }
@@ -126,7 +126,7 @@ export class AuthService {
         name: user.name || null,
         role: user.role
       };
-    } catch (_error) {
+    } catch {
       return null;
     }
   }
@@ -166,7 +166,7 @@ export class AuthService {
         name: user.name || null,
         role: user.role
       };
-    } catch (error: unknown) {
+    } catch {
       return null;
     }
   }

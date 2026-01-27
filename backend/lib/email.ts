@@ -116,7 +116,7 @@ Ce message a été envoyé automatiquement depuis le formulaire de contact NetPu
       await this.transporter.sendMail(mailOptions);
       
       return true;
-    } catch (_error) {
+    } catch {
       
       return false;
     }
@@ -203,7 +203,7 @@ L'équipe NetPub Agency
       await this.transporter.sendMail(mailOptions);
       
       return true;
-    } catch (_error) {
+    } catch {
       
       return false;
     }
@@ -271,7 +271,7 @@ L'équipe NetPub Agency
       await this.transporter.sendMail(clientMailOptions);
       
       return true;
-    } catch (_error) {
+    } catch {
       
       return false;
     }
@@ -337,7 +337,7 @@ L'équipe NetPub Agency
       await this.transporter.sendMail(clientMailOptions);
       
       return true;
-    } catch (_error) {
+    } catch {
       
       return false;
     }
@@ -387,7 +387,7 @@ L'équipe NetPub Agency
       await this.transporter.sendMail(mailOptions);
       
       return true;
-    } catch (_error) {
+    } catch {
       
       return false;
     }
@@ -405,7 +405,7 @@ L'équipe NetPub Agency
       await this.transporter.sendMail(mailOptions);
       
       return true;
-    } catch (_error) {
+    } catch {
       
       return false;
     }

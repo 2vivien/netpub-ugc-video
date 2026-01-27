@@ -89,8 +89,8 @@ export const resolvers = {
           }
         });
         return conversation;
-      } catch (_error) {
-        console.error('Create conversation error:', _error);
+      } catch {
+        console.error('Create conversation error');
         throw new Error(`Failed to create conversation: ${_error instanceof Error ? _error.message : 'Unknown error'}`);
       }
     },
@@ -122,7 +122,7 @@ export const resolvers = {
         }
 
         return conversation;
-      } catch (_error) {
+      } catch {
         throw new Error('Failed to update conversation');
       }
     },
@@ -175,7 +175,7 @@ export const resolvers = {
         }
 
         return appointment;
-      } catch (_error) {
+      } catch {
         throw new Error('Failed to create appointment');
       }
     },
@@ -214,7 +214,7 @@ export const resolvers = {
         }
 
         return order;
-      } catch (_error) {
+      } catch {
         throw new Error('Failed to create order');
       }
     },
@@ -258,7 +258,7 @@ export const resolvers = {
         });
 
         return notificationSent && autoReplySent;
-      } catch (_error) {
+      } catch {
         throw new Error('Failed to send contact message');
       }
     },
@@ -331,7 +331,7 @@ export const resolvers = {
         });
 
         return true;
-      } catch (_error) {
+      } catch {
         return false;
       }
     }
