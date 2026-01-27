@@ -86,7 +86,7 @@ describe('AuthService', () => {
       expect(token).toBeDefined();
       
       // Verify the token can be decoded
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string; email: string; role: string };
       expect(decoded.userId).toBe(user.id);
       expect(decoded.email).toBe(user.email);
       expect(decoded.role).toBe(user.role);

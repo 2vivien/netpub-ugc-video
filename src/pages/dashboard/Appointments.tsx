@@ -165,7 +165,7 @@ const Appointments: React.FC = () => {
                     <div style={{ width: '36px', height: '36px', background: 'var(--bg-app)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-brand)', flexShrink: 0 }}>
                       <User size={18} />
                     </div>
-                    <Badge status={app.status.toLowerCase() as any}>{app.status}</Badge>
+                    <Badge status={(app.status?.toLowerCase() || 'pending') as 'pending' | 'success' | 'warning' | 'danger'}>{app.status}</Badge>
                   </div>
                   <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{app.clientName}</h3>
                   <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{app.service}</p>

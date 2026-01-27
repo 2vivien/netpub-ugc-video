@@ -22,7 +22,7 @@ const Analytics: React.FC = () => {
   if (loading && !stats) return <div className="dashboard-section"><p>Analyse des performances en cours...</p></div>;
   if (error && !stats) return <div className="dashboard-section"><p className="error-message">{error}</p></div>;
 
-  const maxIntentionCount = stats ? Math.max(...stats.mostFrequentIntentions.map((i: any) => i.count), 1) : 1;
+  const maxIntentionCount = stats ? Math.max(...stats.mostFrequentIntentions.map((i) => i.count), 1) : 1;
 
   const getIntentionIcon = (name: string) => {
     const n = name.toLowerCase();
@@ -54,7 +54,7 @@ const Analytics: React.FC = () => {
           actions={<Button variant="ghost" size="sm" icon={<PieChart size={16} />}>Rapport</Button>}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: '16px 0' }}>
-            {stats?.mostFrequentIntentions.map((intent: any, index: number) => (
+            {stats?.mostFrequentIntentions.map((intent, index) => (
               <div key={index}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', gap: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>

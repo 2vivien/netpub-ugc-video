@@ -332,7 +332,7 @@ const Conversations: React.FC = () => {
                     <div key={apt.id} style={{ padding: '12px', borderRadius: '12px', background: 'var(--bg-app)', border: '1px solid var(--border-light)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                         <span style={{ fontSize: '0.8125rem', fontWeight: 600 }}>{apt.service}</span>
-                        <Badge variant="outline" status={apt.status.toLowerCase() as any}>{apt.status}</Badge>
+                        <Badge variant="outline" status={(apt.status?.toLowerCase() || 'pending') as 'pending' | 'success' | 'warning' | 'danger'}>{apt.status}</Badge>
                       </div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                         {new Date(apt.date).toLocaleDateString()} à {apt.time}

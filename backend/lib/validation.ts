@@ -1,6 +1,7 @@
 import { z, ZodError } from 'zod';
 import { UserInputError } from 'apollo-server-express';
 import { GraphQLFieldResolver } from 'graphql';
+import { ResolverContext } from '../types/index.js';
 
 // Schémas de validation avec Zod
 
@@ -20,7 +21,7 @@ export const validationSchemas = {
 
 export const validationMiddleware = {
   Mutation: {
-    sendContactMessage: async (resolve: GraphQLFieldResolver<any, any>, root: any, args: any, context: any, info: any) => {
+    sendContactMessage: async (resolve: GraphQLFieldResolver<unknown, ResolverContext>, root: unknown, args: unknown, context: ResolverContext, info: unknown) => {
       try {
         validationSchemas.sendContactMessage.parse(args);
       } catch (e) {
@@ -29,7 +30,8 @@ export const validationMiddleware = {
         }
         throw e;
       }
-      return resolve(root, args, context, info);
+      // @ts-expect-error - external lib type compatibility
+      return resolve(root, args as Record<string, unknown>, context, info);
     },
   },
 };

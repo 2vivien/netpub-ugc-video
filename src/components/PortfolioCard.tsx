@@ -120,7 +120,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ project, onClick }) => {
           {/* Carousel circles */}
           {mediaItems.length > 1 && (
             <div className="influencer-carousel-nav">
-              {carouselCircles.map((circle: any, idx: number) => (
+              {carouselCircles.map((circle, idx) => (
                 <div
                   key={`${circle.index}-${idx}`}
                   className={`carousel-circle ${circle.index === activeIndex ? 'active' : ''}`}

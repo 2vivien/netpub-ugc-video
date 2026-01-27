@@ -103,14 +103,14 @@ export function handleError(error: Error, res?: Response): void {
   }
 }
 
-export const wrapAsync = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any> | any) => {
+export const wrapAsync = (fn: (req: Request, res: Response, next: NextFunction) => Promise<unknown> | unknown) => {
   return (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
 };
 
 // GraphQL error formatter
-export function formatGraphQLError(error: { message: string; stack?: string; originalError?: Error }) {
+export function formatGraphQLError(error: { message: string; stack?: string; originalError?: unknown }) {
   const originalError = error.originalError;
 
   if (originalError instanceof AppError) {
@@ -130,7 +130,7 @@ export function formatGraphQLError(error: { message: string; stack?: string; ori
     extensions: {
       code: 'INTERNAL_SERVER_ERROR',
       exception: {
-        stacktrace: error.stack
+        stacktrace: (error as { stack?: string }).stack
       }
     }
   };

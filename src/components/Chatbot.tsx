@@ -6,10 +6,24 @@ import { useChatbot } from '../contexts/ChatbotContext';
 import { NotificationService } from '../lib/notifications';
 import { fetchCsrfToken } from '../utils/csrf';
 
+interface SpeechRecognitionInstance extends EventTarget {
+    lang: string;
+    onstart: (() => void) | null;
+    onresult: ((event: SpeechRecognitionEvent) => void) | null;
+    onerror: ((event: { error: string }) => void) | null;
+    onend: (() => void) | null;
+    start: () => void;
+    stop: () => void;
+}
+
+interface SpeechRecognitionConstructor {
+    new (): SpeechRecognitionInstance;
+}
+
 declare global {
     interface Window {
-        SpeechRecognition: any;
-        webkitSpeechRecognition: any;
+        SpeechRecognition: SpeechRecognitionConstructor | undefined;
+        webkitSpeechRecognition: SpeechRecognitionConstructor | undefined;
     }
 }
 
@@ -19,7 +33,9 @@ interface SpeechRecognitionEvent extends Event {
             [index: number]: {
                 transcript: string;
             };
+            length: number;
         };
+        length: number;
     };
 }
 
@@ -117,7 +133,7 @@ const Chatbot: React.FC = () => {
     const [conversationId, setConversationId] = useState<string | null>(null);
 
     const aiRef = useRef<GoogleGenAI | null>(null);
-    const recognitionRef = useRef<any | null>(null);
+    const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
     const audioContextRef = useRef<AudioContext | null>(null);
     const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -334,7 +350,7 @@ const Chatbot: React.FC = () => {
         if (isOpen) {
             if (!aiRef.current && API_KEY) aiRef.current = new GoogleGenAI({ apiKey: API_KEY });
             if (!audioContextRef.current) {
-                const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+                const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
                 if (AudioContextClass) audioContextRef.current = new AudioContextClass({ sampleRate: 24000 });
             }
             if (messages.length === 0 && !conversationId && !isLoading) {
@@ -342,7 +358,8 @@ const Chatbot: React.FC = () => {
             }
 
             const handler = (event: Event) => {
-                const msg = (event as CustomEvent).detail?.message;
+                const customEvent = event as CustomEvent<{ message?: string }>;
+                const msg = customEvent.detail?.message;
                 if (msg) handleSendMessage(null, msg);
             };
             window.addEventListener('chatbotContext', handler);
@@ -358,7 +375,7 @@ const Chatbot: React.FC = () => {
     }, [messages]);
 
     useEffect(() => {
-        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const SR = (window.SpeechRecognition || window.webkitSpeechRecognition) as SpeechRecognitionConstructor | undefined;
         if (!SR) return;
         const recognition = new SR();
         recognition.lang = 'fr-FR';

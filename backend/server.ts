@@ -120,7 +120,7 @@ async function startApolloServer() {
 
     await server.start();
     server.applyMiddleware({
-        app: app as any,
+        app: app as express.Express,
         path: '/graphql',
         cors: false // Handle CORS manually above
     });

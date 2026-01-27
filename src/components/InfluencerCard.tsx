@@ -109,7 +109,7 @@ const InfluencerCard: React.FC<InfluencerCardProps> = ({ project, onMediaClick }
         }
     };
 
-    const renderMedia = (media: any, isMain: boolean) => {
+    const renderMedia = (media: { type: 'video' | 'image'; url: string }, isMain: boolean) => {
         if (media.type === 'video') {
             return (
                 <video

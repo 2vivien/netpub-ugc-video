@@ -20,6 +20,8 @@ interface OverviewStats {
     totalConversations: number;
     activeConversations: number;
     totalAppointments: number;
+    pendingAppointments: number;
+    confirmedAppointments: number;
     totalOrders: number;
     totalLikes: number;
     totalComments: number;

@@ -8,7 +8,9 @@ export class DashboardService {
     const firstDayThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
-    const modelClient = prisma[model as keyof typeof prisma] as any;
+    const modelClient = prisma[model as keyof typeof prisma] as unknown as { 
+        count: (args: { where: Record<string, unknown> }) => Promise<number> 
+    };
 
     const [thisMonth, lastMonth] = await Promise.all([
       modelClient.count({

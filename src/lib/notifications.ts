@@ -4,7 +4,7 @@ export interface NotificationData {
   type: 'appointment' | 'order' | 'contact' | 'conversation';
   title: string;
   message: string;
-  data?: any;
+  data?: Record<string, unknown>;
   recipientEmail?: string;
 }
 

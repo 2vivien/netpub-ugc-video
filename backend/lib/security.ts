@@ -157,7 +157,7 @@ export class PerformanceUtils {
   }
 
   // Database query optimization
-  static optimizeQuery<T extends { take?: number; orderBy?: any }>(query: T): T {
+  static optimizeQuery<T extends { take?: number; orderBy?: unknown }>(query: T): T {
     // Add pagination defaults
     if (!query.take) {
       query.take = 50; // Default limit

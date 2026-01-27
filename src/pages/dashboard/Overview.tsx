@@ -99,7 +99,7 @@ const Overview: React.FC = () => {
             <EmptyState icon={Calendar} title="Aucun rendez-vous" description="Aucune rencontre client n'est prévue." />
           ) : (
             <div className="activity-list">
-              {stats?.recentAppointments.map((apt: any) => (
+              {stats?.recentAppointments.map((apt) => (
                 <div key={apt.id} className="activity-item" style={{ padding: '16px 0', borderBottom: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <div style={{ padding: '10px', background: 'var(--bg-app)', borderRadius: '12px', color: 'var(--color-success)', flexShrink: 0 }}>
                     <Clock size={20} />
@@ -110,7 +110,7 @@ const Overview: React.FC = () => {
                   </div>
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
                     <p style={{ fontWeight: 500 }}>{apt.time}</p>
-                    <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{new Date(apt.date).toLocaleDateString()}</p>
+                    <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{new Date(apt.date || '').toLocaleDateString()}</p>
                   </div>
                 </div>
               ))}
@@ -123,7 +123,7 @@ const Overview: React.FC = () => {
             <EmptyState icon={ShoppingCart} title="Aucune commande" description="Aucune transaction récente détectée." />
           ) : (
             <div className="activity-list">
-              {stats?.recentOrders.map((order: any) => (
+              {stats?.recentOrders.map((order) => (
                 <div key={order.id} className="activity-item" style={{ padding: '16px 0', borderBottom: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <div style={{ padding: '10px', background: 'var(--bg-app)', borderRadius: '12px', color: 'var(--color-warning)', flexShrink: 0 }}>
                     <ShoppingCart size={20} />
@@ -132,7 +132,7 @@ const Overview: React.FC = () => {
                     <p style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{order.clientName}</p>
                     <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{order.type}</p>
                   </div>
-                  <Badge status={order.status.toLowerCase() as any}>{order.status}</Badge>
+                  <Badge status={(order.status?.toLowerCase() || 'pending') as 'pending' | 'success' | 'warning' | 'danger'}>{order.status}</Badge>
                 </div>
               ))}
             </div>
