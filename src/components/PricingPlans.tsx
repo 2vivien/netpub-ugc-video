@@ -164,8 +164,10 @@ const PricingPlans: React.FC = () => {
           </div>
 
           <div className="pricing-advantage">
-            <p><strong><Sparkles size={16} /> Avantage clé :</strong> {plan.advantage}</p>
-            <p><strong>Idéal pour :</strong> {plan.idealFor}</p>
+            <p><strong><Sparkles size={16} /> Avantage clé :</strong></p>
+            <p style={{ marginTop: '4px', marginBottom: '16px' }}>{plan.advantage}</p>
+            <p><strong>Idéal pour :</strong></p>
+            <p style={{ marginTop: '4px' }}>{plan.idealFor}</p>
           </div>
         </div>
 

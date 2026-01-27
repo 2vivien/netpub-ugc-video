@@ -165,9 +165,10 @@ const Chatbot: React.FC = () => {
         if (!aiRef.current || !audioContextRef.current || !text) return;
         stopSpeaking(); 
         try {
-            const response = await aiRef.current.models.generateContent({
-                model: "gemini-1.5-flash",
-                contents: [{ parts: [{ text: text }] }],
+            const genAI = aiRef.current as any;
+            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+            const response = await model.generateContent({
+                contents: [{ role: 'user', parts: [{ text: text }] }],
                 config: {
                     responseModalities: [Modality.AUDIO],
                     speechConfig: {
@@ -177,7 +178,7 @@ const Chatbot: React.FC = () => {
                     },
                 },
             });
-            const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+            const base64Audio = response.response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
             if (typeof base64Audio === 'string' && base64Audio) {
                 const audioBuffer = await decodeAudioData(base64Audio, audioContextRef.current);
                 const source = audioContextRef.current.createBufferSource();
@@ -274,16 +275,22 @@ const Chatbot: React.FC = () => {
         const systemPrompt = `Tu es Naïla, assistante chez Netpub. Discussion humaine, Emojis 😊. Une seule question à la fois.`;
 
         try {
-            const response = await aiRef.current.models.generateContent({
-                model: 'gemini-1.5-flash',
-                contents: [{ role: 'user', parts: [{ text: systemPrompt }] }, ...history, { role: 'user', parts: [{ text: textToSend }] }],
-                config: {
-                    tools: [{ functionDeclarations: [prendreRendezVous, passerCommande, collecterInfosClient, collecterFeedbackSite, enregistrerNomClient] }],
-                },
+            const genAI = aiRef.current as any;
+            const model = genAI.getGenerativeModel({ 
+                model: 'gemini-2.0-flash',
+                systemInstruction: systemPrompt
             });
 
-            if (response.functionCalls && response.functionCalls.length > 0) {
-                const fc = response.functionCalls[0];
+            const result = await model.generateContent({
+                contents: [...history, { role: 'user', parts: [{ text: textToSend }] }],
+                tools: [{ functionDeclarations: [prendreRendezVous, passerCommande, collecterInfosClient, collecterFeedbackSite, enregistrerNomClient] }],
+            });
+
+            const response = result.response;
+            const functionCalls = response.candidates?.[0]?.content?.parts?.filter((p: any) => p.functionCall);
+
+            if (functionCalls && functionCalls.length > 0) {
+                const fc = functionCalls[0].functionCall!;
                 let confirmationText = '';
                 const csrf = await fetchCsrfToken();
 
@@ -333,14 +340,15 @@ const Chatbot: React.FC = () => {
                 saveChatMessageToDb('model', confirmationText);
                 speakText(confirmationText);
             } else {
-                const modelText = response.text || "Désolé.";
+                const modelText = response.text() || "Désolé.";
                 const modelMessage: ChatMessage = { id: Date.now(), role: 'model', text: modelText, type: 'text' };
                 setMessages(prev => [...prev, modelMessage]);
                 saveChatMessageToDb('model', modelText);
                 speakText(modelText);
             }
-        } catch {
-            setMessages(prev => [...prev, { id: Date.now(), role: 'model', text: "Erreur.", type: 'text' }]);
+        } catch (err) {
+            console.error('Chatbot error:', err);
+            setMessages(prev => [...prev, { id: Date.now(), role: 'model', text: "Une erreur est survenue lors de la communication avec Naïla.", type: 'text' }]);
         } finally {
             setIsLoading(false);
         }
