@@ -1,17 +1,20 @@
 import { prisma } from './prisma.js';
-// Prisma types are inferred from the client
+
+type PrismaModel = 'conversation' | 'appointment' | 'order' | 'chatMessage' | 'like';
 
 export class DashboardService {
-  private static async getTrend(model: string, where: Record<string, unknown> = {}, dateField: string = 'createdAt') {
+  private static async getTrend(model: PrismaModel, where: Record<string, unknown> = {}, dateField: string = 'createdAt') {
     const now = new Date();
     const firstDayThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
+    const modelClient = prisma[model as keyof typeof prisma] as any;
+
     const [thisMonth, lastMonth] = await Promise.all([
-      (prisma as any)[model].count({
+      modelClient.count({
         where: { ...where, [dateField]: { gte: firstDayThisMonth } }
       }),
-      (prisma as any)[model].count({
+      modelClient.count({
         where: { ...where, [dateField]: { gte: firstDayLastMonth, lt: firstDayThisMonth } }
       })
     ]);

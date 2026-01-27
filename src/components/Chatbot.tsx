@@ -13,6 +13,16 @@ declare global {
     }
 }
 
+interface SpeechRecognitionEvent extends Event {
+    results: {
+        [index: number]: {
+            [index: number]: {
+                transcript: string;
+            };
+        };
+    };
+}
+
 const prendreRendezVous: FunctionDeclaration = {
     name: 'prendreRendezVous',
     description: "Prendre un rendez-vous pour un service spécifique à une date et une heure données.",
@@ -107,7 +117,7 @@ const Chatbot: React.FC = () => {
     const [conversationId, setConversationId] = useState<string | null>(null);
 
     const aiRef = useRef<GoogleGenAI | null>(null);
-    const recognitionRef = useRef<any>(null);
+    const recognitionRef = useRef<any | null>(null);
     const audioContextRef = useRef<AudioContext | null>(null);
     const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -353,7 +363,10 @@ const Chatbot: React.FC = () => {
         const recognition = new SR();
         recognition.lang = 'fr-FR';
         recognition.onstart = () => setIsRecording(true);
-        recognition.onresult = (event: any) => handleSendMessage(null, event.results[0][0].transcript);
+        recognition.onresult = (event: SpeechRecognitionEvent) => {
+            const transcript = event.results[0][0].transcript;
+            handleSendMessage(null, transcript);
+        };
         recognition.onerror = () => setIsRecording(false);
         recognition.onend = () => setIsRecording(false);
         recognitionRef.current = recognition;
