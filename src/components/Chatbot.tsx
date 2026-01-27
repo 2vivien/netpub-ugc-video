@@ -144,10 +144,6 @@ interface GeminiModel {
     }>;
 }
 
-interface GeminiSDK {
-    getGenerativeModel: (config: { model: string; systemInstruction?: string }) => GeminiModel;
-}
-
 
 const Chatbot: React.FC = () => {
     const { isOpen, toggleChatbot, closeChatbot } = useChatbot(); 
@@ -157,7 +153,7 @@ const Chatbot: React.FC = () => {
     const [isRecording, setIsRecording] = useState(false);
     const [conversationId, setConversationId] = useState<string | null>(null);
 
-    const aiRef = useRef<GoogleGenAI | null>(null);
+    const aiRef = useRef<any>(null);
     const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
     const audioContextRef = useRef<AudioContext | null>(null);
     const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
@@ -190,8 +186,8 @@ const Chatbot: React.FC = () => {
         if (!aiRef.current || !audioContextRef.current || !text) return;
         stopSpeaking(); 
         try {
-            const sdk = aiRef.current as unknown as GeminiSDK;
-            const model = sdk.getGenerativeModel({ model: "gemini-2.0-pro-preview-tts" });
+            // Correct SDK usage for TTS
+            const model = aiRef.current.getGenerativeModel({ model: "gemini-2.0-pro-preview-tts" });
             const result = await model.generateContent({
                 contents: [{ role: 'user', parts: [{ text: text }] }],
                 generationConfig: {
@@ -201,11 +197,11 @@ const Chatbot: React.FC = () => {
                             prebuiltVoiceConfig: { voiceName: 'Kore' },
                         },
                     },
-                },
+                } as any,
             });
             
             const parts = result.response.candidates?.[0]?.content?.parts || [];
-            const audioPart = parts.find(p => p.inlineData?.mimeType?.startsWith('audio/'));
+            const audioPart = parts.find((p: any) => p.inlineData?.mimeType?.startsWith('audio/'));
             const base64Audio = audioPart?.inlineData?.data;
 
             if (typeof base64Audio === 'string' && base64Audio) {
@@ -308,20 +304,25 @@ const Chatbot: React.FC = () => {
             .filter((msg, index) => !(index === 0 && msg.role === 'model'))
             .map(msg => ({ role: msg.role, parts: [{ text: msg.text }] }));
             
-        const systemPrompt = `Tu es Naïla, assistante chez Netpub. Discussion humaine, Emojis 😊. Une seule question à la fois.`;
+        const systemPrompt = `Tu es Naïla, assistante chez Netpub. Discussion humaine, Emojis 😊. COURTE ET DIRECTE.
+        RÈGLES :
+        1. Si l'utilisateur veut commander ou un RDV, appelle 'collecterInfosClient' pour ses coordonnées (Nom, Email, Tel).
+        2. Ne sois pas trop technique.
+        3. Une question à la fois.`;
 
         try {
-            const response = await aiRef.current.models.generateContent({
-                model: 'gemini-2.5-flash-lite',
+            const model = aiRef.current.getGenerativeModel({ 
+                model: 'gemini-2.0-flash-lite',
+                systemInstruction: systemPrompt,
+            });
+
+            const response = await model.generateContent({
                 contents: [...history, { role: 'user', parts: [{ text: textToSend }] }],
-                config: {
-                    systemInstruction: systemPrompt,
-                    tools: [{ functionDeclarations: [prendreRendezVous, passerCommande, collecterInfosClient, collecterFeedbackSite, enregistrerNomClient] }],
-                },
+                tools: [{ functionDeclarations: [prendreRendezVous, passerCommande, collecterInfosClient, collecterFeedbackSite, enregistrerNomClient] }],
             });
 
             const parts = response.candidates?.[0]?.content?.parts || [];
-            const functionCalls = parts.filter(p => !!p.functionCall);
+            const functionCalls = parts.filter((p: any) => !!p.functionCall);
 
             if (functionCalls && functionCalls.length > 0) {
                 const fc = functionCalls[0].functionCall!;
@@ -374,7 +375,7 @@ const Chatbot: React.FC = () => {
                 saveChatMessageToDb('model', confirmationText);
                 speakText(confirmationText);
             } else {
-                const modelText = parts.find(p => !!p.text)?.text || "Désolé.";
+                const modelText = parts.find((p: any) => !!p.text)?.text || "Désolé.";
                 const modelMessage: ChatMessage = { id: Date.now(), role: 'model', text: modelText, type: 'text' };
                 setMessages(prev => [...prev, modelMessage]);
                 saveChatMessageToDb('model', modelText);

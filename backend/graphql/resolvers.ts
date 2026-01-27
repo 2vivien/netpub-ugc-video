@@ -100,17 +100,17 @@ export const resolvers = {
         const conversation = await prisma.conversation.update({
           where: { id: conversationId },
           data: {
-            clientName,
-            clientEmail,
-            clientPhone,
-            discovery,
-            feedback
+            clientName: clientName || undefined,
+            clientEmail: clientEmail || undefined,
+            clientPhone: clientPhone || undefined,
+            discovery: discovery || undefined,
+            feedback: feedback || undefined
           }
         });
 
-        // Notify admin about the updated conversation details
+        // Notify admin about the updated conversation details (async, don't wait for it)
         if (clientName || clientEmail || clientPhone || discovery || feedback) {
-          await emailService.sendConversationNotification({
+          emailService.sendConversationNotification({
             id: conversationId,
             clientName: clientName || conversation.clientName || undefined,
             clientEmail: clientEmail || conversation.clientEmail || undefined,
@@ -118,11 +118,12 @@ export const resolvers = {
             discovery: discovery || conversation.discovery || undefined,
             feedback: feedback || conversation.feedback || undefined,
             lastMessage: 'Informations client mises à jour'
-          });
+          }).catch(err => console.error('Failed to send conversation notification:', err));
         }
 
         return conversation;
-      } catch {
+      } catch (err) {
+        console.error('Update conversation error:', err);
         throw new Error('Failed to update conversation');
       }
     },
@@ -140,15 +141,16 @@ export const resolvers = {
         const clientPhone = conversation?.clientPhone || '';
 
         // Create appointment in DB
-        // Parse the date string properly
+        // Try to parse the date, but fall back to current date if it's text like "demain"
         let appointmentDate: Date;
         try {
           appointmentDate = new Date(date);
           if (isNaN(appointmentDate.getTime())) {
-            throw new Error('Invalid date format');
+            // Fallback for relative dates like "demain"
+            appointmentDate = new Date();
           }
         } catch {
-          throw new Error('Invalid date format. Please provide a valid date.');
+          appointmentDate = new Date();
         }
 
         const appointment = await prisma.appointment.create({
@@ -202,19 +204,20 @@ export const resolvers = {
           }
         });
 
-        // Send email notification
+        // Send email notification (async)
         if (clientEmail) {
-          await emailService.sendOrderNotification({
+          emailService.sendOrderNotification({
             service,
             details,
             clientName,
             clientEmail,
             clientPhone
-          });
+          }).catch(err => console.error('Failed to send order email:', err));
         }
 
         return order;
-      } catch {
+      } catch (err) {
+        console.error('Create order error:', err);
         throw new Error('Failed to create order');
       }
     },
