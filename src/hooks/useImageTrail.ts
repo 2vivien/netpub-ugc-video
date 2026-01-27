@@ -141,7 +141,9 @@ class ImageTrailVariant {
 // Variant 2
 class ImageTrailVariant2 extends ImageTrailVariant {
   render() {
-        const distance = Math.hypot(deltaX, deltaY);
+    const deltaX = this.mousePos.x - this.lastMousePos.x;
+    const deltaY = this.mousePos.y - this.lastMousePos.y;
+    const distance = Math.hypot(deltaX, deltaY);
     this.cacheMousePos.x = lerp(this.cacheMousePos.x, this.mousePos.x, 0.1);
     this.cacheMousePos.y = lerp(this.cacheMousePos.y, this.mousePos.y, 0.1);
 

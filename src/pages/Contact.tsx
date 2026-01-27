@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import useOnScreen from '../hooks/useOnScreen';
 import { FaInstagram, FaTiktok, FaYoutube, FaFacebook, FaLinkedin } from 'react-icons/fa';
 import { useChatbot } from '../contexts/ChatbotContext'; // Import useChatbot

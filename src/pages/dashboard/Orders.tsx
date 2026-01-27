@@ -42,6 +42,7 @@ const Orders: React.FC = () => {
   const { refreshStats } = useDashboard();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [_error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterDate, setFilterDate] = useState<string>('');
   const [totalOrders, setTotalOrders] = useState(0);

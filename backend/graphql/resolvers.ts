@@ -89,7 +89,7 @@ export const resolvers = {
           }
         });
         return conversation;
-      } catch {
+      } catch (_error) {
         console.error('Create conversation error');
         throw new Error(`Failed to create conversation: ${_error instanceof Error ? _error.message : 'Unknown error'}`);
       }
