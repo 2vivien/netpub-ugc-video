@@ -1,5 +1,11 @@
 let csrfToken: string | null = null;
 
+interface EnvMeta {
+  env: {
+    VITE_API_URL?: string;
+  };
+}
+
 export const fetchCsrfToken = async (maxRetries = 5, retryDelayMs = 1000): Promise<string> => {
   if (csrfToken) return csrfToken;
 
@@ -9,7 +15,7 @@ export const fetchCsrfToken = async (maxRetries = 5, retryDelayMs = 1000): Promi
 
   for (let i = 0; i < maxRetries; i++) {
     try {
-      const apiUrl = (import.meta as any).env.VITE_API_URL || '';
+      const apiUrl = (import.meta as unknown as EnvMeta).env.VITE_API_URL || '';
       const response = await fetch(`${apiUrl}/csrf-token`);
       if (!response.ok) {
         // Retry on 5xx errors which often happen during startup/proxying
@@ -26,7 +32,7 @@ export const fetchCsrfToken = async (maxRetries = 5, retryDelayMs = 1000): Promi
       const data = await response.json();
       csrfToken = data.csrfToken;
       return csrfToken as string;
-    } catch (error: any) {
+    } catch (error) {
       // Retry on network errors (like TypeError: Failed to fetch) during startup
       if (i < maxRetries - 1) {
         if (i >= 2) {

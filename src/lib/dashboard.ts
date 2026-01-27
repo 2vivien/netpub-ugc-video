@@ -4,9 +4,9 @@ import { fetchCsrfToken } from '../utils/csrf';
 const GRAPHQL_ENDPOINT = `${import.meta.env.VITE_API_URL || ''}/graphql`;
 
 // Helper for GraphQL requests
-async function graphqlRequest(query: string, variables: any = {}) {
+async function graphqlRequest(query: string, variables: Record<string, unknown> = {}) {
   const token = localStorage.getItem('token');
-  const headers: any = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
 
@@ -39,6 +39,19 @@ async function graphqlRequest(query: string, variables: any = {}) {
   }
 
   return result.data;
+}
+
+interface ConvItem {
+    id: string;
+    userName?: string;
+    name?: string;
+    lastActivity: string;
+    hasAppointment?: boolean;
+    hasCallScheduled?: boolean;
+    hasOrderPlaced?: boolean;
+    messages?: Array<{ text: string }>;
+    orders?: Array<{ id: string }>;
+    appointments?: Array<{ id: string }>;
 }
 
 export class DashboardService {
@@ -82,7 +95,7 @@ export class DashboardService {
         totalProjects: 0, // Not in DashboardStats schema, defaulting
         totalUsers: 0, // Not in schema
         totalConversations: stats.totalConversations,
-        recentConversations: stats.recentConversations.map((conv: any) => ({
+        recentConversations: stats.recentConversations.map((conv: ConvItem) => ({
           id: conv.id,
           userName: conv.name || conv.userName || 'Visitor',
           lastActivity: conv.lastActivity,

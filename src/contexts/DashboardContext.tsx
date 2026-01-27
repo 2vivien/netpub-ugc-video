@@ -1,9 +1,54 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { fetchCsrfToken } from '../utils/csrf';
 
+interface Trend {
+    value: number;
+    isUp: boolean;
+}
+
+interface RecentItem {
+    id: string;
+    clientName: string;
+    service?: string;
+    type?: string;
+    time?: string;
+    date?: string;
+    status?: string;
+}
+
+interface OverviewStats {
+    totalConversations: number;
+    activeConversations: number;
+    totalAppointments: number;
+    totalOrders: number;
+    totalLikes: number;
+    totalComments: number;
+    conversationsTrend: Trend;
+    appointmentsTrend: Trend;
+    ordersTrend: Trend;
+    engagementTrend: Trend;
+    recentAppointments: RecentItem[];
+    recentOrders: RecentItem[];
+}
+
+interface AnalyticsStats {
+    totalMessages: number;
+    totalAppointments: number;
+    totalOrders: number;
+    conversionRate: number;
+    systemLatency: number;
+    systemStatus: string;
+    efficiencyScore: number;
+    messagesTrend: Trend;
+    appointmentsTrend: Trend;
+    ordersTrend: Trend;
+    conversionTrend: Trend;
+    mostFrequentIntentions: Array<{ name: string; count: number; icon: string }>;
+}
+
 interface DashboardContextType {
-    overviewStats: any;
-    analyticsStats: any;
+    overviewStats: OverviewStats | null;
+    analyticsStats: AnalyticsStats | null;
     loading: boolean;
     error: string | null;
     refreshStats: () => Promise<void>;
@@ -47,8 +92,8 @@ const GET_ALL_STATS = `
 `;
 
 export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [overviewStats, setOverviewStats] = useState<any>(null);
-    const [analyticsStats, setAnalyticsStats] = useState<any>(null);
+    const [overviewStats, setOverviewStats] = useState<OverviewStats | null>(null);
+    const [analyticsStats, setAnalyticsStats] = useState<AnalyticsStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 

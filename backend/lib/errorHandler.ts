@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 
 export class AppError extends Error {
   public statusCode: number;
@@ -37,6 +37,10 @@ export class NotFoundError extends AppError {
   }
 }
 
+interface PrismaError extends Error {
+  code: string;
+}
+
 export function handleError(error: Error, res?: Response): void {
   if (error instanceof AppError) {
     if (res) {
@@ -51,7 +55,7 @@ export function handleError(error: Error, res?: Response): void {
 
   // Handle Prisma errors
   if (error.name === 'PrismaClientKnownRequestError') {
-    const prismaError = error as any;
+    const prismaError = error as PrismaError;
     let message = 'Erreur de base de données';
 
     switch (prismaError.code) {
@@ -99,14 +103,14 @@ export function handleError(error: Error, res?: Response): void {
   }
 }
 
-export const wrapAsync = (fn: (req: any, res: any, next: any) => Promise<any> | any) => {
-  return (req: any, res: any, next: any) => {
+export const wrapAsync = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any> | any) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
 };
 
 // GraphQL error formatter
-export function formatGraphQLError(error: any) {
+export function formatGraphQLError(error: { message: string; stack?: string; originalError?: Error }) {
   const originalError = error.originalError;
 
   if (originalError instanceof AppError) {
