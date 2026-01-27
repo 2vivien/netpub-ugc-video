@@ -13,7 +13,7 @@ const ProjectFeedItem: React.FC<ProjectFeedItemProps> = ({ project, isActive }) 
   useEffect(() => {
     if (videoRef.current) {
       if (isActive) {
-        videoRef.current.play().catch(error => {
+        videoRef.current.play().catch(() => {
           // Autoplay prevented
         });
       } else {

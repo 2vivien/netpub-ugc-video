@@ -192,7 +192,7 @@ const PricingPlans: React.FC = () => {
         {screenWidth >= 769 ? (
           // Desktop: Grid statique
           <div className="pricing-plans-grid">
-            {plans.map((plan, index) => (
+            {plans.map((plan) => (
               <PricingCard
                 key={plan.id}
                 plan={plan}

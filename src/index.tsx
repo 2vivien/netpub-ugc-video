@@ -17,12 +17,12 @@ root.render(
 );
 
 // Register Service Worker for advanced caching
-if ('serviceWorker' in navigator) {
+  if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').then((_registration) => {
-        
-      }).catch((_registrationError) => {
-        
+      navigator.serviceWorker.register('/sw.js').then(() => {
+        // Registration successful
+      }).catch(() => {
+        // Registration failed
       });
     });
-}
+  }

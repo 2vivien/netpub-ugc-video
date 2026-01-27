@@ -99,7 +99,7 @@ export class NotificationService {
   }
 
   // Method to get recent notifications (for dashboard)
-  static async getRecentNotifications(limit: number = 10): Promise<NotificationData[]> {
+  static async getRecentNotifications(): Promise<NotificationData[]> {
     try {
       // This would query a notifications table
       // For now, return empty array

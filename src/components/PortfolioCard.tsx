@@ -25,11 +25,6 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ project, onClick }) => {
     setIsFocused(true); // Auto-focus when selecting from circles/thumbnails
   };
 
-  const toggleFocus = (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    setIsFocused(!isFocused);
-  };
-
   const getCarouselItems = () => {
     if (mediaItems.length === 0) return [];
     if (mediaItems.length === 1) return [{ item: mediaItems[0], index: 0 }];

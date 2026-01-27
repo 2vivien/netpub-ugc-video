@@ -19,9 +19,10 @@ export class NotificationService {
     }
   }
 
-  static async sendEmailNotification(_notification: NotificationData): Promise<void> {
+  static async sendEmailNotification(notification: NotificationData): Promise<void> {
     try {
       // Email sending logic would go here
+      console.log('Sending email notification to:', notification.recipientEmail);
     } catch {
       // silent fail
     }
@@ -74,7 +75,7 @@ export class NotificationService {
     await this.createNotification(notification);
   }
 
-  static async getRecentNotifications(_limit: number = 10): Promise<unknown[]> {
+  static async getRecentNotifications(): Promise<unknown[]> {
     try {
       return [];
     } catch {

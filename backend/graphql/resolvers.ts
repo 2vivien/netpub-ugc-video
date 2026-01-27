@@ -147,7 +147,7 @@ export const resolvers = {
           if (isNaN(appointmentDate.getTime())) {
             throw new Error('Invalid date format');
           }
-        } catch (_error) {
+        } catch {
           throw new Error('Invalid date format. Please provide a valid date.');
         }
 

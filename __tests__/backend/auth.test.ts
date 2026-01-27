@@ -1,6 +1,5 @@
 import { AuthService } from '../../backend/lib/auth';
 import * as jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
 
 // Mock the prisma client
 jest.mock('../../backend/lib/prisma', () => ({
@@ -16,7 +15,7 @@ jest.mock('../../backend/lib/prisma', () => ({
 // Mock bcrypt functions
 jest.mock('bcryptjs', () => ({
   hash: jest.fn((password) => Promise.resolve(`hashed_${password}`)),
-  compare: jest.fn((password, hash) => Promise.resolve(password === `validPassword`)),
+  compare: jest.fn((password) => Promise.resolve(password === `validPassword`)),
 }));
 
 // Mock jsonwebtoken functions
