@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useLayoutEffect, useRef } from 'react';
+import React, { useEffect, useId, useLayoutEffect, useRef, useCallback } from 'react';
 
 import './ElectricBorder.css';
 
@@ -27,7 +27,7 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
   const rootRef = useRef<HTMLDivElement>(null);
   const strokeRef = useRef<HTMLDivElement>(null);
 
-  const updateAnim = () => {
+  const updateAnim = useCallback(() => {
     const svg = svgRef.current;
     const host = rootRef.current;
     if (!svg || !host) return;
@@ -69,21 +69,21 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
 
     requestAnimationFrame(() => {
       [...dyAnims, ...dxAnims].forEach(a => {
-        if (typeof (a as any).beginElement === 'function') {
+        const anim = a as unknown as { beginElement?: () => void };
+        if (typeof anim.beginElement === 'function') {
           try {
-            (a as any).beginElement();
+            anim.beginElement();
           } catch {
             
           }
         }
       });
     });
-  };
+  }, [speed, chaos, filterId]);
 
   useEffect(() => {
     updateAnim();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [speed, chaos]);
+  }, [updateAnim]);
 
   useLayoutEffect(() => {
     if (!rootRef.current) return;
@@ -91,8 +91,7 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
     ro.observe(rootRef.current);
     updateAnim();
     return () => ro.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [updateAnim]);
 
   const vars = {
     ['--electric-border-color']: color,

@@ -94,7 +94,7 @@ export class DashboardService {
           appointmentCount: conv.appointments?.length || 0
         }))
       };
-    } catch (error) {
+    } catch (_error) {
       
       return {
         totalProjects: 0,
@@ -131,7 +131,7 @@ export class DashboardService {
     try {
       const data = await graphqlRequest(query);
       return data.conversations;
-    } catch (error) {
+    } catch (_error) {
       
       return [];
     }
@@ -159,7 +159,7 @@ export class DashboardService {
     try {
       const data = await graphqlRequest(query);
       return data.allAppointments.appointments;
-    } catch (error) {
+    } catch (_error) {
       
       return [];
     }
@@ -186,7 +186,7 @@ export class DashboardService {
     try {
       const data = await graphqlRequest(query);
       return data.allOrders.orders;
-    } catch (error) {
+    } catch (_error) {
       
       return [];
     }

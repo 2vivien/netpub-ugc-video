@@ -39,14 +39,14 @@ export class AuthService {
 
   static verifyToken(token: string): AuthUser | null {
     try {
-      const decoded = jwt.verify(token, JWT_SECRET as string) as any;
+      const decoded = jwt.verify(token, JWT_SECRET as string) as { userId: string; email: string; name: string | null; role: string };
       return {
         id: decoded.userId,
         email: decoded.email,
         name: decoded.name,
         role: decoded.role
       };
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -69,9 +69,6 @@ export class AuthService {
             role: 'admin'
           }
         });
-        
-      } else {
-        
       }
       return {
         id: adminUser.id,
@@ -79,8 +76,7 @@ export class AuthService {
         name: adminUser.name || null,
         role: adminUser.role
       };
-    } catch (error) {
-      
+    } catch (_error) {
       return null;
     }
   }
@@ -92,22 +88,18 @@ export class AuthService {
       const attempts = AuthService.failedAttempts.get(ip) || { count: 0, lastAttempt: 0, blockedUntil: 0 };
 
       if (attempts.blockedUntil > now) {
-        
         return null;
       }
 
-      
       const user = await prisma.user.findUnique({
         where: { email }
       });
 
       if (!user) {
-        
         attempts.count++;
         attempts.lastAttempt = now;
         if (attempts.count >= 3) {
           attempts.blockedUntil = now + 24 * 60 * 60 * 1000; // Block for 24 hours
-          
         }
         AuthService.failedAttempts.set(ip, attempts);
         return null;
@@ -115,12 +107,10 @@ export class AuthService {
 
       const isValidPassword = await this.verifyPassword(password, user.password);
       if (!isValidPassword) {
-        
         attempts.count++;
         attempts.lastAttempt = now;
         if (attempts.count >= 3) {
           attempts.blockedUntil = now + 24 * 60 * 60 * 1000; // Block for 24 hours
-          
         }
         AuthService.failedAttempts.set(ip, attempts);
         SecurityUtils.logSecurityEvent('failed_login_attempt', { email, ip });
@@ -136,8 +126,7 @@ export class AuthService {
         name: user.name || null,
         role: user.role
       };
-    } catch (error) {
-      
+    } catch (_error) {
       return null;
     }
   }
@@ -146,20 +135,17 @@ export class AuthService {
     try {
       // Validate input
       if (!email || !password) {
-        
         return null;
       }
 
       // Validate email format
       const emailRegex = /^[\w._%+-]+@[\w.-]+\.[A-Za-z]{2,}$/;
       if (!emailRegex.test(email)) {
-        
         return null;
       }
 
       // Validate password strength
       if (password.length < 8) {
-        
         return null;
       }
 
@@ -174,20 +160,13 @@ export class AuthService {
         }
       });
 
-      
       return {
         id: user.id,
         email: user.email,
         name: user.name || null,
         role: user.role
       };
-    } catch (error: any) {
-      // Handle unique constraint violation
-      if (error.code === 'P2002') { // Prisma unique constraint violation
-        
-      } else {
-        
-      }
+    } catch (error: unknown) {
       return null;
     }
   }

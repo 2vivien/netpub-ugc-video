@@ -2,7 +2,7 @@ import { prisma } from './prisma.js';
 // Prisma types are inferred from the client
 
 export class DashboardService {
-  private static async getTrend(model: string, where: any = {}, dateField: string = 'createdAt') {
+  private static async getTrend(model: string, where: Record<string, unknown> = {}, dateField: string = 'createdAt') {
     const now = new Date();
     const firstDayThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -25,7 +25,6 @@ export class DashboardService {
 
   static async getStats() {
     try {
-      
       const now = new Date();
       const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
@@ -45,8 +44,8 @@ export class DashboardService {
         recentConversations,
         recentAppointments,
         recentOrders,
-        recentComments,
-        recentLikes,
+        _recentComments,
+        _recentLikes,
         conversationsTrend,
         appointmentsTrend,
         ordersTrend,
@@ -62,8 +61,8 @@ export class DashboardService {
         prisma.order.count({ where: { status: 'pending' } }),
         prisma.order.count({ where: { status: 'confirmed' } }),
         prisma.order.count({ where: { status: 'delivered' } }),
-        Promise.resolve(0), // totalComments - model removed
-        Promise.resolve(0), // totalLikes - model removed
+        Promise.resolve(0),
+        Promise.resolve(0),
         prisma.conversation.findMany({
           take: 5,
           orderBy: { lastActivity: 'desc' },
@@ -77,8 +76,8 @@ export class DashboardService {
           take: 5,
           orderBy: { date: 'desc' },
         }),
-        Promise.resolve([]), // recentComments - model removed
-        Promise.resolve([]), // recentLikes - model removed
+        Promise.resolve([]),
+        Promise.resolve([]),
         this.getTrend('conversation'),
         this.getTrend('appointment', {}, 'date'),
         this.getTrend('order', {}, 'date'),
@@ -101,15 +100,14 @@ export class DashboardService {
         recentConversations,
         recentAppointments,
         recentOrders,
-        recentComments,
-        recentLikes,
+        recentComments: _recentComments,
+        recentLikes: _recentLikes,
         conversationsTrend,
         appointmentsTrend,
         ordersTrend,
         engagementTrend
       };
-    } catch (error) {
-      
+    } catch (_error) {
       throw new Error('Failed to get dashboard statistics');
     }
   }
@@ -125,7 +123,6 @@ export class DashboardService {
       ]);
       const systemLatency = Date.now() - start;
 
-      // Efficiency Score based on successful outcomes
       const [allApps, allOrds] = await Promise.all([
         prisma.appointment.findMany({ select: { status: true } }),
         prisma.order.findMany({ select: { status: true } })
@@ -136,7 +133,6 @@ export class DashboardService {
       const efficiencyScore = totalOutcomes > 0 ? ((successApp + successOrd) / totalOutcomes) * 100 : 0;
       const conversionRate = totalConversations > 0 ? (totalOrders / totalConversations) * 100 : 0;
 
-      // Intentions basées sur les services demandés dans les rendez-vous
       const appointments = await prisma.appointment.findMany({ select: { service: true } });
       const counts: Record<string, number> = {};
       appointments.forEach((a: { service: string }) => counts[a.service] = (counts[a.service] || 0) + 1);
@@ -150,7 +146,6 @@ export class DashboardService {
         mostFrequentIntentions.push({ name: 'Demandes Générales', count: totalMessages, icon: '💬' });
       }
 
-      // Real conversion trend calculation
       const now = new Date();
       const firstDayThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -183,13 +178,13 @@ export class DashboardService {
         systemStatus: 'Opérationnel',
         efficiencyScore: Math.round(efficiencyScore * 10) / 10
       };
-    } catch (error) {
+    } catch (_error) {
       throw new Error('Failed to get analytics statistics');
     }
   }
 
   static async getAllOrders(limit: number = 20, offset: number = 0, status?: string, date?: string) {
-    const where: any = {};
+    const where: Record<string, unknown> = {};
     if (status) {
       where.status = status;
     }
@@ -211,14 +206,13 @@ export class DashboardService {
         prisma.order.count({ where }),
       ]);
       return { orders, totalCount };
-    } catch (error) {
-      
+    } catch (_error) {
       throw new Error('Failed to get all orders');
     }
   }
 
   static async getAllAppointments(limit: number = 20, offset: number = 0, status?: string, date?: string) {
-    const where: any = {};
+    const where: Record<string, unknown> = {};
     if (status) {
       where.status = status;
     }
@@ -240,15 +234,13 @@ export class DashboardService {
         prisma.appointment.count({ where }),
       ]);
       return { appointments, totalCount };
-    } catch (error) {
-      
+    } catch (_error) {
       throw new Error('Failed to get all appointments');
     }
   }
 
   static async getConversations(limit: number = 50, offset: number = 0) {
     try {
-      
       const conversations = await prisma.conversation.findMany({
         take: limit,
         skip: offset,
@@ -267,13 +259,11 @@ export class DashboardService {
         },
       });
 
-      
-      return conversations.map((conv: any) => ({
+      return conversations.map((conv) => ({
         ...conv,
-        messages: [...conv.messages].reverse(), // Most recent first
+        messages: [...conv.messages].reverse(),
       }));
-    } catch (error) {
-      
+    } catch (_error) {
       return [];
     }
   }
@@ -296,51 +286,39 @@ export class DashboardService {
       });
 
       return conversation;
-    } catch (error) {
-      
+    } catch (_error) {
       return null;
     }
   }
 
   static async updateAppointmentStatus(appointmentId: string, status: string): Promise<boolean> {
     try {
-      
       await prisma.appointment.update({
         where: { id: appointmentId },
         data: { status },
       });
-      
       return true;
-    } catch (error) {
-      
+    } catch (_error) {
       return false;
     }
   }
 
   static async updateOrderStatus(orderId: string, status: string): Promise<boolean> {
     try {
-      
       await prisma.order.update({
         where: { id: orderId },
         data: { status },
       });
-      
       return true;
-    } catch (error) {
-      
+    } catch (_error) {
       return false;
     }
   }
 
   static async resetChatbotModel(): Promise<boolean> {
     try {
-      // This would typically involve clearing conversation history or resetting AI model state
-      // For now, we'll just log this action
-      
-      // You could add logic here to clear old conversations or reset model state
       return true;
-    } catch (error) {
-      
+    } catch (_error) {
       return false;
     }
   }
@@ -351,15 +329,13 @@ export class DashboardService {
         where: { id: conversationId },
       });
       return true;
-    } catch (error) {
-      
+    } catch (_error) {
       return false;
     }
   }
 
   static async addNoteToConversation(conversationId: string, note: string): Promise<boolean> {
     try {
-      // For now, we'll add a system message as a note
       await prisma.chatMessage.create({
         data: {
           conversationId,
@@ -368,15 +344,13 @@ export class DashboardService {
         },
       });
       return true;
-    } catch (error) {
-      
+    } catch (_error) {
       return false;
     }
   }
 
   static async saveChatMessage(conversationId: string, sender: string, text: string) {
     try {
-      
       const message = await prisma.chatMessage.create({
         data: {
           conversationId,
@@ -385,15 +359,13 @@ export class DashboardService {
         },
       });
 
-      // Update last activity
       await prisma.conversation.update({
         where: { id: conversationId },
         data: { lastActivity: new Date() }
       });
 
       return message;
-    } catch (error) {
-      
+    } catch (_error) {
       throw new Error('Failed to save chat message');
     }
   }

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { GoogleGenAI, FunctionDeclaration, Type, Modality } from '@google/genai';
 import { ChatMessage, PortfolioCategory } from '../types';
 import { decodeAudioData } from '../utils/audioUtils';
@@ -105,14 +105,22 @@ const Chatbot: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [conversationId, setConversationId] = useState<string | null>(null);
-    const [followUpStep, setFollowUpStep] = useState<'none' | 'discovery' | 'feedback' | 'completed'>('none');
-    const [recognitionError, setRecognitionError] = useState<string | null>(null);
 
     const aiRef = useRef<GoogleGenAI | null>(null);
     const recognitionRef = useRef<any>(null);
     const audioContextRef = useRef<AudioContext | null>(null);
     const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
+    const inputValueRef = useRef(inputValue);
+    const messagesRef = useRef(messages);
+
+    useEffect(() => {
+        inputValueRef.current = inputValue;
+    }, [inputValue]);
+
+    useEffect(() => {
+        messagesRef.current = messages;
+    }, [messages]);
 
     const env = (import.meta as unknown as { env: { VITE_API_KEY: string } }).env;
     const API_KEY = env.VITE_API_KEY;
@@ -127,12 +135,12 @@ const Chatbot: React.FC = () => {
         }
     };
 
-    const speakText = async (text: string) => {
+    const speakText = useCallback(async (text: string) => {
         if (!aiRef.current || !audioContextRef.current || !text) return;
         stopSpeaking(); 
         try {
             const response = await aiRef.current.models.generateContent({
-                model: "gemini-2.0-flash",
+                model: "gemini-1.5-flash",
                 contents: [{ parts: [{ text: text }] }],
                 config: {
                     responseModalities: [Modality.AUDIO],
@@ -156,9 +164,9 @@ const Chatbot: React.FC = () => {
                 source.start();
             }
         } catch { /* ignore */ }
-    };
+    }, []);
 
-    const saveChatMessageToDb = async (sender: string, text: string) => {
+    const saveChatMessageToDb = useCallback(async (sender: string, text: string) => {
         if (!conversationId) return;
         try {
             const csrf = await fetchCsrfToken();
@@ -174,12 +182,17 @@ const Chatbot: React.FC = () => {
                 }),
             });
         } catch { /* ignore */ }
-    };
+    }, [conversationId]);
 
-    const createConversation = async () => {
+    const createConversation = useCallback(async () => {
+        if (isLoading || conversationId) return;
+        setIsLoading(true);
         try {
             const csrf = await fetchCsrfToken();
-            if (!csrf) return;
+            if (!csrf) {
+                setIsLoading(false);
+                return;
+            }
             const response = await fetch(GRAPHQL_ENDPOINT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
@@ -193,8 +206,10 @@ const Chatbot: React.FC = () => {
                 setConversationId(conversation.id);
                 const initialGreeting = API_KEY
                     ? "Salut ! 😊 Je suis Naïla, Community Manager chez Netpub. Comment dois-je t'appeler ?"
-                    : "Désolé, le chatbot n'est pas configuré.";
+                    : "Désolé, le chatbot n'est pas entièrement configuré.";
                 
+                setMessages([{ id: Date.now(), role: 'model', text: initialGreeting, type: 'text' }]);
+
                 await fetch(GRAPHQL_ENDPOINT, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
@@ -212,12 +227,14 @@ const Chatbot: React.FC = () => {
                     userId: conversation.userId
                 });
             }
-        } catch { /* ignore */ }
-    };
+        } catch { /* ignore */ } finally {
+            setIsLoading(false);
+        }
+    }, [API_KEY, conversationId, isLoading]);
 
-    const handleSendMessage = async (e: React.FormEvent | null, textOverride?: string) => {
+    const handleSendMessage = useCallback(async (e: React.FormEvent | null, textOverride?: string) => {
         if (e) e.preventDefault();
-        const textToSend = textOverride || inputValue;
+        const textToSend = textOverride || inputValueRef.current;
         if (!textToSend.trim() || isLoading || !aiRef.current) return;
 
         const userMessage: ChatMessage = { id: Date.now(), role: 'user', text: textToSend, type: 'text' };
@@ -227,12 +244,12 @@ const Chatbot: React.FC = () => {
         stopSpeaking();
         saveChatMessageToDb('user', textToSend);
 
-        const history = messages.map(msg => ({ role: msg.role, parts: [{ text: msg.text }] }));
-        const systemPrompt = `Tu es Naïla, assistante chez Netpub. Discussion humaine,Emojis 😊. Une seule question à la fois.`;
+        const history = messagesRef.current.map(msg => ({ role: msg.role, parts: [{ text: msg.text }] }));
+        const systemPrompt = `Tu es Naïla, assistante chez Netpub. Discussion humaine, Emojis 😊. Une seule question à la fois.`;
 
         try {
             const response = await aiRef.current.models.generateContent({
-                model: 'gemini-2.5-flash',
+                model: 'gemini-1.5-flash',
                 contents: [{ role: 'user', parts: [{ text: systemPrompt }] }, ...history, { role: 'user', parts: [{ text: textToSend }] }],
                 config: {
                     tools: [{ functionDeclarations: [prendreRendezVous, passerCommande, collecterInfosClient, collecterFeedbackSite, enregistrerNomClient] }],
@@ -283,7 +300,6 @@ const Chatbot: React.FC = () => {
                             variables: { conversationId, clientName: prenom, clientEmail: email, clientPhone: telephone }
                         }),
                     });
-                    setFollowUpStep('discovery');
                 }
 
                 const functionMessage: ChatMessage = { id: Date.now(), role: 'model', text: confirmationText, type: 'function_confirmation' };
@@ -302,16 +318,18 @@ const Chatbot: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [aiRef, conversationId, isLoading, saveChatMessageToDb, speakText]);
 
     useEffect(() => {
         if (isOpen) {
             if (!aiRef.current && API_KEY) aiRef.current = new GoogleGenAI({ apiKey: API_KEY });
             if (!audioContextRef.current) {
-                const AC = window.AudioContext || window.webkitSpeechRecognition;
-                if (AC) audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+                const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+                if (AudioContextClass) audioContextRef.current = new AudioContextClass({ sampleRate: 24000 });
             }
-            if (messages.length === 0) createConversation();
+            if (messages.length === 0 && !conversationId && !isLoading) {
+                createConversation();
+            }
 
             const handler = (event: Event) => {
                 const msg = (event as CustomEvent).detail?.message;
@@ -320,10 +338,10 @@ const Chatbot: React.FC = () => {
             window.addEventListener('chatbotContext', handler);
             return () => window.removeEventListener('chatbotContext', handler);
         } else {
-            setMessages([]);
-            setConversationId(null);
+            if (messages.length > 0) setMessages([]);
+            if (conversationId !== null) setConversationId(null);
         }
-    }, [isOpen, API_KEY]);
+    }, [isOpen, API_KEY, messages.length, conversationId, isLoading, createConversation, handleSendMessage]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -339,7 +357,7 @@ const Chatbot: React.FC = () => {
         recognition.onerror = () => setIsRecording(false);
         recognition.onend = () => setIsRecording(false);
         recognitionRef.current = recognition;
-    }, []);
+    }, [handleSendMessage]);
 
     const toggleRecording = () => {
         if (!recognitionRef.current) return;

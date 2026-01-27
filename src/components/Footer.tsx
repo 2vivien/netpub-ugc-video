@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaLinkedinIn, FaInstagram, FaTiktok, FaFacebookF, FaXTwitter } from 'react-icons/fa6';
 
 const Footer: React.FC = () => {
     return (

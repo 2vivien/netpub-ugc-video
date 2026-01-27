@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { portfolioProjects, featuredProjectIds } from '../constants';
+import React, { useState } from 'react';
+import { portfolioProjects } from '../constants';
 import { PortfolioCategory, PortfolioProject } from '../types';
 import MasonryGrid from '../components/MasonryGrid';
 import ProjectLightbox from '../components/ProjectLightbox';
@@ -16,33 +16,31 @@ const Portfolio: React.FC = () => {
 
   const categories = ['All', ...Object.values(PortfolioCategory)];
 
-  // eslint-disable-next-line
-  const groupedProjects = useMemo(() => {
-    const influencers = portfolioProjects.filter(p => p.category === PortfolioCategory.INFLUENCEUSES);
-    const otherCategories = Object.values(PortfolioCategory).filter(cat => cat !== PortfolioCategory.INFLUENCEUSES);
+  const influencers = portfolioProjects.filter(p => p.category === PortfolioCategory.INFLUENCEUSES);
+  const otherCategories = Object.values(PortfolioCategory).filter(cat => cat !== PortfolioCategory.INFLUENCEUSES);
 
-    const categoryGroups = otherCategories.map((cat, index) => {
-      const projectsInCat = portfolioProjects.filter(p => p.category === cat);
-      if (projectsInCat.length === 0) return null;
+  const categoryGroups = otherCategories.map((cat, index) => {
+    const projectsInCat = portfolioProjects.filter(p => p.category === cat);
+    if (projectsInCat.length === 0) return null;
 
-      const allMedia = projectsInCat.flatMap(p => p.mediaItems || [{ url: p.mediaUrl, type: p.mediaType }]);
+    const allMedia = projectsInCat.flatMap(p => p.mediaItems || [{ url: p.mediaUrl, type: p.mediaType }]);
 
-      return {
-        id: -(index + 1),
-        title: cat,
-        category: cat,
-        mediaUrl: allMedia[0]?.url || '',
-        mediaType: allMedia[0]?.type || 'image',
-        mediaItems: allMedia,
-        tags: [cat],
-        description: `Découvrez nos réalisations en ${cat}.`
-      } as PortfolioProject;
-    }).filter((p): p is PortfolioProject => p !== null);
+    return {
+      id: -(index + 1),
+      title: cat,
+      category: cat,
+      mediaUrl: allMedia[0]?.url || '',
+      mediaType: allMedia[0]?.type || 'image',
+      mediaItems: allMedia,
+      tags: [cat],
+      description: `Découvrez nos réalisations en ${cat}.`
+    } as PortfolioProject;
+  }).filter((p): p is PortfolioProject => p !== null);
 
-    if (selectedCategory === 'All') return [...categoryGroups, ...influencers];
-    if (selectedCategory === PortfolioCategory.INFLUENCEUSES) return influencers;
-    return categoryGroups.filter(p => p.category === selectedCategory);
-  }, [selectedCategory]);
+  let groupedProjects: PortfolioProject[] = [];
+  if (selectedCategory === 'All') groupedProjects = [...categoryGroups, ...influencers];
+  else if (selectedCategory === PortfolioCategory.INFLUENCEUSES) groupedProjects = influencers;
+  else groupedProjects = categoryGroups.filter(p => p.category === selectedCategory);
 
   const handleCardClick = (project: PortfolioProject) => {
     const projectIndex = groupedProjects.findIndex(p => p.id === project.id);

@@ -1,6 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import useScreenWidth from '../hooks/useScreenWidth';
 import { Sprout, Award, Crown, Clapperboard, TrendingUp, Sparkles } from 'lucide-react';
+
+interface Plan {
+  id: string;
+  name: string;
+  icon: React.ReactNode;
+  tagline: string;
+  badge: { text: string; color: string };
+  popular?: boolean;
+  features: {
+    content: string[];
+    strategy: string[];
+  };
+  advantage: string;
+  idealFor: string;
+}
 
 const PricingPlans: React.FC = () => {
   const screenWidth = useScreenWidth();
@@ -110,7 +125,7 @@ const PricingPlans: React.FC = () => {
     }
   };
 
-  const PricingCard = ({ plan, isPopular = false }: { plan: any, isPopular?: boolean }) => (
+  const PricingCard = ({ plan, isPopular = false }: { plan: Plan, isPopular?: boolean }) => (
     <div className={`pricing-card ${plan.id}-card ${isPopular ? 'popular' : ''}`}>
       <div className={`pricing-badge ${plan.badge.color}-badge`}>
         <span>{plan.badge.text}</span>
@@ -196,7 +211,7 @@ const PricingPlans: React.FC = () => {
                   transition: 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
                 }}
               >
-                {plans.map((plan, index) => (
+                {plans.map((plan) => (
                   <div key={plan.id} className="carousel-slide">
                     <PricingCard
                       plan={plan}
@@ -220,12 +235,12 @@ const PricingPlans: React.FC = () => {
               </button>
 
               <div className="carousel-indicators">
-                {plans.map((_, index) => (
+                {plans.map((_, idx) => (
                   <button
-                    key={index}
-                    className={`indicator ${index === currentIndex ? 'active' : ''}`}
-                    onClick={() => setCurrentIndex(index)}
-                    aria-label={`Aller au plan ${index + 1}`}
+                    key={idx}
+                    className={`indicator ${idx === currentIndex ? 'active' : ''}`}
+                    onClick={() => setCurrentIndex(idx)}
+                    aria-label={`Aller au plan ${idx + 1}`}
                   />
                 ))}
               </div>

@@ -14,20 +14,20 @@ export class NotificationService {
       if (notification.recipientEmail) {
         await this.sendEmailNotification(notification);
       }
-    } catch (error) {
+    } catch (_error) {
       // silent fail
     }
   }
 
-  static async sendEmailNotification(notification: NotificationData): Promise<void> {
+  static async sendEmailNotification(_notification: NotificationData): Promise<void> {
     try {
       // Email sending logic would go here
-    } catch (error) {
+    } catch (_error) {
       // silent fail
     }
   }
 
-  static async notifyNewAppointment(appointmentData: any): Promise<void> {
+  static async notifyNewAppointment(appointmentData: Record<string, unknown>): Promise<void> {
     const notification: NotificationData = {
       type: 'appointment',
       title: 'Nouveau rendez-vous programmé',
@@ -39,7 +39,7 @@ export class NotificationService {
     await this.createNotification(notification);
   }
 
-  static async notifyNewOrder(orderData: any): Promise<void> {
+  static async notifyNewOrder(orderData: Record<string, unknown>): Promise<void> {
     const notification: NotificationData = {
       type: 'order',
       title: 'Nouvelle commande reçue',
@@ -51,7 +51,7 @@ export class NotificationService {
     await this.createNotification(notification);
   }
 
-  static async notifyNewContact(contactData: any): Promise<void> {
+  static async notifyNewContact(contactData: Record<string, unknown>): Promise<void> {
     const notification: NotificationData = {
       type: 'contact',
       title: 'Nouveau message de contact',
@@ -63,7 +63,7 @@ export class NotificationService {
     await this.createNotification(notification);
   }
 
-  static async notifyNewConversation(conversationData: any): Promise<void> {
+  static async notifyNewConversation(conversationData: Record<string, unknown>): Promise<void> {
     const notification: NotificationData = {
       type: 'conversation',
       title: 'Nouvelle conversation chatbot',
@@ -74,10 +74,10 @@ export class NotificationService {
     await this.createNotification(notification);
   }
 
-  static async getRecentNotifications(limit: number = 10): Promise<any[]> {
+  static async getRecentNotifications(_limit: number = 10): Promise<unknown[]> {
     try {
       return [];
-    } catch (error) {
+    } catch (_error) {
       return [];
     }
   }

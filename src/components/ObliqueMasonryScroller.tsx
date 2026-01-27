@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import useOnScreen from '../hooks/useOnScreen';
-import { Link } from 'react-router-dom';
+
 import { PortfolioProject } from '../types';
 import PortfolioCard from './PortfolioCard';
 

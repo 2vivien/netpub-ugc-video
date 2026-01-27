@@ -107,7 +107,7 @@ const Conversations: React.FC = () => {
   const [conversations, setConversations] = useState<ConversationWithDetails[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<ConversationWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [_error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   const formatTimestamp = (timestamp: Date | string) => {

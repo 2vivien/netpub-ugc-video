@@ -1,12 +1,10 @@
 import React, { Suspense, lazy } from 'react';
 import AnimatedHero from '../components/AnimatedHero'; // Re-added
 import ClientMarquee from '../components/ClientMarquee';
-import ObliqueMasonryScroller from '../components/ObliqueMasonryScroller';
-import { portfolioProjects, featuredProjectIds } from '../constants';
-import { PortfolioProject } from '../types';
+import { portfolioProjects } from '../constants';
+import { PortfolioProject, PortfolioCategory } from '../types';
 import StatsSection from '../components/StatsSection';
 import { Link } from 'react-router-dom';
-import useScreenWidth from '../hooks/useScreenWidth';
 import MasonryGrid from '../components/MasonryGrid';
 
 import SEO from '../components/SEO';
@@ -17,30 +15,20 @@ const TestimonialCarousel = lazy(() => import('../components/TestimonialCarousel
 const CallToAction = lazy(() => import('../components/CallToAction'));
 
 const Home: React.FC = () => {
-  const screenWidth = useScreenWidth();
-  const isMobile = screenWidth < 768;
-
-  const handleProjectClick = (project: PortfolioProject) => {
+  const handleProjectClick = (_project: PortfolioProject) => {
     // Future implementation: handle project click, e.g., open a modal or navigate to a project page
   };
 
   // Group projects by category (same logic as Portfolio)
   const groupedProjects = React.useMemo(() => {
-    const influencers = portfolioProjects.filter(p => p.category === 'Influenceuses');
-    const otherCategories = ['Photo UGC', 'Photo Mode', 'Photo Spot Publicitaire', 'Vidéo UGC', 'Vidéo Mode', 'Spot Publicitaire 4K'];
+    const influencers = portfolioProjects.filter(p => p.category === PortfolioCategory.INFLUENCEUSES);
+    const otherCategories = Object.values(PortfolioCategory).filter(cat => cat !== PortfolioCategory.INFLUENCEUSES);
 
     const categoryGroups = otherCategories.map((cat, index) => {
       const projectsInCat = portfolioProjects.filter(p => p.category === cat);
       if (projectsInCat.length === 0) return null;
 
-      const allMedia: Array<{ url: string; type: 'image' | 'video' }> = [];
-      projectsInCat.forEach(p => {
-        if (p.mediaItems) {
-          allMedia.push(...p.mediaItems);
-        } else {
-          allMedia.push({ url: p.mediaUrl, type: p.mediaType });
-        }
-      });
+      const allMedia = projectsInCat.flatMap(p => p.mediaItems || [{ url: p.mediaUrl, type: p.mediaType }]);
 
       return {
         id: -(index + 1),
@@ -52,7 +40,7 @@ const Home: React.FC = () => {
         tags: [cat],
         description: `Découvrez nos réalisations en ${cat}.`
       } as PortfolioProject;
-    }).filter(p => p !== null) as PortfolioProject[];
+    }).filter((p): p is PortfolioProject => p !== null);
 
     // Return 6 category cards + 2 influencer cards = 8 total
     return [...categoryGroups, ...influencers.slice(0, 2)].filter(Boolean);

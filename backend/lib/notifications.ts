@@ -20,7 +20,7 @@ export class NotificationService {
       }
 
       // You could also implement push notifications, SMS, etc.
-    } catch (error) {
+    } catch (_error) {
       
     }
   }
@@ -30,7 +30,7 @@ export class NotificationService {
       // This would integrate with your email service
       // For now, we'll just log it
       
-    } catch (error) {
+    } catch (_error) {
       
     }
   }
@@ -88,7 +88,7 @@ export class NotificationService {
       // This would query a notifications table
       // For now, return empty array
       return [];
-    } catch (error) {
+    } catch (_error) {
       
       return [];
     }

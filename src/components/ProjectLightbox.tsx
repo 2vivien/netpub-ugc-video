@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PortfolioProject } from '../types';
-import { X, ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2, X } from 'lucide-react';
 import './ProjectLightbox.css';
 
 interface ProjectLightboxProps {

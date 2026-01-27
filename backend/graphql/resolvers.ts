@@ -89,8 +89,9 @@ export const resolvers = {
           }
         });
         return conversation;
-      } catch (error) {
-        throw new Error(`Failed to create conversation: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      } catch (_error) {
+        console.error('Create conversation error:', _error);
+        throw new Error(`Failed to create conversation: ${_error instanceof Error ? _error.message : 'Unknown error'}`);
       }
     },
 
@@ -121,7 +122,7 @@ export const resolvers = {
         }
 
         return conversation;
-      } catch (error) {
+      } catch (_error) {
         throw new Error('Failed to update conversation');
       }
     },
@@ -146,7 +147,7 @@ export const resolvers = {
           if (isNaN(appointmentDate.getTime())) {
             throw new Error('Invalid date format');
           }
-        } catch (error) {
+        } catch (_error) {
           throw new Error('Invalid date format. Please provide a valid date.');
         }
 
@@ -174,7 +175,7 @@ export const resolvers = {
         }
 
         return appointment;
-      } catch (error) {
+      } catch (_error) {
         throw new Error('Failed to create appointment');
       }
     },
@@ -213,7 +214,7 @@ export const resolvers = {
         }
 
         return order;
-      } catch (error) {
+      } catch (_error) {
         throw new Error('Failed to create order');
       }
     },
@@ -257,7 +258,7 @@ export const resolvers = {
         });
 
         return notificationSent && autoReplySent;
-      } catch (error) {
+      } catch (_error) {
         throw new Error('Failed to send contact message');
       }
     },
@@ -330,7 +331,7 @@ export const resolvers = {
         });
 
         return true;
-      } catch (error) {
+      } catch (_error) {
         return false;
       }
     }

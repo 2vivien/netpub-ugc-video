@@ -4,18 +4,17 @@ import useOnScreen from '../hooks/useOnScreen';
 import StatsSection from '../components/StatsSection';
 import TestimonialCarousel from '../components/TestimonialCarousel';
 import CallToAction from '../components/CallToAction';
-import ElectricBorder from '../components/ElectricBorder';
 import SEO from '../components/SEO';
 
 const About: React.FC = () => {
     // Refs for fade-in animations
-    const introRef = useRef<HTMLDivElement>(null);
-    const valuesRef = useRef<HTMLDivElement>(null);
-    const methodRef = useRef<HTMLDivElement>(null);
+    const introRef = useRef<HTMLElement>(null);
+    const valuesRef = useRef<HTMLElement>(null);
+    const methodRef = useRef<HTMLElement>(null);
 
-    const isIntroVisible = useOnScreen(introRef as any, { threshold: 0.2 });
-    const isValuesVisible = useOnScreen(valuesRef as any, { threshold: 0.2 });
-    const isMethodVisible = useOnScreen(methodRef as any, { threshold: 0.1 });
+    const isIntroVisible = useOnScreen(introRef, { threshold: 0.2 });
+    const isValuesVisible = useOnScreen(valuesRef, { threshold: 0.2 });
+    const isMethodVisible = useOnScreen(methodRef, { threshold: 0.1 });
 
     return (
         <div className="page-container new-about-page">
@@ -54,13 +53,11 @@ const About: React.FC = () => {
                 <h2 className="section-title text-center">Notre Valeur</h2>
                 <div className="values-grid">
                     {ourValues.map((value, index) => (
-                        <ElectricBorder key={index} color="#5227FF">
-                            <div className="value-card" style={{ transitionDelay: `${index * 150}ms`, height: '100%' }}>
-                                <div className="value-icon">{value.icon}</div>
-                                <h3 className="value-title">{value.title}</h3>
-                                <p className="value-description">{value.description}</p>
-                            </div>
-                        </ElectricBorder>
+                        <div key={index} className="value-card" style={{ transitionDelay: `${index * 150}ms` }}>
+                            <div className="value-icon">{value.icon}</div>
+                            <h3 className="value-title">{value.title}</h3>
+                            <p className="value-description">{value.description}</p>
+                        </div>
                     ))}
                 </div>
             </section>

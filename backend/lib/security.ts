@@ -188,7 +188,7 @@ export class PerformanceUtils {
       // This would check database connectivity
       // For now, return true
       return true;
-    } catch (error) {
+    } catch (_error) {
       
       return false;
     }

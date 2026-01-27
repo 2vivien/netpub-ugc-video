@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+
 import { newServicesData, newWhyChooseUsPillars } from '../constants';
 import useOnScreen from '../hooks/useOnScreen';
 import TestimonialCarousel from '../components/TestimonialCarousel';
