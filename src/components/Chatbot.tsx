@@ -124,27 +124,6 @@ const enregistrerNomClient: FunctionDeclaration = {
 };
 
 
-interface GeminiModel {
-    generateContent: (config: unknown) => Promise<{ 
-        response: { 
-            text: () => string;
-            candidates?: Array<{ 
-                content?: { 
-                    parts?: Array<{ 
-                        text?: string; 
-                        inlineData?: { data: string };
-                        functionCall?: { name: string; args: unknown };
-                    }> 
-                } 
-            }> 
-        } 
-    }>;
-}
-
-interface GeminiSDK {
-    getGenerativeModel: (config: { model: string; systemInstruction?: string }) => GeminiModel;
-}
-
 const Chatbot: React.FC = () => {
     const { isOpen, toggleChatbot, closeChatbot } = useChatbot(); 
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -186,9 +165,8 @@ const Chatbot: React.FC = () => {
         if (!aiRef.current || !audioContextRef.current || !text) return;
         stopSpeaking(); 
         try {
-            const sdk = aiRef.current as unknown as GeminiSDK;
-            const model = sdk.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
-            const result = await model.generateContent({
+            const response = await aiRef.current.models.generateContent({
+                model: "gemini-2.5-flash-lite",
                 contents: [{ role: 'user', parts: [{ text: text }] }],
                 config: {
                     responseModalities: [Modality.AUDIO],
@@ -199,7 +177,7 @@ const Chatbot: React.FC = () => {
                     },
                 },
             });
-            const base64Audio = result.response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+            const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
             if (typeof base64Audio === 'string' && base64Audio) {
                 const audioBuffer = await decodeAudioData(base64Audio, audioContextRef.current);
                 const source = audioContextRef.current.createBufferSource();
@@ -301,20 +279,17 @@ const Chatbot: React.FC = () => {
         const systemPrompt = `Tu es Naïla, assistante chez Netpub. Discussion humaine, Emojis 😊. Une seule question à la fois.`;
 
         try {
-            const sdk = aiRef.current as unknown as GeminiSDK;
-            const model = sdk.getGenerativeModel({ 
+            const response = await aiRef.current.models.generateContent({
                 model: 'gemini-2.5-flash-lite',
-                systemInstruction: systemPrompt
-            });
-
-            const result = await model.generateContent({
                 contents: [...history, { role: 'user', parts: [{ text: textToSend }] }],
-                tools: [{ functionDeclarations: [prendreRendezVous, passerCommande, collecterInfosClient, collecterFeedbackSite, enregistrerNomClient] }],
+                config: {
+                    systemInstruction: systemPrompt,
+                    tools: [{ functionDeclarations: [prendreRendezVous, passerCommande, collecterInfosClient, collecterFeedbackSite, enregistrerNomClient] }],
+                },
             });
 
-            const response = result.response;
             const parts = response.candidates?.[0]?.content?.parts || [];
-            const functionCalls = parts.filter((p: { functionCall?: unknown }) => !!p.functionCall);
+            const functionCalls = parts.filter(p => !!p.functionCall);
 
             if (functionCalls && functionCalls.length > 0) {
                 const fc = functionCalls[0].functionCall!;
@@ -367,7 +342,7 @@ const Chatbot: React.FC = () => {
                 saveChatMessageToDb('model', confirmationText);
                 speakText(confirmationText);
             } else {
-                const modelText = response.text() || "Désolé.";
+                const modelText = parts.find(p => !!p.text)?.text || "Désolé.";
                 const modelMessage: ChatMessage = { id: Date.now(), role: 'model', text: modelText, type: 'text' };
                 setMessages(prev => [...prev, modelMessage]);
                 saveChatMessageToDb('model', modelText);
