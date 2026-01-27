@@ -123,6 +123,31 @@ const enregistrerNomClient: FunctionDeclaration = {
     },
 };
 
+interface GeminiModel {
+    generateContent: (config: { 
+        contents: any[]; 
+        generationConfig?: any;
+        tools?: any[];
+    }) => Promise<{ 
+        response: { 
+            text: () => string;
+            candidates?: Array<{ 
+                content?: { 
+                    parts?: Array<{ 
+                        text?: string; 
+                        inlineData?: { data: string; mimeType?: string };
+                        functionCall?: { name: string; args: unknown };
+                    }> 
+                } 
+            }> 
+        } 
+    }>;
+}
+
+interface GeminiSDK {
+    getGenerativeModel: (config: { model: string; systemInstruction?: string }) => GeminiModel;
+}
+
 
 const Chatbot: React.FC = () => {
     const { isOpen, toggleChatbot, closeChatbot } = useChatbot(); 
@@ -165,11 +190,12 @@ const Chatbot: React.FC = () => {
         if (!aiRef.current || !audioContextRef.current || !text) return;
         stopSpeaking(); 
         try {
-            const response = await aiRef.current.models.generateContent({
-                model: "gemini-2.5-flash-lite",
+            const sdk = aiRef.current as unknown as GeminiSDK;
+            const model = sdk.getGenerativeModel({ model: "gemini-2.0-pro-preview-tts" });
+            const result = await model.generateContent({
                 contents: [{ role: 'user', parts: [{ text: text }] }],
-                config: {
-                    responseModalities: [Modality.AUDIO],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
                     speechConfig: {
                         voiceConfig: {
                             prebuiltVoiceConfig: { voiceName: 'Kore' },
@@ -177,7 +203,11 @@ const Chatbot: React.FC = () => {
                     },
                 },
             });
-            const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+            
+            const parts = result.response.candidates?.[0]?.content?.parts || [];
+            const audioPart = parts.find(p => p.inlineData?.mimeType?.startsWith('audio/'));
+            const base64Audio = audioPart?.inlineData?.data;
+
             if (typeof base64Audio === 'string' && base64Audio) {
                 const audioBuffer = await decodeAudioData(base64Audio, audioContextRef.current);
                 const source = audioContextRef.current.createBufferSource();
@@ -189,7 +219,9 @@ const Chatbot: React.FC = () => {
                 };
                 source.start();
             }
-        } catch { /* ignore */ }
+        } catch (err) {
+            console.error('TTS Error:', err);
+        }
     }, []);
 
     const saveChatMessageToDb = useCallback(async (sender: string, text: string) => {
@@ -399,7 +431,13 @@ const Chatbot: React.FC = () => {
         recognitionRef.current = recognition;
     }, [handleSendMessage]);
 
-    const toggleRecording = () => {
+    const handleToggleChatbot = () => {
+        audioContextRef.current?.resume().catch(() => {});
+        toggleChatbot();
+    };
+
+    const handleToggleRecording = () => {
+        audioContextRef.current?.resume().catch(() => {});
         if (!recognitionRef.current) return;
         if (isRecording) recognitionRef.current.stop();
         else { stopSpeaking(); recognitionRef.current.start(); }
@@ -407,7 +445,7 @@ const Chatbot: React.FC = () => {
 
     return (
         <>
-            <button className="chatbot-toggler" onClick={toggleChatbot}>
+            <button className="chatbot-toggler" onClick={handleToggleChatbot}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7c0 1.76.743 3.37 1.97 4.6-.097 1.016-.417 2.13-.771 2.966-.079.186.074.394.273.362 2.256-.37 3.597-.938 4.18-1.234A9.06 9.06 0 0 0 8 15zM2 8c0-3.418 2.582-6.182 5.5-6.182S13.5 4.582 13.5 8s-2.582 6.182-5.5 6.182c-1.802 0-3.41-.8-4.47-2.067a.498.498 0 0 1 .11-.643c.488-.34.954-.743 1.34-1.22.04-.05.056-.118.042-.176-.17-.73-.255-1.52-.255-2.355C4.733 8.36 4.613 8.68 4.5 9c-.114.32-.26.657-.43 1.004-.175.35-.37.718-.592 1.107A6.47 6.47 0 0 1 2 8zm5-1.996a.5.5 0 0 0-1 0v.002a.5.5 0 0 0 1 0v-.002zm2.5.002a.5.5 0 0 0-1 0v.002a.5.5 0 0 0 1 0v-.002zm2.5-.002a.5.5 0 0 0-1 0v.002a.5.5 0 0 0 1 0v-.002z" /></svg>
             </button>
             {isOpen && (
@@ -428,7 +466,7 @@ const Chatbot: React.FC = () => {
                     </div>
                     <form className="chatbot-input-form" onSubmit={handleSendMessage}>
                         <input type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)} placeholder="Posez votre question..." disabled={isLoading} />
-                        <button type="button" className={`mic-button ${isRecording ? 'recording' : ''}`} onClick={toggleRecording} disabled={isLoading}>
+                        <button type="button" className={`mic-button ${isRecording ? 'recording' : ''}`} onClick={handleToggleRecording} disabled={isLoading}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z" /><path d="M8 8a3 3 0 0 0 3-3V3a3 3 0 0 0-6 0v2a3 3 0 0 0 3 3z" /></svg>
                         </button>
                         <button type="submit" disabled={isLoading || !inputValue.trim()}><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11zM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07zm6.787-8.201L1.591 6.602l4.339 2.76 7.494-7.493z" /></svg></button>
