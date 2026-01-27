@@ -4,6 +4,7 @@ import useOnScreen from '../hooks/useOnScreen';
 import StatsSection from '../components/StatsSection';
 import TestimonialCarousel from '../components/TestimonialCarousel';
 import CallToAction from '../components/CallToAction';
+import ElectricBorder from '../components/ElectricBorder';
 import SEO from '../components/SEO';
 
 const About: React.FC = () => {
@@ -53,11 +54,13 @@ const About: React.FC = () => {
                 <h2 className="section-title text-center">Notre Valeur</h2>
                 <div className="values-grid">
                     {ourValues.map((value, index) => (
-                        <div key={index} className="value-card" style={{ transitionDelay: `${index * 150}ms` }}>
-                            <div className="value-icon">{value.icon}</div>
-                            <h3 className="value-title">{value.title}</h3>
-                            <p className="value-description">{value.description}</p>
-                        </div>
+                        <ElectricBorder key={index} color="#5227FF">
+                            <div className="value-card" style={{ transitionDelay: `${index * 150}ms`, height: '100%' }}>
+                                <div className="value-icon">{value.icon}</div>
+                                <h3 className="value-title">{value.title}</h3>
+                                <p className="value-description">{value.description}</p>
+                            </div>
+                        </ElectricBorder>
                     ))}
                 </div>
             </section>
