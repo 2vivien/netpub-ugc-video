@@ -42,7 +42,6 @@ const Orders: React.FC = () => {
   const { refreshStats } = useDashboard();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [_error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterDate, setFilterDate] = useState<string>('');
   const [totalOrders, setTotalOrders] = useState(0);
@@ -50,7 +49,6 @@ const Orders: React.FC = () => {
 
   const loadOrders = useCallback(async () => {
     setLoading(true);
-    setError(null);
     try {
       const csrf = await fetchCsrfToken();
       const gqlVariables = {
@@ -82,8 +80,7 @@ const Orders: React.FC = () => {
         setTotalOrders(result.data.allOrders.totalCount);
       }
     } catch (err) {
-      
-      setError(err instanceof Error ? err.message : 'Erreur de chargement');
+      console.error(err instanceof Error ? err.message : 'Erreur de chargement');
     } finally {
       setLoading(false);
     }

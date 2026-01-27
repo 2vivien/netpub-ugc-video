@@ -165,8 +165,8 @@ const Chatbot: React.FC = () => {
         if (!aiRef.current || !audioContextRef.current || !text) return;
         stopSpeaking(); 
         try {
-            const genAI = aiRef.current as any;
-            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+            const genAI = aiRef.current as unknown as { getGenerativeModel: (config: { model: string }) => any };
+            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
             const response = await model.generateContent({
                 contents: [{ role: 'user', parts: [{ text: text }] }],
                 config: {
@@ -275,9 +275,11 @@ const Chatbot: React.FC = () => {
         const systemPrompt = `Tu es Naïla, assistante chez Netpub. Discussion humaine, Emojis 😊. Une seule question à la fois.`;
 
         try {
-            const genAI = aiRef.current as any;
+            const genAI = aiRef.current as unknown as { 
+                getGenerativeModel: (config: { model: string; systemInstruction?: string }) => any 
+            };
             const model = genAI.getGenerativeModel({ 
-                model: 'gemini-2.0-flash',
+                model: 'gemini-2.5-flash-lite',
                 systemInstruction: systemPrompt
             });
 
@@ -287,7 +289,8 @@ const Chatbot: React.FC = () => {
             });
 
             const response = result.response;
-            const functionCalls = response.candidates?.[0]?.content?.parts?.filter((p: any) => p.functionCall);
+            const parts = response.candidates?.[0]?.content?.parts || [];
+            const functionCalls = parts.filter((p: any) => !!p.functionCall);
 
             if (functionCalls && functionCalls.length > 0) {
                 const fc = functionCalls[0].functionCall!;

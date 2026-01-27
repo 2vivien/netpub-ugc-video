@@ -104,7 +104,6 @@ const Conversations: React.FC = () => {
   const [conversations, setConversations] = useState<ConversationWithDetails[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<ConversationWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
-  const [_error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   const formatTimestamp = (timestamp: Date | string) => {
@@ -136,10 +135,10 @@ const Conversations: React.FC = () => {
             setSelectedConversation(result.data.conversations[0]);
           }
         } else {
-          setError(result.errors ? result.errors[0].message : 'Erreur lors du chargement');
+          console.error(result.errors ? result.errors[0].message : 'Erreur lors du chargement');
         }
       } catch {
-        setError('Erreur lors du chargement');
+        console.error('Erreur lors du chargement');
       } finally {
         setLoading(false);
       }
