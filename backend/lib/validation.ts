@@ -1,5 +1,6 @@
-import { z } from 'zod';
+import { z, ZodError } from 'zod';
 import { UserInputError } from 'apollo-server-express';
+import { GraphQLFieldResolver } from 'graphql';
 
 // Schémas de validation avec Zod
 
@@ -19,11 +20,14 @@ export const validationSchemas = {
 
 export const validationMiddleware = {
   Mutation: {
-    sendContactMessage: async (resolve: any, root: any, args: any, context: any, info: any) => {
+    sendContactMessage: async (resolve: GraphQLFieldResolver<any, any>, root: any, args: any, context: any, info: any) => {
       try {
         validationSchemas.sendContactMessage.parse(args);
-      } catch (e: any) {
-        throw new UserInputError(e.issues.map((err: any) => err.message).join(', '));
+      } catch (e) {
+        if (e instanceof ZodError) {
+          throw new UserInputError(e.issues.map((err) => err.message).join(', '));
+        }
+        throw e;
       }
       return resolve(root, args, context, info);
     },

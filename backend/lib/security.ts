@@ -23,7 +23,7 @@ export class SecurityUtils {
   }
 
   // Validate file uploads
-  static validateFileUpload(file: any): { valid: boolean; error?: string } {
+  static validateFileUpload(file: { mimetype: string; size: number }): { valid: boolean; error?: string } {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4'];
     const maxSize = 10 * 1024 * 1024; // 10MB
 
@@ -116,8 +116,8 @@ export class SecurityUtils {
   }
 
   // Log security events
-  static logSecurityEvent(event: string, details: any): void {
-    const timestamp = new Date().toISOString();
+  static logSecurityEvent(_event: string, _details: Record<string, unknown>): void {
+    // const timestamp = new Date().toISOString();
     
 
     // In production, you might want to send this to a logging service
@@ -157,7 +157,7 @@ export class PerformanceUtils {
   }
 
   // Database query optimization
-  static optimizeQuery(query: any): any {
+  static optimizeQuery<T extends { take?: number; orderBy?: any }>(query: T): T {
     // Add pagination defaults
     if (!query.take) {
       query.take = 50; // Default limit
@@ -172,8 +172,8 @@ export class PerformanceUtils {
   }
 
   // Response compression
-  static shouldCompressResponse(req: any): boolean {
-    const acceptEncoding = req.headers['accept-encoding'] || '';
+  static shouldCompressResponse(req: { headers: { [key: string]: string | string[] | undefined } }): boolean {
+    const acceptEncoding = (req.headers['accept-encoding'] as string) || '';
     return acceptEncoding.includes('gzip') || acceptEncoding.includes('deflate');
   }
 
@@ -197,7 +197,7 @@ export class PerformanceUtils {
 
 // Monitoring and analytics
 export class MonitoringUtils {
-  static startTimer(label: string): () => number {
+  static startTimer(_label: string): () => number {
     const start = process.hrtime.bigint();
     return () => {
       const end = process.hrtime.bigint();
@@ -207,19 +207,19 @@ export class MonitoringUtils {
     };
   }
 
-  static trackApiCall(endpoint: string, method: string, duration: number, statusCode: number): void {
+  static trackApiCall(_endpoint: string, _method: string, _duration: number, _statusCode: number): void {
     
 
     // In production, send to monitoring service like DataDog, New Relic, etc.
   }
 
-  static trackError(error: Error, context?: any): void {
+  static trackError(_error: Error, _context?: Record<string, unknown>): void {
     
 
     // In production, send to error tracking service like Sentry, Rollbar, etc.
   }
 
-  static trackUserAction(userId: string, action: string, details?: any): void {
+  static trackUserAction(_userId: string, _action: string, _details?: Record<string, unknown>): void {
     
 
     // In production, send to analytics service
