@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { GoogleGenAI, FunctionDeclaration, Type, Modality } from '@google/genai';
+import { GoogleGenAI, FunctionDeclaration, Type } from '@google/genai';
 import { ChatMessage, PortfolioCategory } from '../types';
 import { decodeAudioData } from '../utils/audioUtils';
 import { useChatbot } from '../contexts/ChatbotContext'; 
@@ -125,9 +125,9 @@ const enregistrerNomClient: FunctionDeclaration = {
 
 interface GeminiModel {
     generateContent: (config: { 
-        contents: any[]; 
-        generationConfig?: any;
-        tools?: any[];
+        contents: unknown[]; 
+        generationConfig?: unknown;
+        tools?: unknown[];
     }) => Promise<{ 
         response: { 
             text: () => string;
