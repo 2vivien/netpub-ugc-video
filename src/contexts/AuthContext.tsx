@@ -49,7 +49,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setIsAuthenticated(false);
         }
       } catch (error) {
-        console.error('Error verifying token:', error);
+        
         localStorage.removeItem('auth_token');
         setUser(null);
         setIsAuthenticated(false);
@@ -108,7 +108,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         throw new Error(errorMessage);
       }
     } catch (error) {
-      console.error('Login error:', error);
+      
       return false;
     }
   };

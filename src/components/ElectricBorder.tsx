@@ -73,7 +73,7 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
           try {
             (a as any).beginElement();
           } catch {
-            console.warn('ElectricBorder: beginElement failed, this may be due to a browser limitation.');
+            
           }
         }
       });

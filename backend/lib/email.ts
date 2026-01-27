@@ -57,18 +57,14 @@ class EmailService {
     try {
       // Validate required fields
       if (!contactData.name || !contactData.email || !contactData.message) {
-        console.error('❌ Missing required fields for contact notification:', {
-          name: contactData.name,
-          email: contactData.email,
-          message: contactData.message ? 'provided' : 'missing'
-        });
+        
         return false;
       }
 
       // Validate email format
       const emailRegex = /^[\w._%+-]+@[\w.-]+\.[A-Za-z]{2,}$/;
       if (!emailRegex.test(contactData.email)) {
-        console.error('❌ Invalid email format for contact notification:', contactData.email);
+        
         return false;
       }
 
@@ -118,10 +114,10 @@ Ce message a été envoyé automatiquement depuis le formulaire de contact NetPu
       };
 
       await this.transporter.sendMail(mailOptions);
-      console.log(`✅ Contact notification email sent successfully to admin: ${process.env.ADMIN_EMAIL}`);
+      
       return true;
     } catch (error) {
-      console.error('❌ Error sending contact notification email:', error);
+      
       return false;
     }
   }
@@ -130,17 +126,14 @@ Ce message a été envoyé automatiquement depuis le formulaire de contact NetPu
     try {
       // Validate required fields
       if (!contactData.name || !contactData.email) {
-        console.error('❌ Missing required fields for auto-reply:', {
-          name: contactData.name,
-          email: contactData.email
-        });
+        
         return false;
       }
 
       // Validate email format
       const emailRegex = /^[\w._%+-]+@[\w.-]+\.[A-Za-z]{2,}$/;
       if (!emailRegex.test(contactData.email)) {
-        console.error('❌ Invalid email format for auto-reply:', contactData.email);
+        
         return false;
       }
 
@@ -208,10 +201,10 @@ L'équipe NetPub Agency
       };
 
       await this.transporter.sendMail(mailOptions);
-      console.log(`✅ Auto-reply email sent successfully to: ${contactData.email}`);
+      
       return true;
     } catch (error) {
-      console.error('❌ Error sending auto-reply email:', error);
+      
       return false;
     }
   }
@@ -220,18 +213,14 @@ L'équipe NetPub Agency
     try {
       // Validate required fields
       if (!appointmentData.service || !appointmentData.clientName || !appointmentData.clientEmail) {
-        console.error('❌ Missing required fields for appointment notification:', {
-          service: appointmentData.service,
-          clientName: appointmentData.clientName,
-          clientEmail: appointmentData.clientEmail
-        });
+        
         return false;
       }
 
       // Validate email format
       const emailRegex = /^[\w._%+-]+@[\w.-]+\.[A-Za-z]{2,}$/;
       if (!emailRegex.test(appointmentData.clientEmail)) {
-        console.error('❌ Invalid email format for appointment notification:', appointmentData.clientEmail);
+        
         return false;
       }
 
@@ -278,12 +267,12 @@ L'équipe NetPub Agency
       };
 
       await this.transporter.sendMail(adminMailOptions);
-      console.log(`✅ Appointment notification email sent successfully to admin: ${process.env.ADMIN_EMAIL}`);
+      
       await this.transporter.sendMail(clientMailOptions);
-      console.log(`✅ Appointment confirmation email sent successfully to: ${appointmentData.clientEmail}`);
+      
       return true;
     } catch (error) {
-      console.error('❌ Error sending appointment notification email:', error);
+      
       return false;
     }
   }
@@ -292,19 +281,14 @@ L'équipe NetPub Agency
     try {
       // Validate required fields
       if (!orderData.service || !orderData.clientName || !orderData.clientEmail || !orderData.details) {
-        console.error('❌ Missing required fields for order notification:', {
-          service: orderData.service,
-          clientName: orderData.clientName,
-          clientEmail: orderData.clientEmail,
-          details: orderData.details ? 'provided' : 'missing'
-        });
+        
         return false;
       }
 
       // Validate email format
       const emailRegex = /^[\w._%+-]+@[\w.-]+\.[A-Za-z]{2,}$/;
       if (!emailRegex.test(orderData.clientEmail)) {
-        console.error('❌ Invalid email format for order notification:', orderData.clientEmail);
+        
         return false;
       }
 
@@ -349,12 +333,12 @@ L'équipe NetPub Agency
       };
 
       await this.transporter.sendMail(adminMailOptions);
-      console.log(`✅ Order notification email sent successfully to admin: ${process.env.ADMIN_EMAIL}`);
+      
       await this.transporter.sendMail(clientMailOptions);
-      console.log(`✅ Order confirmation email sent successfully to: ${orderData.clientEmail}`);
+      
       return true;
     } catch (error) {
-      console.error('❌ Error sending order notification email:', error);
+      
       return false;
     }
   }
@@ -401,10 +385,10 @@ L'équipe NetPub Agency
       };
 
       await this.transporter.sendMail(mailOptions);
-      console.log(`✅ Conversation notification email sent successfully to admin: ${process.env.ADMIN_EMAIL}`);
+      
       return true;
     } catch (error) {
-      console.error('❌ Error sending conversation notification email:', error);
+      
       return false;
     }
   }
@@ -419,10 +403,10 @@ L'équipe NetPub Agency
       };
 
       await this.transporter.sendMail(mailOptions);
-      console.log(`✅ Generic email "${subject}" sent to admin.`);
+      
       return true;
     } catch (error) {
-      console.error('❌ Error sending generic email:', error);
+      
       return false;
     }
   }

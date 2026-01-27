@@ -4,6 +4,7 @@ import { emailService } from '../lib/email.js';
 import { DashboardService } from '../lib/dashboard.js';
 import createDOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
+import { ResolverContext } from '../types/index.js';
 
 const window = new JSDOM('').window;
 const DOMPurify = createDOMPurify(window);
@@ -11,7 +12,7 @@ const DOMPurify = createDOMPurify(window);
 export const resolvers = {
   Query: {
     // User queries
-    me: (_: any, __: any, { user }: any) => user,
+    me: (_parent: unknown, _args: unknown, { user }: ResolverContext) => user,
     users: () => prisma.user.findMany(),
 
     // Project queries
@@ -23,7 +24,7 @@ export const resolvers = {
       });
       return projects;
     },
-    project: async (_: any, { id }: { id: string }) => {
+    project: async (_parent: unknown, { id }: { id: string }) => {
       const idInt = parseInt(id, 10);
       if (isNaN(idInt)) {
         return null;
@@ -39,7 +40,7 @@ export const resolvers = {
       }
       return project;
     },
-    projectsByCategory: async (_: any, { category }: { category: string }) => {
+    projectsByCategory: async (_parent: unknown, { category }: { category: string }) => {
       const projects = await prisma.project.findMany({
         where: { category },
         include: {
@@ -52,15 +53,15 @@ export const resolvers = {
     // Dashboard queries
     dashboardStats: () => DashboardService.getStats(),
     analyticsStats: () => DashboardService.getAnalyticsStats(),
-    conversations: (_: any, { limit, offset }: { limit?: number; offset?: number }) => DashboardService.getConversations(limit, offset),
-    conversation: (_: any, { id }: { id: string }) => DashboardService.getConversationById(id),
-    allOrders: (_: any, { limit, offset, status, date }: { limit?: number; offset?: number; status?: string; date?: string }) => DashboardService.getAllOrders(limit, offset, status, date),
-    allAppointments: (_: any, { limit, offset, status, date }: { limit?: number; offset?: number; status?: string; date?: string }) => DashboardService.getAllAppointments(limit, offset, status, date),
+    conversations: (_parent: unknown, { limit, offset }: { limit?: number; offset?: number }) => DashboardService.getConversations(limit, offset),
+    conversation: (_parent: unknown, { id }: { id: string }) => DashboardService.getConversationById(id),
+    allOrders: (_parent: unknown, { limit, offset, status, date }: { limit?: number; offset?: number; status?: string; date?: string }) => DashboardService.getAllOrders(limit, offset, status, date),
+    allAppointments: (_parent: unknown, { limit, offset, status, date }: { limit?: number; offset?: number; status?: string; date?: string }) => DashboardService.getAllAppointments(limit, offset, status, date),
   },
 
   Mutation: {
     // Auth mutations
-    login: async (_: any, { email, password }: { email: string; password: string }, context: any) => {
+    login: async (_parent: unknown, { email, password }: { email: string; password: string }, context: ResolverContext) => {
       const ip = context.req.ip || context.req.connection.remoteAddress;
       const user = await AuthService.authenticateUser(email, password, ip);
       if (!user) throw new Error('Invalid credentials or IP blocked');
@@ -69,7 +70,7 @@ export const resolvers = {
       return { token, user };
     },
 
-    register: async (_: any, { email, password, name }: { email: string; password: string; name?: string }) => {
+    register: async (_parent: unknown, { email, password, name }: { email: string; password: string; name?: string }) => {
       const user = await AuthService.registerUser(email, password, name);
       if (!user) throw new Error('Registration failed');
 
@@ -89,12 +90,11 @@ export const resolvers = {
         });
         return conversation;
       } catch (error) {
-        console.error('❌ Prisma Error in createConversation:', error);
         throw new Error(`Failed to create conversation: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     },
 
-    updateConversation: async (_: any, { conversationId, clientName, clientEmail, clientPhone, discovery, feedback }: { conversationId: string; clientName?: string; clientEmail?: string; clientPhone?: string; discovery?: string; feedback?: string }) => {
+    updateConversation: async (_parent: unknown, { conversationId, clientName, clientEmail, clientPhone, discovery, feedback }: { conversationId: string; clientName?: string; clientEmail?: string; clientPhone?: string; discovery?: string; feedback?: string }) => {
       try {
         const conversation = await prisma.conversation.update({
           where: { id: conversationId },
@@ -126,7 +126,7 @@ export const resolvers = {
       }
     },
 
-    createAppointment: async (_: any, { service, date, time, conversationId }: { service: string; date: string; time: string; conversationId: string }) => {
+    createAppointment: async (_parent: unknown, { service, date, time, conversationId }: { service: string; date: string; time: string; conversationId: string }) => {
       try {
 
         // Retrieve client info from conversation
@@ -179,7 +179,7 @@ export const resolvers = {
       }
     },
 
-    createOrder: async (_: any, { service, details, conversationId }: { service: string; details: string; conversationId: string }) => {
+    createOrder: async (_parent: unknown, { service, details, conversationId }: { service: string; details: string; conversationId: string }) => {
       try {
 
         // Retrieve client info from conversation
@@ -219,7 +219,7 @@ export const resolvers = {
     },
 
     // Contact mutations
-    sendContactMessage: async (_: any, {
+    sendContactMessage: async (_parent: unknown, {
       name,
       email,
       company,
@@ -256,10 +256,6 @@ export const resolvers = {
           message: sanitizedMessage
         });
 
-        if (notificationSent && autoReplySent) {
-        } else {
-        }
-
         return notificationSent && autoReplySent;
       } catch (error) {
         throw new Error('Failed to send contact message');
@@ -269,16 +265,16 @@ export const resolvers = {
 
     // Dashboard mutations
 
-    updateAppointmentStatus: (_: any, { appointmentId, status }: { appointmentId: string; status: string }) => DashboardService.updateAppointmentStatus(appointmentId, status),
+    updateAppointmentStatus: (_parent: unknown, { appointmentId, status }: { appointmentId: string; status: string }) => DashboardService.updateAppointmentStatus(appointmentId, status),
 
-    updateOrderStatus: (_: any, { orderId, status }: { orderId: string; status: string }) => DashboardService.updateOrderStatus(orderId, status),
+    updateOrderStatus: (_parent: unknown, { orderId, status }: { orderId: string; status: string }) => DashboardService.updateOrderStatus(orderId, status),
 
     resetChatbotModel: () => DashboardService.resetChatbotModel(),
 
-    deleteConversation: (_: any, { conversationId }: { conversationId: string }) => DashboardService.deleteConversation(conversationId),
+    deleteConversation: (_parent: unknown, { conversationId }: { conversationId: string }) => DashboardService.deleteConversation(conversationId),
 
-    addNoteToConversation: (_: any, { conversationId, note }: { conversationId: string; note: string }) => DashboardService.addNoteToConversation(conversationId, note),
-    addChatMessage: async (_: any, { conversationId, sender, text }: { conversationId: string; sender: string; text: string }) => {
+    addNoteToConversation: (_parent: unknown, { conversationId, note }: { conversationId: string; note: string }) => DashboardService.addNoteToConversation(conversationId, note),
+    addChatMessage: async (_parent: unknown, { conversationId, sender, text }: { conversationId: string; sender: string; text: string }) => {
       const message = await DashboardService.saveChatMessage(conversationId, sender, text);
 
       // Notify admin if the message is from the user
@@ -299,11 +295,11 @@ export const resolvers = {
       return message;
     },
 
-    exportAllData: async (_: any, __: any, { user }: any) => {
+    exportAllData: async (_parent: unknown, _args: unknown, { user }: ResolverContext) => {
       // Security: Only admins should be able to trigger this
-      // if (!user || user.role !== 'admin') {
-      //   throw new Error('Unauthorized');
-      // }
+      if (!user || user.role !== 'admin') {
+        throw new Error('Unauthorized');
+      }
 
       try {
         const [conversations, orders, appointments] = await Promise.all([
@@ -335,7 +331,6 @@ export const resolvers = {
 
         return true;
       } catch (error) {
-        console.error('Export error:', error);
         return false;
       }
     }

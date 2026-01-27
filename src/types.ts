@@ -14,6 +14,13 @@ export interface User {
   avatar?: string;
 }
 
+export interface Comment {
+  id: string;
+  author: string;
+  text: string;
+  date: string;
+}
+
 export interface PortfolioProject {
   id: number;
   title: string;
@@ -24,6 +31,10 @@ export interface PortfolioProject {
   hashtags?: string[];
   tags?: string[];
   description?: string;
+  likes?: string[];
+  comments?: Comment[];
+  likeCount?: number;
+  commentCount?: number;
   // Optional fields, depending on usage
   client?: string;
   objective?: string;

@@ -9,8 +9,8 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 // Validate that required environment variables are present
 if (!JWT_SECRET) {
-  console.error('❌ ERROR: JWT_SECRET environment variable is required');
-  console.error('Please set JWT_SECRET in your .env file');
+  
+  
   process.exit(1);
 }
 
@@ -69,9 +69,9 @@ export class AuthService {
             role: 'admin'
           }
         });
-        console.log('✅ Utilisateur admin créé avec succès');
+        
       } else {
-        console.log('ℹ️ Utilisateur admin existe déjà');
+        
       }
       return {
         id: adminUser.id,
@@ -80,7 +80,7 @@ export class AuthService {
         role: adminUser.role
       };
     } catch (error) {
-      console.error('❌ Erreur lors de la création de l\'utilisateur admin:', error);
+      
       return null;
     }
   }
@@ -92,22 +92,22 @@ export class AuthService {
       const attempts = AuthService.failedAttempts.get(ip) || { count: 0, lastAttempt: 0, blockedUntil: 0 };
 
       if (attempts.blockedUntil > now) {
-        console.log(`❌ IP ${ip} est bloquée jusqu'à ${new Date(attempts.blockedUntil).toLocaleString()}`);
+        
         return null;
       }
 
-      console.log(`🔐 Tentative d'authentification pour ${email} depuis IP ${ip}`);
+      
       const user = await prisma.user.findUnique({
         where: { email }
       });
 
       if (!user) {
-        console.log(`❌ Utilisateur ${email} non trouvé`);
+        
         attempts.count++;
         attempts.lastAttempt = now;
         if (attempts.count >= 3) {
           attempts.blockedUntil = now + 24 * 60 * 60 * 1000; // Block for 24 hours
-          console.log(`🚫 IP ${ip} bloquée pour 24 heures suite à des tentatives échouées.`);
+          
         }
         AuthService.failedAttempts.set(ip, attempts);
         return null;
@@ -115,12 +115,12 @@ export class AuthService {
 
       const isValidPassword = await this.verifyPassword(password, user.password);
       if (!isValidPassword) {
-        console.log(`❌ Mot de passe invalide pour ${email}`);
+        
         attempts.count++;
         attempts.lastAttempt = now;
         if (attempts.count >= 3) {
           attempts.blockedUntil = now + 24 * 60 * 60 * 1000; // Block for 24 hours
-          console.log(`🚫 IP ${ip} bloquée pour 24 heures suite à des tentatives échouées.`);
+          
         }
         AuthService.failedAttempts.set(ip, attempts);
         SecurityUtils.logSecurityEvent('failed_login_attempt', { email, ip });
@@ -129,7 +129,7 @@ export class AuthService {
 
       // Authentication successful, reset attempts for this IP
       AuthService.failedAttempts.delete(ip);
-      console.log(`✅ Authentification réussie pour ${email} (rôle: ${user.role}) depuis IP ${ip}`);
+      
       return {
         id: user.id,
         email: user.email,
@@ -137,7 +137,7 @@ export class AuthService {
         role: user.role
       };
     } catch (error) {
-      console.error('❌ Erreur lors de l\'authentification:', error);
+      
       return null;
     }
   }
@@ -146,20 +146,20 @@ export class AuthService {
     try {
       // Validate input
       if (!email || !password) {
-        console.error('❌ Missing required fields for registration:', { email: !!email, password: !!password });
+        
         return null;
       }
 
       // Validate email format
       const emailRegex = /^[\w._%+-]+@[\w.-]+\.[A-Za-z]{2,}$/;
       if (!emailRegex.test(email)) {
-        console.error('❌ Invalid email format for registration:', email);
+        
         return null;
       }
 
       // Validate password strength
       if (password.length < 8) {
-        console.error('❌ Password too short for registration');
+        
         return null;
       }
 
@@ -174,7 +174,7 @@ export class AuthService {
         }
       });
 
-      console.log(`✅ User registered successfully: ${email}`);
+      
       return {
         id: user.id,
         email: user.email,
@@ -184,9 +184,9 @@ export class AuthService {
     } catch (error: any) {
       // Handle unique constraint violation
       if (error.code === 'P2002') { // Prisma unique constraint violation
-        console.error('❌ User registration failed - email already exists:', email);
+        
       } else {
-        console.error('❌ User registration failed:', error.message);
+        
       }
       return null;
     }

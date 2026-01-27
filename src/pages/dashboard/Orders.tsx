@@ -88,7 +88,7 @@ const Orders: React.FC = () => {
         setTotalOrders(result.data.allOrders.totalCount);
       }
     } catch (err: any) {
-      console.error('Error loading orders:', err);
+      
       setError(err.message || 'Erreur de chargement');
     } finally {
       setLoading(false);

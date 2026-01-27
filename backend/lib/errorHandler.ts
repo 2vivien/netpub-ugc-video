@@ -38,8 +38,6 @@ export class NotFoundError extends AppError {
 }
 
 export function handleError(error: Error, res?: Response): void {
-  console.error('Error:', error);
-
   if (error instanceof AppError) {
     if (res) {
       res.status(error.statusCode).json({
@@ -101,15 +99,14 @@ export function handleError(error: Error, res?: Response): void {
   }
 }
 
-export function asyncHandler(fn: Function) {
+export const wrapAsync = (fn: (req: any, res: any, next: any) => Promise<any> | any) => {
   return (req: any, res: any, next: any) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
-}
+};
 
 // GraphQL error formatter
 export function formatGraphQLError(error: any) {
-  console.error('GraphQL Error Details:', JSON.stringify(error, null, 2));
   const originalError = error.originalError;
 
   if (originalError instanceof AppError) {
@@ -127,7 +124,7 @@ export function formatGraphQLError(error: any) {
   return {
     message: error.message,
     extensions: {
-      code: 'INTERNAL_SERVER_ERROR', // Changed code from INTERNAL_ERROR for clarity
+      code: 'INTERNAL_SERVER_ERROR',
       exception: {
         stacktrace: error.stack
       }

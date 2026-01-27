@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { portfolioProjects, featuredProjectIds } from '../constants';
 import { PortfolioCategory, PortfolioProject } from '../types';
 import MasonryGrid from '../components/MasonryGrid';
-import ProjectFeed from '../components/ProjectFeed';
+import ProjectLightbox from '../components/ProjectLightbox';
 import TestimonialCarousel from '../components/TestimonialCarousel';
 import CallToAction from '../components/CallToAction';
 import SEO from '../components/SEO';
@@ -11,34 +11,24 @@ import SEO from '../components/SEO';
 
 const Portfolio: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<PortfolioCategory | 'All'>('All');
-  const [viewMode, setViewMode] = useState<'grid' | 'feed'>('grid');
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const [initialProjectIndex, setInitialProjectIndex] = useState(0);
 
   const categories = ['All', ...Object.values(PortfolioCategory)];
 
+  // eslint-disable-next-line
   const groupedProjects = useMemo(() => {
-    // 1. Filter influencers and keep them individual
     const influencers = portfolioProjects.filter(p => p.category === PortfolioCategory.INFLUENCEUSES);
-
-    // 2. Group other projects by category
     const otherCategories = Object.values(PortfolioCategory).filter(cat => cat !== PortfolioCategory.INFLUENCEUSES);
 
     const categoryGroups = otherCategories.map((cat, index) => {
       const projectsInCat = portfolioProjects.filter(p => p.category === cat);
       if (projectsInCat.length === 0) return null;
 
-      // Group all media into one "super-project"
-      const allMedia: Array<{ url: string; type: 'image' | 'video' }> = [];
-      projectsInCat.forEach(p => {
-        if (p.mediaItems) {
-          allMedia.push(...p.mediaItems);
-        } else {
-          allMedia.push({ url: p.mediaUrl, type: p.mediaType });
-        }
-      });
+      const allMedia = projectsInCat.flatMap(p => p.mediaItems || [{ url: p.mediaUrl, type: p.mediaType }]);
 
       return {
-        id: -(index + 1), // Negative IDs for category groups to avoid collision
+        id: -(index + 1),
         title: cat,
         category: cat,
         mediaUrl: allMedia[0]?.url || '',
@@ -47,39 +37,18 @@ const Portfolio: React.FC = () => {
         tags: [cat],
         description: `Découvrez nos réalisations en ${cat}.`
       } as PortfolioProject;
-    }).filter(p => (p !== null)) as PortfolioProject[];
+    }).filter((p): p is PortfolioProject => p !== null);
 
-    // 3. Combine based on selected category
-    if (selectedCategory === 'All') {
-      return [...categoryGroups, ...influencers];
-    }
-
-    if (selectedCategory === PortfolioCategory.INFLUENCEUSES) {
-      return influencers;
-    }
-
+    if (selectedCategory === 'All') return [...categoryGroups, ...influencers];
+    if (selectedCategory === PortfolioCategory.INFLUENCEUSES) return influencers;
     return categoryGroups.filter(p => p.category === selectedCategory);
   }, [selectedCategory]);
 
   const handleCardClick = (project: PortfolioProject) => {
     const projectIndex = groupedProjects.findIndex(p => p.id === project.id);
     setInitialProjectIndex(projectIndex);
-    setViewMode('feed');
+    setLightboxOpen(true);
   };
-
-  const handleCloseFeed = () => {
-    setViewMode('grid');
-  };
-
-  if (viewMode === 'feed') {
-    return (
-      <ProjectFeed
-        projects={groupedProjects}
-        initialProjectIndex={initialProjectIndex}
-        onClose={handleCloseFeed}
-      />
-    );
-  }
 
   return (
     <div className="page-container portfolio-page">
@@ -106,6 +75,14 @@ const Portfolio: React.FC = () => {
       </div>
 
       <MasonryGrid projects={groupedProjects} onProjectClick={handleCardClick} />
+      
+      <ProjectLightbox 
+        key={initialProjectIndex}
+        projects={groupedProjects} 
+        initialIndex={initialProjectIndex} 
+        isOpen={lightboxOpen} 
+        onClose={() => setLightboxOpen(false)} 
+      />
 
       <TestimonialCarousel />
       <CallToAction />

@@ -25,7 +25,7 @@ export class DashboardService {
 
   static async getStats() {
     try {
-      console.log('📊 Récupération des statistiques réelles du dashboard');
+      
       const now = new Date();
       const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
@@ -109,7 +109,7 @@ export class DashboardService {
         engagementTrend
       };
     } catch (error) {
-      console.error('❌ Erreur stats:', error);
+      
       throw new Error('Failed to get dashboard statistics');
     }
   }
@@ -212,7 +212,7 @@ export class DashboardService {
       ]);
       return { orders, totalCount };
     } catch (error) {
-      console.error('❌ Erreur lors de la récupération des commandes:', error);
+      
       throw new Error('Failed to get all orders');
     }
   }
@@ -241,14 +241,14 @@ export class DashboardService {
       ]);
       return { appointments, totalCount };
     } catch (error) {
-      console.error('❌ Erreur lors de la récupération des rendez-vous:', error);
+      
       throw new Error('Failed to get all appointments');
     }
   }
 
   static async getConversations(limit: number = 50, offset: number = 0) {
     try {
-      console.log(`💬 Récupération des conversations (limit: ${limit}, offset: ${offset})`);
+      
       const conversations = await prisma.conversation.findMany({
         take: limit,
         skip: offset,
@@ -267,13 +267,13 @@ export class DashboardService {
         },
       });
 
-      console.log(`✅ ${conversations.length} conversations récupérées`);
+      
       return conversations.map((conv: any) => ({
         ...conv,
         messages: [...conv.messages].reverse(), // Most recent first
       }));
     } catch (error) {
-      console.error('❌ Erreur lors de la récupération des conversations:', error);
+      
       return [];
     }
   }
@@ -297,37 +297,37 @@ export class DashboardService {
 
       return conversation;
     } catch (error) {
-      console.error('Error getting conversation:', error);
+      
       return null;
     }
   }
 
   static async updateAppointmentStatus(appointmentId: string, status: string): Promise<boolean> {
     try {
-      console.log(`📅 Mise à jour du statut du rendez-vous ${appointmentId} vers ${status}`);
+      
       await prisma.appointment.update({
         where: { id: appointmentId },
         data: { status },
       });
-      console.log(`✅ Statut du rendez-vous ${appointmentId} mis à jour`);
+      
       return true;
     } catch (error) {
-      console.error('❌ Erreur lors de la mise à jour du statut du rendez-vous:', error);
+      
       return false;
     }
   }
 
   static async updateOrderStatus(orderId: string, status: string): Promise<boolean> {
     try {
-      console.log(`📦 Mise à jour du statut de la commande ${orderId} vers ${status}`);
+      
       await prisma.order.update({
         where: { id: orderId },
         data: { status },
       });
-      console.log(`✅ Statut de la commande ${orderId} mis à jour`);
+      
       return true;
     } catch (error) {
-      console.error('❌ Erreur lors de la mise à jour du statut de la commande:', error);
+      
       return false;
     }
   }
@@ -336,11 +336,11 @@ export class DashboardService {
     try {
       // This would typically involve clearing conversation history or resetting AI model state
       // For now, we'll just log this action
-      console.log('Chatbot model reset requested');
+      
       // You could add logic here to clear old conversations or reset model state
       return true;
     } catch (error) {
-      console.error('Error resetting chatbot model:', error);
+      
       return false;
     }
   }
@@ -352,7 +352,7 @@ export class DashboardService {
       });
       return true;
     } catch (error) {
-      console.error('Error deleting conversation:', error);
+      
       return false;
     }
   }
@@ -369,14 +369,14 @@ export class DashboardService {
       });
       return true;
     } catch (error) {
-      console.error('Error adding note to conversation:', error);
+      
       return false;
     }
   }
 
   static async saveChatMessage(conversationId: string, sender: string, text: string) {
     try {
-      console.log(`💬 Enregistrement du message (${sender}): ${text.substring(0, 50)}...`);
+      
       const message = await prisma.chatMessage.create({
         data: {
           conversationId,
@@ -393,7 +393,7 @@ export class DashboardService {
 
       return message;
     } catch (error) {
-      console.error('❌ Erreur lors de l\'enregistrement du message:', error);
+      
       throw new Error('Failed to save chat message');
     }
   }

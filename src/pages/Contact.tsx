@@ -108,7 +108,7 @@ const Contact = () => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('HTTP error:', response.status, errorText);
+        
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -125,11 +125,11 @@ const Contact = () => {
           message: '',
         });
       } else {
-        console.error('Error sending contact message:', result.errors);
+        
         setError(result.errors ? result.errors[0].message : 'Une erreur est survenue lors de l\'envoi du message. Veuillez réessayer.');
       }
     } catch (err) {
-      console.error('Erreur lors de la soumission du formulaire:', err);
+      
       setError('Une erreur inattendue est survenue. Veuillez réessayer.');
     } finally {
       setLoading(false);

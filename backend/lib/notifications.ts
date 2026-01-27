@@ -12,7 +12,7 @@ export class NotificationService {
   static async createNotification(notification: NotificationData): Promise<void> {
     try {
       // Store notification in database (you might want to add a notifications table)
-      console.log('Notification créée:', notification);
+      
 
       // Send email notification if recipient specified
       if (notification.recipientEmail) {
@@ -21,7 +21,7 @@ export class NotificationService {
 
       // You could also implement push notifications, SMS, etc.
     } catch (error) {
-      console.error('Error creating notification:', error);
+      
     }
   }
 
@@ -29,13 +29,9 @@ export class NotificationService {
     try {
       // This would integrate with your email service
       // For now, we'll just log it
-      console.log('Email notification would be sent:', {
-        to: notification.recipientEmail,
-        subject: notification.title,
-        message: notification.message
-      });
+      
     } catch (error) {
-      console.error('Error sending email notification:', error);
+      
     }
   }
 
@@ -93,7 +89,7 @@ export class NotificationService {
       // For now, return empty array
       return [];
     } catch (error) {
-      console.error('Error getting recent notifications:', error);
+      
       return [];
     }
   }

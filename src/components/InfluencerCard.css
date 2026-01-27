@@ -275,3 +275,176 @@
     gap: 8px;
   }
 }
+
+/* Focus Mode Styles - Refined & Discreet */
+.influencer-overlay-wrapper {
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.influencer-overlay-wrapper.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.focus-ui-controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.focus-ui-controls.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.focus-close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s;
+  pointer-events: auto;
+}
+
+.focus-close-btn:hover {
+  background: rgba(0, 0, 0, 0.6);
+  transform: scale(1.05);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.nav-arrow-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 30;
+  pointer-events: auto;
+}
+
+.nav-arrow-btn:hover {
+  background: rgba(0, 0, 0, 0.5);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.nav-arrow-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.nav-arrow-btn.prev {
+  left: 15px;
+}
+
+.nav-arrow-btn.next {
+  right: 15px;
+}
+
+@media (max-width: 768px) {
+  .nav-arrow-btn {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.focus-video-controls {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 16px;
+  pointer-events: auto;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px 20px;
+  border-radius: 30px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: opacity 0.3s;
+}
+
+.focus-control-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 4px;
+}
+
+.focus-control-btn:hover {
+  transform: scale(1.1);
+  color: #fff;
+}
+
+/* Action Row Layout */
+.influencer-action-row {
+  display: flex;
+  justify-content: center; /* Center main button */
+  align-items: center;
+  position: relative; /* To position the toggle absolutely if needed, or flex */
+  width: 100%;
+}
+
+/* View Mode Toggle - Discreet Bottom Right */
+.view-mode-toggle-btn {
+  position: absolute;
+  right: 0;
+  bottom: 0px;
+  width: 44px; /* Slightly larger hit area */
+  height: 44px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 10;
+  padding: 0;
+}
+
+.view-mode-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.view-mode-toggle-btn svg {
+  opacity: 0.9;
+}

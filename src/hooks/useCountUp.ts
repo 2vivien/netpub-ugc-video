@@ -6,12 +6,12 @@ const easeOutExpo = (t: number) => {
 
 const useCountUp = (end: number, duration: number = 2000): number => {
   const [count, setCount] = useState(0);
-  const frameRef = useRef<number>();
-  const startTimeRef = useRef<number>();
+  const frameRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number | null>(null);
 
   useEffect(() => {
     const animate = (timestamp: number) => {
-      if (!startTimeRef.current) {
+      if (startTimeRef.current === null) {
         startTimeRef.current = timestamp;
       }
 
@@ -31,10 +31,10 @@ const useCountUp = (end: number, duration: number = 2000): number => {
     frameRef.current = requestAnimationFrame(animate);
 
     return () => {
-      if (frameRef.current) {
+      if (frameRef.current !== null) {
         cancelAnimationFrame(frameRef.current);
       }
-      startTimeRef.current = undefined;
+      startTimeRef.current = null;
     };
   }, [end, duration]);
 

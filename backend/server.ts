@@ -27,7 +27,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Ensure critical variables are present
 if (!process.env.JWT_SECRET) {
-    console.warn('⚠️ WARNING: JWT_SECRET not set. Using fallback for development only.');
+    
 }
 
 const PORT = process.env.PORT || 4000;
@@ -110,7 +110,7 @@ async function startApolloServer() {
                     const bearerToken = token.replace('Bearer ', '');
                     user = AuthService.verifyToken(bearerToken);
                 } catch (e) {
-                    console.error("Token verification failed", e);
+                    
                 }
             }
             return { req, res, prisma, user };
@@ -141,9 +141,9 @@ async function startApolloServer() {
 
     // Start Server
     await new Promise<void>(resolve => httpServer.listen({ port: PORT }, resolve));
-    console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`);
+    
 }
 
 startApolloServer().catch(err => {
-    console.error('❌ Server failed to start:', err);
+    
 });

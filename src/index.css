@@ -2795,6 +2795,17 @@ main {
     white-space: nowrap; /* Empêche le texte de se couper */
 }
 
+@media (max-width: 480px) {
+    .pricing-badge {
+        font-size: 0.75rem;
+        padding: 4px 14px;
+        top: -12px;
+    }
+    .pricing-card {
+        overflow: visible !important;
+    }
+}
+
 .elan-badge { 
     background: #374151;
 }
@@ -2919,14 +2930,15 @@ main {
 .pricing-plans-mobile-carousel {
     display: none;
     position: relative;
-    overflow: hidden;
-    padding: 0 15px;
+    overflow: visible;
+    padding: 20px 15px 0;
 }
 
 .carousel-wrapper {
     overflow: hidden;
     border-radius: 16px;
     margin-bottom: 30px;
+    padding-top: 15px; /* Space for the badge */
 }
 
 .pricing-cards-track {

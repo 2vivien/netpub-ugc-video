@@ -8,8 +8,8 @@ import { fetchCsrfToken } from '../utils/csrf';
 
 declare global {
     interface Window {
-        SpeechRecognition: any;
-        webkitSpeechRecognition: any;
+        SpeechRecognition: typeof SpeechRecognition;
+        webkitSpeechRecognition: typeof SpeechRecognition;
     }
 }
 
@@ -126,18 +126,16 @@ const Chatbot: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [conversationId, setConversationId] = useState<string | null>(null);
-    const [userInfoCollected, setUserInfoCollected] = useState(false);
-    const [feedbackCollected, setFeedbackCollected] = useState(false);
     const [followUpStep, setFollowUpStep] = useState<'none' | 'discovery' | 'feedback' | 'completed'>('none');
     const [recognitionError, setRecognitionError] = useState<string | null>(null);
 
     const aiRef = useRef<GoogleGenAI | null>(null);
-    const recognitionRef = useRef<any | null>(null);
+    const recognitionRef = useRef<SpeechRecognition | null>(null);
     const audioContextRef = useRef<AudioContext | null>(null);
     const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-    const API_KEY = (import.meta as any).env.VITE_API_KEY;
+    const API_KEY = (import.meta as unknown as { env: { VITE_API_KEY: string } }).env.VITE_API_KEY;
     const GRAPHQL_ENDPOINT = '/graphql';
 
     // Notification logic removed for now, can be re-added if needed via context
@@ -230,8 +228,9 @@ const Chatbot: React.FC = () => {
             }
 
             // Écouter les événements de contexte des plans
-            const handleChatbotContext = (event: any) => {
-                const { plan, message } = event.detail;
+            const handleChatbotContext = (event: Event) => {
+                const customEvent = event as CustomEvent<{ plan: string; message: string }>;
+                const { message } = customEvent.detail;
                 if (message) {
                     handleSendMessage(null, message);
                 }
@@ -279,7 +278,7 @@ const Chatbot: React.FC = () => {
                 }),
             });
         } catch (error) {
-            console.error('Failed to save message to DB:', error);
+            
         }
     };
 
@@ -362,14 +361,14 @@ const Chatbot: React.FC = () => {
                 setRecognitionError(null);
             };
 
-            recognition.onresult = (event: any) => {
+            recognition.onresult = (event: SpeechRecognitionEvent) => {
                 const transcript = event.results[0][0].transcript;
                 if (transcript.trim()) {
                     handleSendMessage(null, transcript);
                 }
             };
 
-            recognition.onerror = (event: any) => {
+            recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
                 let errorMessage = 'Une erreur est survenue avec la reconnaissance vocale.';
                 if (event.error === 'not-allowed') {
                     errorMessage = "L'accès au microphone a été refusé. Veuillez l'autoriser dans les paramètres.";

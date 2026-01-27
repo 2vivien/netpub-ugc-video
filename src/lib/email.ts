@@ -42,7 +42,7 @@ class EmailService {
 
   async sendContactNotification(contactData: ContactFormData): Promise<boolean> {
     try {
-      console.log(`📧 Envoi d'une notification de contact à l'admin pour ${contactData.name}`);
+      
       const mailOptions = {
         from: '"NetPub Contact" <noreply@netpub.agency>',
         to: process.env.ADMIN_EMAIL || 'org.netpub@gmail.com',
@@ -89,17 +89,17 @@ Ce message a été envoyé automatiquement depuis le formulaire de contact NetPu
       };
 
       await this.transporter.sendMail(mailOptions);
-      console.log('✅ Email de notification envoyé avec succès à l\'admin');
+      
       return true;
     } catch (error) {
-      console.error('❌ Erreur lors de l\'envoi de l\'email de notification:', error);
+      
       return false;
     }
   }
 
   async sendAutoReply(contactData: ContactFormData): Promise<boolean> {
     try {
-      console.log(`📧 Envoi d'une réponse automatique à ${contactData.email}`);
+      
       const mailOptions = {
         from: '"NetPub Agency" <noreply@netpub.agency>',
         to: contactData.email,
@@ -164,17 +164,17 @@ L'équipe NetPub Agency
       };
 
       await this.transporter.sendMail(mailOptions);
-      console.log('✅ Email de réponse automatique envoyé avec succès');
+      
       return true;
     } catch (error) {
-      console.error('❌ Erreur lors de l\'envoi de l\'email de réponse automatique:', error);
+      
       return false;
     }
   }
 
   async sendAppointmentNotification(appointmentData: AppointmentData): Promise<boolean> {
     try {
-      console.log(`📧 Envoi d'une notification de RDV pour ${appointmentData.clientName}`);
+      
 
       // Email to Admin
       const adminMailOptions = {
@@ -220,17 +220,17 @@ L'équipe NetPub Agency
 
       await this.transporter.sendMail(adminMailOptions);
       await this.transporter.sendMail(clientMailOptions);
-      console.log('✅ Emails de RDV envoyés avec succès');
+      
       return true;
     } catch (error) {
-      console.error('❌ Erreur lors de l\'envoi des emails de RDV:', error);
+      
       return false;
     }
   }
 
   async sendOrderNotification(orderData: OrderData): Promise<boolean> {
     try {
-      console.log(`📧 Envoi d'une notification de commande pour ${orderData.clientName}`);
+      
 
       // Email to Admin
       const adminMailOptions = {
@@ -274,10 +274,10 @@ L'équipe NetPub Agency
 
       await this.transporter.sendMail(adminMailOptions);
       await this.transporter.sendMail(clientMailOptions);
-      console.log('✅ Emails de commande envoyés avec succès');
+      
       return true;
     } catch (error) {
-      console.error('❌ Erreur lors de l\'envoi des emails de commande:', error);
+      
       return false;
     }
   }

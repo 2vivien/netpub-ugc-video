@@ -23,7 +23,11 @@ const MasonryGrid: React.FC<MasonryGridProps> = ({ projects, onProjectClick }) =
       columnClassName="my-masonry-grid_column"
     >
       {projects.map((project) => (
-        <InfluencerCard key={project.id} project={project} />
+        <InfluencerCard 
+          key={project.id} 
+          project={project} 
+          onMediaClick={() => onProjectClick(project)} 
+        />
       ))}
     </Masonry>
   );

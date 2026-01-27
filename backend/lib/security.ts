@@ -69,7 +69,7 @@ export class SecurityUtils {
     const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'];
 
     return {
-      origin: (origin: string | undefined, callback: Function) => {
+      origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
         if (!origin || allowedOrigins.includes(origin)) {
           callback(null, true);
         } else {
@@ -118,7 +118,7 @@ export class SecurityUtils {
   // Log security events
   static logSecurityEvent(event: string, details: any): void {
     const timestamp = new Date().toISOString();
-    console.log(`[SECURITY ${timestamp}] ${event}:`, details);
+    
 
     // In production, you might want to send this to a logging service
     // or store it in a database
@@ -189,7 +189,7 @@ export class PerformanceUtils {
       // For now, return true
       return true;
     } catch (error) {
-      console.error('Database health check failed:', error);
+      
       return false;
     }
   }
@@ -202,30 +202,25 @@ export class MonitoringUtils {
     return () => {
       const end = process.hrtime.bigint();
       const duration = Number(end - start) / 1e6; // Convert to milliseconds
-      console.log(`${label} took ${duration.toFixed(2)}ms`);
+      
       return duration;
     };
   }
 
   static trackApiCall(endpoint: string, method: string, duration: number, statusCode: number): void {
-    console.log(`API Call: ${method} ${endpoint} - ${statusCode} - ${duration.toFixed(2)}ms`);
+    
 
     // In production, send to monitoring service like DataDog, New Relic, etc.
   }
 
   static trackError(error: Error, context?: any): void {
-    console.error('Tracked Error:', {
-      message: error.message,
-      stack: error.stack,
-      context,
-      timestamp: new Date().toISOString()
-    });
+    
 
     // In production, send to error tracking service like Sentry, Rollbar, etc.
   }
 
   static trackUserAction(userId: string, action: string, details?: any): void {
-    console.log(`User Action: ${userId} - ${action}`, details);
+    
 
     // In production, send to analytics service
   }

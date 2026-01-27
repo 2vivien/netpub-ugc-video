@@ -1,4 +1,4 @@
-import { prisma } from '../backend/lib/prisma';
+// import { prisma } from '../backend/lib/prisma';
 
 export interface NotificationData {
   type: 'appointment' | 'order' | 'contact' | 'conversation';

@@ -15,7 +15,7 @@ export const fetchCsrfToken = async (maxRetries = 5, retryDelayMs = 1000): Promi
         // Retry on 5xx errors which often happen during startup/proxying
         if (response.status >= 500 && i < maxRetries - 1) {
           if (i >= 2) {
-            console.warn(`Attempt ${i + 1} failed to fetch CSRF token (Status: ${response.status}). Retrying in ${retryDelayMs}ms...`);
+            
           }
           await new Promise(resolve => setTimeout(resolve, retryDelayMs));
           continue;
@@ -30,12 +30,12 @@ export const fetchCsrfToken = async (maxRetries = 5, retryDelayMs = 1000): Promi
       // Retry on network errors (like TypeError: Failed to fetch) during startup
       if (i < maxRetries - 1) {
         if (i >= 2) {
-          console.warn(`Attempt ${i + 1} failed to fetch CSRF token. Retrying in ${retryDelayMs}ms... Error: ${error.message}`);
+          
         }
         await new Promise(resolve => setTimeout(resolve, retryDelayMs));
         continue;
       }
-      console.error('Final error fetching CSRF token:', error);
+      
       throw error;
     }
   }

@@ -11,4 +11,4 @@ dotenv.config();
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 
-console.log('🔧 Encironment variables loaded via load-env.ts');
+

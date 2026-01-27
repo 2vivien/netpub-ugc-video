@@ -1,6 +1,6 @@
 import { useState, useEffect, RefObject } from 'react';
 
-const useOnScreen = <T extends Element>(
+const useOnScreen = <T extends Element | null>(
   ref: RefObject<T>,
   options: IntersectionObserverInit = { rootMargin: '0px', threshold: 0.1 }
 ): boolean => {

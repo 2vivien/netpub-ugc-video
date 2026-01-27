@@ -26,7 +26,7 @@ const DashboardHeader: React.FC = () => {
         </button>
 
         <div className="user-profile">
-          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyCenter: 'center', overflow: 'hidden' }}>
+          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
             <User size={20} color="#999" />
           </div>
           <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Admin</span>

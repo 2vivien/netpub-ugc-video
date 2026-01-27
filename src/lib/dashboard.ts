@@ -20,7 +20,7 @@ async function graphqlRequest(query: string, variables: any = {}) {
     if (csrf) headers['X-CSRF-Token'] = csrf;
   } catch (e) {
     // Ignore CSRF fetch error for now if it fails, or log it
-    console.warn("CSRF fetch failed", e);
+    
   }
 
   const response = await fetch(GRAPHQL_ENDPOINT, {
@@ -95,7 +95,7 @@ export class DashboardService {
         }))
       };
     } catch (error) {
-      console.error('Error getting dashboard stats:', error);
+      
       return {
         totalProjects: 0,
         totalUsers: 0,
@@ -132,7 +132,7 @@ export class DashboardService {
       const data = await graphqlRequest(query);
       return data.conversations;
     } catch (error) {
-      console.error('Error getting conversations:', error);
+      
       return [];
     }
   }
@@ -160,7 +160,7 @@ export class DashboardService {
       const data = await graphqlRequest(query);
       return data.allAppointments.appointments;
     } catch (error) {
-      console.error('Error getting appointments:', error);
+      
       return [];
     }
   }
@@ -187,7 +187,7 @@ export class DashboardService {
       const data = await graphqlRequest(query);
       return data.allOrders.orders;
     } catch (error) {
-      console.error('Error getting orders:', error);
+      
       return [];
     }
   }
