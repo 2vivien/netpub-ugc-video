@@ -165,9 +165,8 @@ const Chatbot: React.FC = () => {
         if (!aiRef.current || !audioContextRef.current || !text) return;
         stopSpeaking(); 
         try {
-            const genAI = aiRef.current as unknown as { getGenerativeModel: (config: { model: string }) => any };
-            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
-            const response = await model.generateContent({
+            const response = await aiRef.current.models.generateContent({
+                model: "gemini-2.0-flash",
                 contents: [{ role: 'user', parts: [{ text: text }] }],
                 config: {
                     responseModalities: [Modality.AUDIO],
@@ -178,7 +177,7 @@ const Chatbot: React.FC = () => {
                     },
                 },
             });
-            const base64Audio = response.response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+            const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
             if (typeof base64Audio === 'string' && base64Audio) {
                 const audioBuffer = await decodeAudioData(base64Audio, audioContextRef.current);
                 const source = audioContextRef.current.createBufferSource();
@@ -271,24 +270,23 @@ const Chatbot: React.FC = () => {
         stopSpeaking();
         saveChatMessageToDb('user', textToSend);
 
-        const history = messagesRef.current.map(msg => ({ role: msg.role, parts: [{ text: msg.text }] }));
+        // Gemini requires history to start with a 'user' message. 
+        // We filter out the initial model greeting from the history sent to the API.
+        const history = messagesRef.current
+            .filter((msg, index) => !(index === 0 && msg.role === 'model'))
+            .map(msg => ({ role: msg.role, parts: [{ text: msg.text }] }));
+            
         const systemPrompt = `Tu es Naïla, assistante chez Netpub. Discussion humaine, Emojis 😊. Une seule question à la fois.`;
 
         try {
-            const genAI = aiRef.current as unknown as { 
-                getGenerativeModel: (config: { model: string; systemInstruction?: string }) => any 
-            };
-            const model = genAI.getGenerativeModel({ 
-                model: 'gemini-2.5-flash-lite',
-                systemInstruction: systemPrompt
+            const response = await aiRef.current.models.generateContent({
+                model: 'gemini-2.0-flash',
+                contents: [{ role: 'user', parts: [{ text: systemPrompt }] }, ...history, { role: 'user', parts: [{ text: textToSend }] }],
+                config: {
+                    tools: [{ functionDeclarations: [prendreRendezVous, passerCommande, collecterInfosClient, collecterFeedbackSite, enregistrerNomClient] }],
+                },
             });
 
-            const result = await model.generateContent({
-                contents: [...history, { role: 'user', parts: [{ text: textToSend }] }],
-                tools: [{ functionDeclarations: [prendreRendezVous, passerCommande, collecterInfosClient, collecterFeedbackSite, enregistrerNomClient] }],
-            });
-
-            const response = result.response;
             const parts = response.candidates?.[0]?.content?.parts || [];
             const functionCalls = parts.filter((p: any) => !!p.functionCall);
 
@@ -343,7 +341,7 @@ const Chatbot: React.FC = () => {
                 saveChatMessageToDb('model', confirmationText);
                 speakText(confirmationText);
             } else {
-                const modelText = response.text() || "Désolé.";
+                const modelText = parts.find(p => p.text)?.text || "Désolé.";
                 const modelMessage: ChatMessage = { id: Date.now(), role: 'model', text: modelText, type: 'text' };
                 setMessages(prev => [...prev, modelMessage]);
                 saveChatMessageToDb('model', modelText);
