@@ -275,6 +275,49 @@ export const resolvers = {
     deleteConversation: (_parent: unknown, { conversationId }: { conversationId: string }) => DashboardService.deleteConversation(conversationId),
 
     addNoteToConversation: (_parent: unknown, { conversationId, note }: { conversationId: string; note: string }) => DashboardService.addNoteToConversation(conversationId, note),
+    
+    notifyConversationEnded: async (_parent: unknown, { conversationId }: { conversationId: string }) => {
+      try {
+        const conversation = await prisma.conversation.findUnique({
+          where: { id: conversationId },
+          include: { messages: { take: 5, orderBy: { timestamp: 'desc' } } }
+        });
+
+        if (!conversation) return false;
+
+        // Count non-null relevant fields
+        const fields = [
+          conversation.clientName,
+          conversation.clientEmail,
+          conversation.clientPhone,
+          conversation.discovery,
+          conversation.feedback
+        ];
+        const filledFieldsCount = fields.filter(f => f && f.trim() !== '').length;
+
+        // Condition: at least 2 variables filled
+        if (filledFieldsCount >= 2) {
+          const lastMessages = conversation.messages.map(m => `${m.sender}: ${m.text}`).join('\n');
+          
+          await emailService.sendConversationNotification({
+            id: conversationId,
+            clientName: conversation.clientName || undefined,
+            clientEmail: conversation.clientEmail || undefined,
+            clientPhone: conversation.clientPhone || undefined,
+            discovery: conversation.discovery || undefined,
+            feedback: conversation.feedback || undefined,
+            lastMessage: `Résumé des derniers échanges:\n${lastMessages}`
+          });
+          return true;
+        }
+        
+        return false;
+      } catch (err) {
+        console.error('Error in notifyConversationEnded:', err);
+        return false;
+      }
+    },
+
     addChatMessage: async (_parent: unknown, { conversationId, sender, text }: { conversationId: string; sender: string; text: string }) => {
       const message = await DashboardService.saveChatMessage(conversationId, sender, text);
 

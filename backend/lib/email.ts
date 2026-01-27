@@ -57,19 +57,17 @@ class EmailService {
     try {
       // Validate required fields
       if (!contactData.name || !contactData.email || !contactData.message) {
-        
         return false;
       }
 
       // Validate email format
       const emailRegex = /^[\w._%+-]+@[\w.-]+\.[A-Za-z]{2,}$/;
       if (!emailRegex.test(contactData.email)) {
-        
         return false;
       }
 
       const mailOptions = {
-        from: '"NetPub Contact" <org.netpub@gmail.com>',
+        from: `"NetPub Contact" <${process.env.BREVO_SMTP_USER}>`,
         to: process.env.ADMIN_EMAIL,
         subject: `Nouveau message de contact - ${contactData.name}`,
         html: `
@@ -114,10 +112,10 @@ Ce message a été envoyé automatiquement depuis le formulaire de contact NetPu
       };
 
       await this.transporter.sendMail(mailOptions);
-      
+      console.log(`Email de contact envoyé avec succès à: ${process.env.ADMIN_EMAIL}`);
       return true;
-    } catch {
-      
+    } catch (err) {
+      console.error('SMTP Error (Contact Notification):', err);
       return false;
     }
   }
@@ -126,19 +124,17 @@ Ce message a été envoyé automatiquement depuis le formulaire de contact NetPu
     try {
       // Validate required fields
       if (!contactData.name || !contactData.email) {
-        
         return false;
       }
 
       // Validate email format
       const emailRegex = /^[\w._%+-]+@[\w.-]+\.[A-Za-z]{2,}$/;
       if (!emailRegex.test(contactData.email)) {
-        
         return false;
       }
 
       const mailOptions = {
-        from: '"NetPub Agency" <org.netpub@gmail.com>',
+        from: `"NetPub Agency" <${process.env.BREVO_SMTP_USER}>`,
         to: contactData.email,
         subject: 'Merci pour votre message - NetPub Agency',
         html: `
@@ -201,10 +197,10 @@ L'équipe NetPub Agency
       };
 
       await this.transporter.sendMail(mailOptions);
-      
+      console.log('Auto-reply envoyé avec succès');
       return true;
-    } catch {
-      
+    } catch (err) {
+      console.error('SMTP Error (Auto-reply):', err);
       return false;
     }
   }
@@ -213,20 +209,18 @@ L'équipe NetPub Agency
     try {
       // Validate required fields
       if (!appointmentData.service || !appointmentData.clientName || !appointmentData.clientEmail) {
-        
         return false;
       }
 
       // Validate email format
       const emailRegex = /^[\w._%+-]+@[\w.-]+\.[A-Za-z]{2,}$/;
       if (!emailRegex.test(appointmentData.clientEmail)) {
-        
         return false;
       }
 
       // Email to Admin
       const adminMailOptions = {
-        from: '"NetPub RDV" <org.netpub@gmail.com>',
+        from: `"NetPub RDV" <${process.env.BREVO_SMTP_USER}>`,
         to: process.env.ADMIN_EMAIL,
         subject: `Nouveau Rendez-vous : ${appointmentData.service} - ${appointmentData.clientName}`,
         html: `
@@ -248,7 +242,7 @@ L'équipe NetPub Agency
 
       // Email to Client
       const clientMailOptions = {
-        from: '"NetPub Agency" <org.netpub@gmail.com>',
+        from: `"NetPub Agency" <${process.env.BREVO_SMTP_USER}>`,
         to: appointmentData.clientEmail,
         subject: 'Confirmation de votre demande de rendez-vous - NetPub Agency',
         html: `
@@ -267,12 +261,11 @@ L'équipe NetPub Agency
       };
 
       await this.transporter.sendMail(adminMailOptions);
-      
       await this.transporter.sendMail(clientMailOptions);
-      
+      console.log('Notifications de rendez-vous envoyées');
       return true;
-    } catch {
-      
+    } catch (err) {
+      console.error('SMTP Error (Appointment):', err);
       return false;
     }
   }
@@ -281,20 +274,18 @@ L'équipe NetPub Agency
     try {
       // Validate required fields
       if (!orderData.service || !orderData.clientName || !orderData.clientEmail || !orderData.details) {
-        
         return false;
       }
 
       // Validate email format
       const emailRegex = /^[\w._%+-]+@[\w.-]+\.[A-Za-z]{2,}$/;
       if (!emailRegex.test(orderData.clientEmail)) {
-        
         return false;
       }
 
       // Email to Admin
       const adminMailOptions = {
-        from: '"NetPub Commande" <org.netpub@gmail.com>',
+        from: `"NetPub Commande" <${process.env.BREVO_SMTP_USER}>`,
         to: process.env.ADMIN_EMAIL,
         subject: `Nouvelle Commande : ${orderData.service} - ${orderData.clientName}`,
         html: `
@@ -315,7 +306,7 @@ L'équipe NetPub Agency
 
       // Email to Client
       const clientMailOptions = {
-        from: '"NetPub Agency" <org.netpub@gmail.com>',
+        from: `"NetPub Agency" <${process.env.BREVO_SMTP_USER}>`,
         to: orderData.clientEmail,
         subject: 'Confirmation de votre commande - NetPub Agency',
         html: `
@@ -333,12 +324,11 @@ L'équipe NetPub Agency
       };
 
       await this.transporter.sendMail(adminMailOptions);
-      
       await this.transporter.sendMail(clientMailOptions);
-      
+      console.log('Notifications de commande envoyées');
       return true;
-    } catch {
-      
+    } catch (err) {
+      console.error('SMTP Error (Order):', err);
       return false;
     }
   }
@@ -354,30 +344,29 @@ L'équipe NetPub Agency
   }): Promise<boolean> {
     try {
       const mailOptions = {
-        from: '"NetPub Chat" <org.netpub@gmail.com>',
+        from: `"NetPub Chat" <${process.env.BREVO_SMTP_USER}>`,
         to: process.env.ADMIN_EMAIL,
-        subject: `Nouvelle interaction Chat : ${conversationData.clientName || 'Anonyme'}`,
+        subject: `Résumé Chat : ${conversationData.clientName || 'Anonyme'}`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px;">
-              Nouvelle Interaction sur le Chat
+              Fin de session Chat - Netpub
             </h2>
             <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <p><strong>ID Conversation :</strong> ${conversationData.id}</p>
               <p><strong>Client :</strong> ${conversationData.clientName || 'Non renseigné'}</p>
               <p><strong>Email :</strong> ${conversationData.clientEmail || 'Non renseigné'}</p>
               <p><strong>Téléphone :</strong> ${conversationData.clientPhone || 'Non renseigné'}</p>
               ${conversationData.discovery ? `<p><strong>Découverte :</strong> ${conversationData.discovery}</p>` : ''}
-              ${conversationData.feedback ? `<p><strong>Feedback/Recommandations :</strong> ${conversationData.feedback}</p>` : ''}
+              ${conversationData.feedback ? `<p><strong>Feedback :</strong> ${conversationData.feedback}</p>` : ''}
               <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
-              <p><strong>Dernier message :</strong></p>
+              <p><strong>Résumé :</strong></p>
               <div style="background: white; padding: 15px; border-radius: 5px; border-left: 4px solid #667eea;">
-                ${conversationData.lastMessage || 'Aucun message'}
+                ${conversationData.lastMessage || 'La conversation a été clôturée.'}
               </div>
             </div>
             <div style="text-align: center; margin-top: 20px;">
-              <a href="https://netpub.eurinhash.com/dashboard/conversations" style="background: #667eea; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold;">
-                Voir sur le Dashboard
+              <a href="https://netpub.agency/dashboard/conversations" style="background: #667eea; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold;">
+                Voir tous les messages
               </a>
             </div>
           </div>
@@ -385,10 +374,10 @@ L'équipe NetPub Agency
       };
 
       await this.transporter.sendMail(mailOptions);
-      
+      console.log('Notification de conversation envoyée');
       return true;
-    } catch {
-      
+    } catch (err) {
+      console.error('SMTP Error (Conversation):', err);
       return false;
     }
   }
@@ -396,17 +385,17 @@ L'équipe NetPub Agency
   async sendGenericEmail({ subject, html }: { subject: string; html: string }): Promise<boolean> {
     try {
       const mailOptions = {
-        from: '"NetPub System" <org.netpub@gmail.com>',
+        from: `"NetPub System" <${process.env.BREVO_SMTP_USER}>`,
         to: process.env.ADMIN_EMAIL,
         subject,
         html
       };
 
       await this.transporter.sendMail(mailOptions);
-      
+      console.log('Email générique envoyé');
       return true;
-    } catch {
-      
+    } catch (err) {
+      console.error('SMTP Error (Generic):', err);
       return false;
     }
   }

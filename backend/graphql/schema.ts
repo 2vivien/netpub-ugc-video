@@ -267,6 +267,7 @@ export const typeDefs = gql`
     deleteConversation(conversationId: ID!): Boolean!
     addNoteToConversation(conversationId: ID!, note: String!): Boolean!
     addChatMessage(conversationId: ID!, sender: String!, text: String!): ChatMessage!
+    notifyConversationEnded(conversationId: ID!): Boolean!
     exportAllData: Boolean!
   }
 `;
