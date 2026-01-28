@@ -144,10 +144,6 @@ interface GeminiModel {
     }>;
 }
 
-interface GeminiSDK {
-    getGenerativeModel: (config: { model: string; systemInstruction?: string }) => GeminiModel;
-}
-
 const Chatbot: React.FC = () => {
     const { isOpen, toggleChatbot, closeChatbot } = useChatbot(); 
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -172,7 +168,7 @@ const Chatbot: React.FC = () => {
         messagesRef.current = messages;
     }, [messages]);
 
-    const env = (import.meta as unknown as { env: { VITE_API_KEY: string } }).env;
+    const env = (import.meta as any).env;
     const API_KEY = env.VITE_API_KEY;
     const GRAPHQL_ENDPOINT = '/graphql';
 
@@ -189,10 +185,9 @@ const Chatbot: React.FC = () => {
         if (!aiRef.current || !audioContextRef.current || !text) return;
         stopSpeaking(); 
         try {
-            const sdk = aiRef.current as unknown as GeminiSDK;
-            const model = sdk.getGenerativeModel({ model: "gemini-2.0-pro-preview-tts" });
+            const model = (aiRef.current as any).getGenerativeModel({ model: "gemini-2.0-pro-preview-tts" });
             
-            const result = await model.generateContent({
+            const result = await (model as unknown as GeminiModel).generateContent({
                 contents: [{ role: 'user', parts: [{ text: text }] }],
                 generationConfig: {
                     responseModalities: ["AUDIO"],
@@ -304,7 +299,7 @@ const Chatbot: React.FC = () => {
 
         const history = messagesRef.current
             .filter((msg, index) => !(index === 0 && msg.role === 'model'))
-            .map(msg => ({ role: msg.role, parts: [{ text: msg.text }] }));
+            .map(msg => ({ role: msg.role as any, parts: [{ text: msg.text }] }));
             
         const systemPrompt = `Tu es Naïla, assistante chez Netpub. Discussion humaine, Emojis 😊. COURTE ET DIRECTE.
         RÈGLES :
@@ -313,19 +308,18 @@ const Chatbot: React.FC = () => {
         3. Une question à la fois.`;
 
         try {
-            const sdk = aiRef.current as unknown as GeminiSDK;
-            const model = sdk.getGenerativeModel({ 
+            const model = (aiRef.current as any).getGenerativeModel({ 
                 model: 'gemini-2.0-flash-lite',
                 systemInstruction: systemPrompt,
             });
 
-            const response = await model.generateContent({
+            const response = await (model as unknown as GeminiModel).generateContent({
                 contents: [...history, { role: 'user', parts: [{ text: textToSend }] }],
                 tools: [{ functionDeclarations: [prendreRendezVous, passerCommande, collecterInfosClient, collecterFeedbackSite, enregistrerNomClient] }],
             });
 
             const parts = response.response.candidates?.[0]?.content?.parts || [];
-            const functionCalls = parts.filter((p: { functionCall?: unknown }) => !!p.functionCall);
+            const functionCalls = parts.filter(p => !!p.functionCall);
 
             if (functionCalls && functionCalls.length > 0) {
                 const fc = functionCalls[0].functionCall as { name: string; args: any };
@@ -378,7 +372,7 @@ const Chatbot: React.FC = () => {
                 saveChatMessageToDb('model', confirmationText);
                 speakText(confirmationText);
             } else {
-                const modelText = parts.find((p: { text?: string }) => !!p.text)?.text || "Désolé.";
+                const modelText = parts.find(p => !!p.text)?.text || "Désolé.";
                 const modelMessage: ChatMessage = { id: Date.now(), role: 'model', text: modelText, type: 'text' };
                 setMessages(prev => [...prev, modelMessage]);
                 saveChatMessageToDb('model', modelText);
@@ -394,7 +388,7 @@ const Chatbot: React.FC = () => {
 
     useEffect(() => {
         if (isOpen) {
-            if (!aiRef.current && API_KEY) aiRef.current = new GoogleGenAI({ apiKey: API_KEY });
+            if (!aiRef.current && API_KEY) aiRef.current = new GoogleGenAI(API_KEY);
             if (!audioContextRef.current) {
                 const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
                 if (AudioContextClass) audioContextRef.current = new AudioContextClass({ sampleRate: 24000 });
