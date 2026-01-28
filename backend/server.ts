@@ -107,10 +107,14 @@ export async function bootstrap() {
         cors: false
     });
 
-    if (process.env.NODE_ENV === 'production') {
+    // Serve Static Frontend Files (Production)
+    // On Vercel, we let Vercel handle static files via vercel.json rewrites
+    if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
+        // Path from backend/dist/server.js to /app/dist (frontend build)
         const distPath = path.join(__dirname, '../../dist');
         app.use(express.static(distPath));
         app.get('*', (req: any, res: any, next: any) => {
+            // Don't intercept API routes
             if (req.path.startsWith('/graphql') || req.path.startsWith('/health') || req.path.startsWith('/csrf-token')) {
                 return next();
             }
@@ -118,6 +122,7 @@ export async function bootstrap() {
         });
     }
 
+    console.log('Bootstrap completed successfully');
     return { app, httpServer };
 }
 

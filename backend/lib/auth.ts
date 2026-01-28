@@ -9,9 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 // Validate that required environment variables are present
 if (!JWT_SECRET) {
-  
-  
-  process.exit(1);
+  console.error('CRITICAL ERROR: JWT_SECRET is not defined in environment variables.');
 }
 
 export class AuthService {
