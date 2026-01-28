@@ -80,7 +80,7 @@ export default defineConfig(({ mode }: { mode: string }) => {
       rollupOptions: {
         output: {
           manualChunks: {
-            vendor: ['react', 'react-dom', 'react-router-dom', 'framer-motion', 'gsap', 'lucide-react', 'react-icons'],
+            vendor: ['react', 'react-dom', 'react-router-dom', 'gsap', 'lucide-react', 'react-icons'],
           },
         },
       },
