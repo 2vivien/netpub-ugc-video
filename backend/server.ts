@@ -83,12 +83,12 @@ export async function bootstrap() {
     app.use(express.json());
 
     // Health Check
-    app.get('/health', (req, res) => {
+    app.get('/health', (req: express.Request, res: express.Response) => {
         res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
     });
 
     // CSRF Token Endpoint (Simple implementation)
-    app.get('/csrf-token', (req, res) => {
+    app.get('/csrf-token', (req: express.Request, res: express.Response) => {
         // In a stateless JWT setup, CSRF tokens might be handled differently,
         // but here's a placeholder if the frontend expects it.
         // Ideally use csurf middleware if using sessions.
@@ -101,7 +101,7 @@ export async function bootstrap() {
     // Apollo Server Setup
     const server = new ApolloServer({
         schema,
-        context: async ({ req, res }) => {
+        context: async ({ req, res }: { req: express.Request; res: express.Response }) => {
             // Get the user token from the headers
             const token = req.headers.authorization || '';
             let user = null;
@@ -120,7 +120,7 @@ export async function bootstrap() {
 
     await server.start();
     server.applyMiddleware({
-        app: app as express.Express,
+        app: app as any,
         path: '/graphql',
         cors: false // Handle CORS manually above
     });
@@ -130,7 +130,7 @@ export async function bootstrap() {
         // Path from backend/dist/server.js to /app/dist (frontend build)
         const distPath = path.join(__dirname, '../../dist');
         app.use(express.static(distPath));
-        app.get('*', (req, res, next) => {
+        app.get('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
             // Don't intercept API routes
             if (req.path.startsWith('/graphql') || req.path.startsWith('/health') || req.path.startsWith('/csrf-token')) {
                 return next();
