@@ -1,46 +1,16 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { GoogleGenAI, FunctionDeclaration, Type, Tool, GenerationConfig, Modality } from '@google/genai';
+import { GoogleGenerativeAI, FunctionDeclaration, SchemaType, Tool, GoogleGenerativeAIFetchError } from '@google/generative-ai';
 import { ChatMessage, PortfolioCategory } from '../types';
-import { decodeAudioData } from '../utils/audioUtils';
-import { useChatbot } from '../contexts/ChatbotContext'; 
+import { useChatbot } from '../contexts/ChatbotContext';
 import { NotificationService } from '../lib/notifications';
 import { fetchCsrfToken } from '../utils/csrf';
+import { getAIContext } from '../lib/context-loader';
 
-// --- Interfaces pour le SDK Gemini (Audio/TTS) ---
-
-interface GeminiContentPart {
-    text?: string;
-    inlineData?: {
-        data: string;
-        mimeType: string;
-    };
-    functionCall?: {
-        name: string;
-        args: Record<string, unknown>;
-    };
-}
-
-interface GeminiCandidate {
-    content?: {
-        parts?: GeminiContentPart[];
-    };
-}
+// --- Interfaces pour le SDK Gemini ---
 
 interface GeminiResponse {
-    candidates?: GeminiCandidate[];
-    text?: () => string;
-}
-
-interface GeminiModel {
-    generateContent(request: {
-        contents: Array<{ role: string; parts: Array<{ text?: string; inlineData?: { data: string; mimeType: string } }> }>;
-        tools?: Tool[];
-        generationConfig?: GenerationConfig & { responseModalities?: Modality[] };
-    }): Promise<{ response: GeminiResponse }>;
-}
-
-interface GeminiSDK {
-    getGenerativeModel(config: { model: string; systemInstruction?: string }): GeminiModel;
+    text(): string;
+    functionCalls(): Array<{ name: string; args: object }> | undefined;
 }
 
 // --- Interfaces pour Speech Recognition ---
@@ -56,7 +26,7 @@ interface SpeechRecognitionInstance extends EventTarget {
 }
 
 interface SpeechRecognitionConstructor {
-    new (): SpeechRecognitionInstance;
+    new(): SpeechRecognitionInstance;
 }
 
 declare global {
@@ -85,18 +55,18 @@ const prendreRendezVous: FunctionDeclaration = {
     name: 'prendreRendezVous',
     description: "Prendre un rendez-vous pour un service spécifique à une date et une heure données.",
     parameters: {
-        type: Type.OBJECT,
+        type: SchemaType.OBJECT,
         properties: {
             service: {
-                type: Type.STRING,
+                type: SchemaType.STRING,
                 description: `Le service qui intéresse le client. Doit être l'une des options suivantes : '${PortfolioCategory.VIDEO_UGC}' ou '${PortfolioCategory.VIDEO_SPOT_PUBLICITAIRE}'.`,
             },
             date: {
-                type: Type.STRING,
+                type: SchemaType.STRING,
                 description: "La date souhaitée pour le rendez-vous, au format 'JJ/MM/AAAA' ou une description textuelle comme 'demain' ou 'mardi prochain'.",
             },
             heure: {
-                type: Type.STRING,
+                type: SchemaType.STRING,
                 description: "L'heure souhaitée pour le rendez-vous, au format 'HH:MM' ou une description textuelle comme 'l'après-midi' ou '15h'.",
             },
         },
@@ -108,14 +78,14 @@ const passerCommande: FunctionDeclaration = {
     name: 'passerCommande',
     description: "Passer une commande pour un service spécifique avec des détails additionnels.",
     parameters: {
-        type: Type.OBJECT,
+        type: SchemaType.OBJECT,
         properties: {
             service: {
-                type: Type.STRING,
+                type: SchemaType.STRING,
                 description: `Le service que le client souhaite commander. Doit être l'une des options suivantes : '${PortfolioCategory.VIDEO_UGC}' ou '${PortfolioCategory.VIDEO_SPOT_PUBLICITAIRE}'.`,
             },
             details: {
-                type: Type.STRING,
+                type: SchemaType.STRING,
                 description: "Un bref résumé des besoins ou des détails spécifiques pour la commande.",
             },
         },
@@ -127,12 +97,12 @@ const collecterInfosClient: FunctionDeclaration = {
     name: 'collecterInfosClient',
     description: "Collecter les informations du client pour le contacter.",
     parameters: {
-        type: Type.OBJECT,
+        type: SchemaType.OBJECT,
         properties: {
-            nom: { type: Type.STRING, description: "Le nom complet du client." },
-            prenom: { type: Type.STRING, description: "Le prénom du client." },
-            telephone: { type: Type.STRING, description: "Le numéro de téléphone du client." },
-            email: { type: Type.STRING, description: "L'adresse email du client." },
+            nom: { type: SchemaType.STRING, description: "Le nom complet du client." },
+            prenom: { type: SchemaType.STRING, description: "Le prénom du client." },
+            telephone: { type: SchemaType.STRING, description: "Le numéro de téléphone du client." },
+            email: { type: SchemaType.STRING, description: "L'adresse email du client." },
         },
     },
 };
@@ -141,10 +111,10 @@ const collecterFeedbackSite: FunctionDeclaration = {
     name: 'collecterFeedbackSite',
     description: "Collecter le feedback du client sur comment il a trouvé le site.",
     parameters: {
-        type: Type.OBJECT,
+        type: SchemaType.OBJECT,
         properties: {
             feedback: {
-                type: Type.STRING,
+                type: SchemaType.STRING,
                 description: "Comment le client a trouvé le site.",
             },
         },
@@ -156,10 +126,10 @@ const enregistrerNomClient: FunctionDeclaration = {
     name: 'enregistrerNomClient',
     description: "Enregistrer le nom du client.",
     parameters: {
-        type: Type.OBJECT,
+        type: SchemaType.OBJECT,
         properties: {
-            nom: { type: Type.STRING, description: "Le nom de famille du client." },
-            prenom: { type: Type.STRING, description: "Le prénom du client." },
+            nom: { type: SchemaType.STRING, description: "Le nom de famille du client." },
+            prenom: { type: SchemaType.STRING, description: "Le prénom du client." },
         },
         required: ['prenom'],
     },
@@ -187,17 +157,16 @@ interface ClientNameArgs {
 // --- Composant Principal ---
 
 const Chatbot: React.FC = () => {
-    const { isOpen, toggleChatbot, closeChatbot } = useChatbot(); 
+    const { isOpen, toggleChatbot, closeChatbot } = useChatbot();
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [conversationId, setConversationId] = useState<string | null>(null);
 
-    const aiRef = useRef<GoogleGenAI | null>(null);
+    const aiRef = useRef<GoogleGenerativeAI | null>(null);
     const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
-    const audioContextRef = useRef<AudioContext | null>(null);
-    const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
+    const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
     const inputValueRef = useRef(inputValue);
     const messagesRef = useRef(messages);
@@ -210,71 +179,36 @@ const Chatbot: React.FC = () => {
         messagesRef.current = messages;
     }, [messages]);
 
-    const API_KEY = import.meta.env.VITE_API_KEY;
+    // Robust API Key retrieval with fallbacks
+    const envProcess = (process.env as unknown) as Record<string, string | undefined>;
+    const API_KEY = (import.meta.env.VITE_API_KEY || envProcess.VITE_API_KEY || envProcess.GEMINI_API_KEY || "").trim();
+
+    const isApiKeyValid = API_KEY !== "" &&
+        API_KEY !== "undefined" &&
+        API_KEY !== "null" &&
+        API_KEY.length > 20;
+
     const GRAPHQL_ENDPOINT = '/graphql';
 
-    const stopSpeaking = () => {
-        if (audioSourceRef.current) {
-            try {
-                audioSourceRef.current.stop();
-            } catch { /* ignore */ }
-            audioSourceRef.current = null;
-        }
-    };
-
-    const speakText = useCallback(async (text: string) => {
-        if (!aiRef.current || !audioContextRef.current || !text) return;
-        stopSpeaking(); 
-        try {
-            const sdk = aiRef.current as unknown as GeminiSDK;
-            const model = sdk.getGenerativeModel({ model: "gemini-2.0-pro-preview-tts" });
-            
-            // We cast to any here only because the SDK types might not yet include responseModalities
-            // but we use a local interface to keep it as safe as possible without 'any' in the main logic.
-            interface AudioGenerationConfig extends GenerationConfig {
-                responseModalities?: Modality[];
-                speechConfig?: {
-                    voiceConfig?: {
-                        prebuiltVoiceConfig?: {
-                            voiceName: string;
-                        };
-                    };
-                };
-            }
-
-            const generationConfig: AudioGenerationConfig = {
-                responseModalities: [Modality.AUDIO],
-                speechConfig: {
-                    voiceConfig: {
-                        prebuiltVoiceConfig: { voiceName: 'Kore' },
-                    },
-                },
-            };
-
-            const result = await model.generateContent({
-                contents: [{ role: 'user', parts: [{ text: text }] }],
-                generationConfig,
-            });
-            
-            const parts = result.response.candidates?.[0]?.content?.parts || [];
-            const audioPart = parts.find((p: GeminiContentPart) => p.inlineData?.mimeType?.startsWith('audio/'));
-            const base64Audio = audioPart?.inlineData?.data;
-
-            if (typeof base64Audio === 'string' && base64Audio) {
-                const audioBuffer = await decodeAudioData(base64Audio, audioContextRef.current);
-                const source = audioContextRef.current.createBufferSource();
-                source.buffer = audioBuffer;
-                source.connect(audioContextRef.current.destination);
-                audioSourceRef.current = source;
-                source.onended = () => {
-                    if (audioSourceRef.current === source) audioSourceRef.current = null;
-                };
-                source.start();
-            }
-        } catch (err) {
-            console.error('TTS Error:', err);
+    const stopSpeaking = useCallback(() => {
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
         }
     }, []);
+
+    const speakText = useCallback((text: string) => {
+        if (!window.speechSynthesis || !text) return;
+
+        stopSpeaking();
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'fr-FR';
+        utterance.rate = 1;
+        utterance.pitch = 1;
+
+        utteranceRef.current = utterance;
+        window.speechSynthesis.speak(utterance);
+    }, [stopSpeaking]);
 
     const saveChatMessageToDb = useCallback(async (sender: string, text: string) => {
         if (!conversationId) return;
@@ -310,7 +244,7 @@ const Chatbot: React.FC = () => {
                     query: `mutation CreateConversation { createConversation { id userName userId } }`,
                 }),
             });
-            
+
             interface CreateConversationResponse {
                 data?: {
                     createConversation?: {
@@ -325,14 +259,11 @@ const Chatbot: React.FC = () => {
             if (result.data?.createConversation) {
                 const conversation = result.data.createConversation;
                 setConversationId(conversation.id);
-                
-                // Robust check for API key
-                const isApiKeyValid = API_KEY && API_KEY !== "undefined" && API_KEY !== "null" && API_KEY !== "";
-                
+
                 const initialGreeting = isApiKeyValid
                     ? "Salut ! 😊 Je suis Naïla, Community Manager chez Netpub. Comment dois-je t'appeler ?"
                     : "Désolé, le chatbot n'est pas entièrement configuré.";
-                
+
                 setMessages([{ id: Date.now(), role: 'model', text: initialGreeting, type: 'text' }]);
 
                 await fetch(GRAPHQL_ENDPOINT, {
@@ -355,7 +286,7 @@ const Chatbot: React.FC = () => {
         } catch { /* ignore */ } finally {
             setIsLoading(false);
         }
-    }, [API_KEY, conversationId, isLoading]);
+    }, [conversationId, isLoading, isApiKeyValid]);
 
     const handleSendMessage = useCallback(async (e: React.FormEvent | null, textOverride?: string) => {
         if (e) e.preventDefault();
@@ -372,17 +303,22 @@ const Chatbot: React.FC = () => {
         const history = messagesRef.current
             .filter((msg, index) => !(index === 0 && msg.role === 'model'))
             .map(msg => ({ role: msg.role, parts: [{ text: msg.text }] }));
-            
+
+        const aiContext = getAIContext();
         const systemPrompt = `Tu es Naïla, assistante chez Netpub. Discussion humaine, Emojis 😊. COURTE ET DIRECTE.
-        RÈGLES :
-        1. Si l'utilisateur veut commander ou un RDV, appelle 'collecterInfosClient' pour ses coordonnées (Nom, Email, Tel).
-        2. Ne sois pas trop technique.
-        3. Une question à la fois.`;
+        
+        UTILISE LE CONTEXTE SUIVANT POUR RÉPONDRE :
+        ${aiContext}
+        
+        RÈGLES CRITIQUES :
+        1. Sois indulgente avec les fautes de frappe ou les abréviations.
+        2. Utilise 'collecterInfosClient' dès que l'utilisateur veut un service, un devis ou un RDV.
+        3. Ne sois pas trop technique, reste chaleureuse.
+        4. Une question à la fois. Max 2 phrases par réponse.`;
 
         try {
-            const sdk = aiRef.current as unknown as GeminiSDK;
-            const model = sdk.getGenerativeModel({ 
-                model: 'gemini-2.0-flash-lite',
+            const model = aiRef.current.getGenerativeModel({
+                model: 'gemini-2.5-flash-lite',
                 systemInstruction: systemPrompt,
             });
 
@@ -393,11 +329,11 @@ const Chatbot: React.FC = () => {
                 tools,
             });
 
-            const parts = result.response.candidates?.[0]?.content?.parts || [];
-            const functionCallPart = parts.find((p: GeminiContentPart) => !!p.functionCall);
+            const response = result.response as GeminiResponse;
+            const calls = response.functionCalls?.();
 
-            if (functionCallPart && functionCallPart.functionCall) {
-                const fc = functionCallPart.functionCall;
+            if (calls && calls.length > 0) {
+                const fc = calls[0];
                 let confirmationText = '';
                 const csrf = await fetchCsrfToken();
 
@@ -447,7 +383,7 @@ const Chatbot: React.FC = () => {
                 saveChatMessageToDb('model', confirmationText);
                 speakText(confirmationText);
             } else {
-                const modelText = parts.find((p: GeminiContentPart) => !!p.text)?.text || "Désolé.";
+                const modelText = response.text() || "Désolé.";
                 const modelMessage: ChatMessage = { id: Date.now(), role: 'model', text: modelText, type: 'text' };
                 setMessages(prev => [...prev, modelMessage]);
                 saveChatMessageToDb('model', modelText);
@@ -455,21 +391,33 @@ const Chatbot: React.FC = () => {
             }
         } catch (err) {
             console.error('Chatbot error:', err);
-            setMessages(prev => [...prev, { id: Date.now(), role: 'model', text: "Une erreur est survenue lors de la communication avec Naïla.", type: 'text' }]);
+            let errorMessage = "Oups, Naïla a eu un petit hoquet. Peux-tu reformuler ta question ? 😊";
+
+            if (err instanceof GoogleGenerativeAIFetchError) {
+                const status = (err as { status?: number }).status;
+                if (status === 429) {
+                    errorMessage = "Oups ! Je suis un peu trop sollicitée en ce moment. Attends quelques secondes et réessaie 😊";
+                } else if (status === 503) {
+                    errorMessage = "Le serveur est un peu fatigué (503). Réessaie dans un instant, je suis là ! 🔋";
+                } else if (status && status >= 500) {
+                    errorMessage = "Il y a un petit souci technique de mon côté (500). Re-tente ta chance ! 🛠️";
+                }
+            }
+
+            setMessages(prev => [...prev, { id: Date.now(), role: 'model', text: errorMessage, type: 'text' }]);
         } finally {
             setIsLoading(false);
         }
-    }, [aiRef, conversationId, isLoading, saveChatMessageToDb, speakText]);
+    }, [aiRef, conversationId, isLoading, saveChatMessageToDb, speakText, stopSpeaking]);
 
     useEffect(() => {
         if (isOpen) {
-            // Strong validation of API key before instantiation
-            if (!aiRef.current && API_KEY && API_KEY !== "undefined" && API_KEY !== "null" && API_KEY !== "") {
-                aiRef.current = new GoogleGenAI(API_KEY);
-            }
-            if (!audioContextRef.current) {
-                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                if (AudioContextClass) audioContextRef.current = new AudioContextClass({ sampleRate: 24000 });
+            if (!aiRef.current && isApiKeyValid) {
+                try {
+                    aiRef.current = new GoogleGenerativeAI(API_KEY);
+                } catch (err) {
+                    console.error('Failed to initialize GoogleGenAI:', err);
+                }
             }
             if (messages.length === 0 && !conversationId && !isLoading) {
                 createConversation();
@@ -486,7 +434,7 @@ const Chatbot: React.FC = () => {
             if (messages.length > 0) setMessages([]);
             if (conversationId !== null) setConversationId(null);
         }
-    }, [isOpen, API_KEY, messages.length, conversationId, isLoading, createConversation, handleSendMessage]);
+    }, [isOpen, API_KEY, messages.length, conversationId, isLoading, createConversation, handleSendMessage, isApiKeyValid]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -508,15 +456,17 @@ const Chatbot: React.FC = () => {
     }, [handleSendMessage]);
 
     const handleToggleChatbot = () => {
-        audioContextRef.current?.resume().catch(() => {});
         toggleChatbot();
     };
 
     const handleToggleRecording = () => {
-        audioContextRef.current?.resume().catch(() => {});
         if (!recognitionRef.current) return;
-        if (isRecording) recognitionRef.current.stop();
-        else { stopSpeaking(); recognitionRef.current.start(); }
+        if (isRecording) {
+            recognitionRef.current.stop();
+        } else {
+            stopSpeaking();
+            recognitionRef.current.start();
+        }
     };
 
     const handleCloseChatbot = async () => {

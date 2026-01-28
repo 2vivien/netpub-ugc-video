@@ -28,7 +28,12 @@ setInterval(checkBackend, 2000);
 checkBackend();
 
 export default defineConfig(({ mode }: { mode: string }) => {
-  const env = loadEnv(mode, '.', '');
+  const env = loadEnv(mode, process.cwd(), '');
+  
+  // Debug log during build (will show up in your terminal)
+  console.log('Vite build mode:', mode);
+  console.log('VITE_API_KEY present:', !!env.VITE_API_KEY);
+
   return {
     server: {
       port: 3000,
@@ -61,9 +66,9 @@ export default defineConfig(({ mode }: { mode: string }) => {
     },
     plugins: [react()],
     define: {
-      'process.env.API_KEY': JSON.stringify(env.VITE_API_KEY || env.GEMINI_API_KEY),
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.VITE_API_KEY || env.GEMINI_API_KEY),
-      'process.env.VITE_API_KEY': JSON.stringify(env.VITE_API_KEY)
+      'process.env.VITE_API_KEY': JSON.stringify(env.VITE_API_KEY),
+      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || env.VITE_API_KEY),
+      'process.env.API_KEY': JSON.stringify(env.API_KEY || env.VITE_API_KEY || env.GEMINI_API_KEY)
     },
     resolve: {
       alias: {

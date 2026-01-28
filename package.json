@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@apollo/server": "^4.11.3",
-    "@google/genai": "^1.26.0",
+    "@google/generative-ai": "^0.21.0",
     "@graphql-tools/schema": "^10.0.7",
     "@prisma/client": "^7.2.0",
     "@prisma/extension-accelerate": "^2.0.2",
