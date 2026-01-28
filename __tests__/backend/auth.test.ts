@@ -1,4 +1,5 @@
 import { AuthService } from '../../backend/lib/auth';
+import { prisma } from '../../backend/lib/prisma';
 import * as jwt from 'jsonwebtoken';
 
 // Mock the prisma client
@@ -13,16 +14,28 @@ jest.mock('../../backend/lib/prisma', () => ({
 }));
 
 // Mock bcrypt functions
-jest.mock('bcryptjs', () => ({
-  hash: jest.fn((password) => Promise.resolve(`hashed_${password}`)),
-  compare: jest.fn((password) => Promise.resolve(password === `validPassword`)),
-}));
+jest.mock('bcryptjs', () => {
+  return {
+    __esModule: true,
+    default: {
+      hash: jest.fn((password) => Promise.resolve(`hashed_${password}`)),
+      compare: jest.fn((password, hash) => Promise.resolve(hash === `hashed_${password}`)),
+    },
+  };
+});
 
 // Mock jsonwebtoken functions
-jest.mock('jsonwebtoken', () => ({
-  sign: jest.fn(() => 'mocked_jwt_token'),
-  verify: jest.fn(() => ({ userId: '1', email: 'test@example.com', role: 'user' })),
-}));
+jest.mock('jsonwebtoken', () => {
+  return {
+    __esModule: true,
+    default: {
+      sign: jest.fn(() => 'mocked_jwt_token'),
+      verify: jest.fn(() => ({ userId: '1', email: 'test@example.com', role: 'user' })),
+    },
+    sign: jest.fn(() => 'mocked_jwt_token'),
+    verify: jest.fn(() => ({ userId: '1', email: 'test@example.com', role: 'user' })),
+  };
+});
 
 describe('AuthService', () => {
   const mockUser = {

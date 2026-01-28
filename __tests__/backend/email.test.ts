@@ -1,23 +1,40 @@
-import nodemailer from 'nodemailer';
-import { emailService } from '../../backend/lib/email';
-
-// Mock nodemailer
-jest.mock('nodemailer', () => ({
-  createTransport: jest.fn(() => ({
-    sendMail: jest.fn().mockResolvedValue({}),
-  })),
-}));
-
-// Mock environment variables
-process.env.ADMIN_EMAIL = 'admin@example.com';
-process.env.BREVO_SMTP_HOST = 'smtp-relay.brevo.com';
-process.env.BREVO_SMTP_PORT = '587';
-process.env.BREVO_SMTP_USER = 'test@example.com';
-process.env.BREVO_SMTP_PASS = 'test-password';
 
 describe('EmailService', () => {
+  let emailService: any;
+  let mockSendMail: any;
+  let mockCreateTransport: any;
+
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetModules();
+    
+    mockSendMail = jest.fn().mockResolvedValue({});
+    mockCreateTransport = jest.fn(() => ({
+      sendMail: mockSendMail,
+    }));
+
+    jest.doMock('dotenv', () => ({
+      __esModule: true,
+      default: { config: jest.fn() },
+      config: jest.fn(),
+    }));
+
+    jest.doMock('nodemailer', () => ({
+      __esModule: true,
+      default: {
+        createTransport: mockCreateTransport,
+      },
+      createTransport: mockCreateTransport,
+    }));
+
+    // Mock environment variables
+    process.env.ADMIN_EMAIL = 'admin@example.com';
+    process.env.BREVO_SMTP_HOST = 'smtp-relay.brevo.com';
+    process.env.BREVO_SMTP_PORT = '587';
+    process.env.BREVO_SMTP_USER = 'test@example.com';
+    process.env.BREVO_SMTP_PASS = 'test-password';
+
+    const module = require('../../backend/lib/email');
+    emailService = module.emailService;
   });
 
   describe('sendContactNotification', () => {
@@ -33,7 +50,7 @@ describe('EmailService', () => {
       const result = await emailService.sendContactNotification(contactData);
 
       expect(result).toBe(true);
-      expect(nodemailer.createTransport).toHaveBeenCalled();
+      expect(mockSendMail).toHaveBeenCalled();
     });
 
     it('should return false if required fields are missing', async () => {

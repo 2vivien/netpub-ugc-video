@@ -1,4 +1,8 @@
 // Jest setup file
+jest.mock('dotenv', () => ({
+  config: jest.fn(),
+}));
+
 process.env.JWT_SECRET = 'test-jwt-secret';
 process.env.SESSION_SECRET = 'test-session-secret';
 process.env.ADMIN_EMAIL = 'admin@test.com';
