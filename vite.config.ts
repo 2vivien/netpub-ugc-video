@@ -23,13 +23,19 @@ const checkBackend = () => {
   }).connect(4000, '127.0.0.1');
 };
 
-// Check every 2 seconds
-setInterval(checkBackend, 2000);
-checkBackend();
+// Check every 2 seconds only in development
+let interval: NodeJS.Timeout;
 
-export default defineConfig(({ mode }: { mode: string }) => {
+export default defineConfig(({ command, mode }: { command: string, mode: string }) => {
   const env = loadEnv(mode, process.cwd(), '');
   
+  if (command === 'serve') {
+    if (!interval) {
+      interval = setInterval(checkBackend, 2000);
+      checkBackend();
+    }
+  }
+
   // Debug log during build (will show up in your terminal)
   console.log('Vite build mode:', mode);
   console.log('VITE_API_KEY present:', !!env.VITE_API_KEY);
