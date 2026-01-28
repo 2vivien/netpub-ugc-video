@@ -125,9 +125,9 @@ const enregistrerNomClient: FunctionDeclaration = {
 
 interface GeminiModel {
     generateContent: (config: { 
-        contents: unknown[]; 
-        generationConfig?: unknown;
-        tools?: unknown[];
+        contents: any[]; 
+        generationConfig?: any;
+        tools?: any[];
     }) => Promise<{ 
         response: { 
             text: () => string;
@@ -144,6 +144,9 @@ interface GeminiModel {
     }>;
 }
 
+interface GeminiSDK {
+    getGenerativeModel: (config: { model: string; systemInstruction?: string }) => GeminiModel;
+}
 
 const Chatbot: React.FC = () => {
     const { isOpen, toggleChatbot, closeChatbot } = useChatbot(); 
@@ -153,7 +156,7 @@ const Chatbot: React.FC = () => {
     const [isRecording, setIsRecording] = useState(false);
     const [conversationId, setConversationId] = useState<string | null>(null);
 
-    const aiRef = useRef<any>(null);
+    const aiRef = useRef<GoogleGenAI | null>(null);
     const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
     const audioContextRef = useRef<AudioContext | null>(null);
     const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
@@ -186,8 +189,8 @@ const Chatbot: React.FC = () => {
         if (!aiRef.current || !audioContextRef.current || !text) return;
         stopSpeaking(); 
         try {
-            // Correct usage according to @google/genai documentation
-            const model = aiRef.current.getGenerativeModel({ model: "gemini-2.0-pro-preview-tts" });
+            const sdk = aiRef.current as unknown as GeminiSDK;
+            const model = sdk.getGenerativeModel({ model: "gemini-2.0-pro-preview-tts" });
             
             const result = await model.generateContent({
                 contents: [{ role: 'user', parts: [{ text: text }] }],
@@ -202,7 +205,7 @@ const Chatbot: React.FC = () => {
             });
             
             const parts = result.response.candidates?.[0]?.content?.parts || [];
-            const audioPart = parts.find((p: any) => p.inlineData?.mimeType?.startsWith('audio/'));
+            const audioPart = parts.find(p => p.inlineData?.mimeType?.startsWith('audio/'));
             const base64Audio = audioPart?.inlineData?.data;
 
             if (typeof base64Audio === 'string' && base64Audio) {
@@ -299,8 +302,6 @@ const Chatbot: React.FC = () => {
         stopSpeaking();
         saveChatMessageToDb('user', textToSend);
 
-        // Gemini requires history to start with a 'user' message. 
-        // We filter out the initial model greeting from the history sent to the API.
         const history = messagesRef.current
             .filter((msg, index) => !(index === 0 && msg.role === 'model'))
             .map(msg => ({ role: msg.role, parts: [{ text: msg.text }] }));
@@ -312,8 +313,8 @@ const Chatbot: React.FC = () => {
         3. Une question à la fois.`;
 
         try {
-            // Correct usage: instance.getGenerativeModel
-            const model = aiRef.current.getGenerativeModel({ 
+            const sdk = aiRef.current as unknown as GeminiSDK;
+            const model = sdk.getGenerativeModel({ 
                 model: 'gemini-2.0-flash-lite',
                 systemInstruction: systemPrompt,
             });
@@ -323,11 +324,11 @@ const Chatbot: React.FC = () => {
                 tools: [{ functionDeclarations: [prendreRendezVous, passerCommande, collecterInfosClient, collecterFeedbackSite, enregistrerNomClient] }],
             });
 
-            const parts = response.candidates?.[0]?.content?.parts || [];
-            const functionCalls = parts.filter((p: any) => !!p.functionCall);
+            const parts = response.response.candidates?.[0]?.content?.parts || [];
+            const functionCalls = parts.filter((p: { functionCall?: unknown }) => !!p.functionCall);
 
             if (functionCalls && functionCalls.length > 0) {
-                const fc = functionCalls[0].functionCall!;
+                const fc = functionCalls[0].functionCall as { name: string; args: any };
                 let confirmationText = '';
                 const csrf = await fetchCsrfToken();
 
@@ -377,7 +378,7 @@ const Chatbot: React.FC = () => {
                 saveChatMessageToDb('model', confirmationText);
                 speakText(confirmationText);
             } else {
-                const modelText = parts.find((p: any) => !!p.text)?.text || "Désolé.";
+                const modelText = parts.find((p: { text?: string }) => !!p.text)?.text || "Désolé.";
                 const modelMessage: ChatMessage = { id: Date.now(), role: 'model', text: modelText, type: 'text' };
                 setMessages(prev => [...prev, modelMessage]);
                 saveChatMessageToDb('model', modelText);
@@ -395,7 +396,7 @@ const Chatbot: React.FC = () => {
         if (isOpen) {
             if (!aiRef.current && API_KEY) aiRef.current = new GoogleGenAI({ apiKey: API_KEY });
             if (!audioContextRef.current) {
-                const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+                const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
                 if (AudioContextClass) audioContextRef.current = new AudioContextClass({ sampleRate: 24000 });
             }
             if (messages.length === 0 && !conversationId && !isLoading) {
@@ -420,7 +421,7 @@ const Chatbot: React.FC = () => {
     }, [messages]);
 
     useEffect(() => {
-        const SR = (window.SpeechRecognition || window.webkitSpeechRecognition) as SpeechRecognitionConstructor | undefined;
+        const SR = (window.SpeechRecognition || (window as any).webkitSpeechRecognition) as SpeechRecognitionConstructor | undefined;
         if (!SR) return;
         const recognition = new SR();
         recognition.lang = 'fr-FR';
