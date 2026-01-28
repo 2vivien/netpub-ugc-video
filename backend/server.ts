@@ -142,7 +142,7 @@ export async function bootstrap() {
     return { app, httpServer };
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (process.argv[1] === fileURLToPath(import.meta.url) && !process.env.VERCEL) {
     bootstrap().then(async ({ httpServer }) => {
         await new Promise<void>(resolve => httpServer.listen({ port: PORT }, resolve));
         console.log(`Server ready at http://localhost:${PORT}/graphql`);
