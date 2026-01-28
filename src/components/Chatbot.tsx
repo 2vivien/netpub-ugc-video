@@ -1,10 +1,49 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { GoogleGenAI, FunctionDeclaration, Type } from '@google/genai';
+import { GoogleGenAI, FunctionDeclaration, Type, Tool, GenerationConfig, Modality } from '@google/genai';
 import { ChatMessage, PortfolioCategory } from '../types';
 import { decodeAudioData } from '../utils/audioUtils';
 import { useChatbot } from '../contexts/ChatbotContext'; 
 import { NotificationService } from '../lib/notifications';
 import { fetchCsrfToken } from '../utils/csrf';
+
+// --- Interfaces pour le SDK Gemini (Audio/TTS) ---
+
+interface GeminiContentPart {
+    text?: string;
+    inlineData?: {
+        data: string;
+        mimeType: string;
+    };
+    functionCall?: {
+        name: string;
+        args: Record<string, unknown>;
+    };
+}
+
+interface GeminiCandidate {
+    content?: {
+        parts?: GeminiContentPart[];
+    };
+}
+
+interface GeminiResponse {
+    candidates?: GeminiCandidate[];
+    text?: () => string;
+}
+
+interface GeminiModel {
+    generateContent(request: {
+        contents: Array<{ role: string; parts: Array<{ text?: string; inlineData?: { data: string; mimeType: string } }> }>;
+        tools?: Tool[];
+        generationConfig?: GenerationConfig & { responseModalities?: Modality[] };
+    }): Promise<{ response: GeminiResponse }>;
+}
+
+interface GeminiSDK {
+    getGenerativeModel(config: { model: string; systemInstruction?: string }): GeminiModel;
+}
+
+// --- Interfaces pour Speech Recognition ---
 
 interface SpeechRecognitionInstance extends EventTarget {
     lang: string;
@@ -24,6 +63,7 @@ declare global {
     interface Window {
         SpeechRecognition: SpeechRecognitionConstructor | undefined;
         webkitSpeechRecognition: SpeechRecognitionConstructor | undefined;
+        webkitAudioContext: typeof AudioContext;
     }
 }
 
@@ -38,6 +78,8 @@ interface SpeechRecognitionEvent extends Event {
         length: number;
     };
 }
+
+// --- Déclarations des fonctions Gemini ---
 
 const prendreRendezVous: FunctionDeclaration = {
     name: 'prendreRendezVous',
@@ -123,26 +165,26 @@ const enregistrerNomClient: FunctionDeclaration = {
     },
 };
 
-interface GeminiModel {
-    generateContent: (config: { 
-        contents: any[]; 
-        generationConfig?: any;
-        tools?: any[];
-    }) => Promise<{ 
-        response: { 
-            text: () => string;
-            candidates?: Array<{ 
-                content?: { 
-                    parts?: Array<{ 
-                        text?: string; 
-                        inlineData?: { data: string; mimeType?: string };
-                        functionCall?: { name: string; args: unknown };
-                    }> 
-                } 
-            }> 
-        } 
-    }>;
+// --- Types pour les Arguments de Fonction ---
+
+interface AppointmentArgs {
+    service: string;
+    date: string;
+    heure: string;
 }
+
+interface ClientInfoArgs {
+    prenom: string;
+    telephone: string;
+    email: string;
+}
+
+interface ClientNameArgs {
+    nom?: string;
+    prenom: string;
+}
+
+// --- Composant Principal ---
 
 const Chatbot: React.FC = () => {
     const { isOpen, toggleChatbot, closeChatbot } = useChatbot(); 
@@ -168,8 +210,7 @@ const Chatbot: React.FC = () => {
         messagesRef.current = messages;
     }, [messages]);
 
-    const env = (import.meta as any).env;
-    const API_KEY = env.VITE_API_KEY;
+    const API_KEY = import.meta.env.VITE_API_KEY;
     const GRAPHQL_ENDPOINT = '/graphql';
 
     const stopSpeaking = () => {
@@ -185,22 +226,38 @@ const Chatbot: React.FC = () => {
         if (!aiRef.current || !audioContextRef.current || !text) return;
         stopSpeaking(); 
         try {
-            const model = (aiRef.current as any).getGenerativeModel({ model: "gemini-2.0-pro-preview-tts" });
+            const sdk = aiRef.current as unknown as GeminiSDK;
+            const model = sdk.getGenerativeModel({ model: "gemini-2.0-pro-preview-tts" });
             
-            const result = await (model as unknown as GeminiModel).generateContent({
-                contents: [{ role: 'user', parts: [{ text: text }] }],
-                generationConfig: {
-                    responseModalities: ["AUDIO"],
-                    speechConfig: {
-                        voiceConfig: {
-                            prebuiltVoiceConfig: { voiceName: 'Kore' },
-                        },
+            // We cast to any here only because the SDK types might not yet include responseModalities
+            // but we use a local interface to keep it as safe as possible without 'any' in the main logic.
+            interface AudioGenerationConfig extends GenerationConfig {
+                responseModalities?: Modality[];
+                speechConfig?: {
+                    voiceConfig?: {
+                        prebuiltVoiceConfig?: {
+                            voiceName: string;
+                        };
+                    };
+                };
+            }
+
+            const generationConfig: AudioGenerationConfig = {
+                responseModalities: [Modality.AUDIO],
+                speechConfig: {
+                    voiceConfig: {
+                        prebuiltVoiceConfig: { voiceName: 'Kore' },
                     },
                 },
+            };
+
+            const result = await model.generateContent({
+                contents: [{ role: 'user', parts: [{ text: text }] }],
+                generationConfig,
             });
             
             const parts = result.response.candidates?.[0]?.content?.parts || [];
-            const audioPart = parts.find(p => p.inlineData?.mimeType?.startsWith('audio/'));
+            const audioPart = parts.find((p: GeminiContentPart) => p.inlineData?.mimeType?.startsWith('audio/'));
             const base64Audio = audioPart?.inlineData?.data;
 
             if (typeof base64Audio === 'string' && base64Audio) {
@@ -253,11 +310,26 @@ const Chatbot: React.FC = () => {
                     query: `mutation CreateConversation { createConversation { id userName userId } }`,
                 }),
             });
-            const result = await response.json();
+            
+            interface CreateConversationResponse {
+                data?: {
+                    createConversation?: {
+                        id: string;
+                        userName: string;
+                        userId: string;
+                    };
+                };
+            }
+
+            const result = await response.json() as CreateConversationResponse;
             if (result.data?.createConversation) {
                 const conversation = result.data.createConversation;
                 setConversationId(conversation.id);
-                const initialGreeting = API_KEY
+                
+                // Robust check for API key
+                const isApiKeyValid = API_KEY && API_KEY !== "undefined" && API_KEY !== "null" && API_KEY !== "";
+                
+                const initialGreeting = isApiKeyValid
                     ? "Salut ! 😊 Je suis Naïla, Community Manager chez Netpub. Comment dois-je t'appeler ?"
                     : "Désolé, le chatbot n'est pas entièrement configuré.";
                 
@@ -299,7 +371,7 @@ const Chatbot: React.FC = () => {
 
         const history = messagesRef.current
             .filter((msg, index) => !(index === 0 && msg.role === 'model'))
-            .map(msg => ({ role: msg.role as any, parts: [{ text: msg.text }] }));
+            .map(msg => ({ role: msg.role, parts: [{ text: msg.text }] }));
             
         const systemPrompt = `Tu es Naïla, assistante chez Netpub. Discussion humaine, Emojis 😊. COURTE ET DIRECTE.
         RÈGLES :
@@ -308,27 +380,30 @@ const Chatbot: React.FC = () => {
         3. Une question à la fois.`;
 
         try {
-            const model = (aiRef.current as any).getGenerativeModel({ 
+            const sdk = aiRef.current as unknown as GeminiSDK;
+            const model = sdk.getGenerativeModel({ 
                 model: 'gemini-2.0-flash-lite',
                 systemInstruction: systemPrompt,
             });
 
-            const response = await (model as unknown as GeminiModel).generateContent({
+            const tools: Tool[] = [{ functionDeclarations: [prendreRendezVous, passerCommande, collecterInfosClient, collecterFeedbackSite, enregistrerNomClient] }];
+
+            const result = await model.generateContent({
                 contents: [...history, { role: 'user', parts: [{ text: textToSend }] }],
-                tools: [{ functionDeclarations: [prendreRendezVous, passerCommande, collecterInfosClient, collecterFeedbackSite, enregistrerNomClient] }],
+                tools,
             });
 
-            const parts = response.response.candidates?.[0]?.content?.parts || [];
-            const functionCalls = parts.filter(p => !!p.functionCall);
+            const parts = result.response.candidates?.[0]?.content?.parts || [];
+            const functionCallPart = parts.find((p: GeminiContentPart) => !!p.functionCall);
 
-            if (functionCalls && functionCalls.length > 0) {
-                const fc = functionCalls[0].functionCall as { name: string; args: any };
+            if (functionCallPart && functionCallPart.functionCall) {
+                const fc = functionCallPart.functionCall;
                 let confirmationText = '';
                 const csrf = await fetchCsrfToken();
 
                 if (fc.name === 'prendreRendezVous' && csrf) {
-                    const { service, date, heure } = fc.args as { service: string; date: string; heure: string };
-                    confirmationText = `RDV noté pour ${service} le ${date} à ${heure}.`;
+                    const args = fc.args as unknown as AppointmentArgs;
+                    confirmationText = `RDV noté pour ${args.service} le ${args.date} à ${args.heure}.`;
                     await fetch(GRAPHQL_ENDPOINT, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
@@ -336,12 +411,12 @@ const Chatbot: React.FC = () => {
                             query: `mutation CreateAppointment($service: String!, $date: String!, $time: String!, $conversationId: String!) {
                                 createAppointment(service: $service, date: $date, time: $time, conversationId: $conversationId) { id }
                             }`,
-                            variables: { service, date, time: heure, conversationId }
+                            variables: { service: args.service, date: args.date, time: args.heure, conversationId }
                         }),
                     });
                 } else if (fc.name === 'enregistrerNomClient' && csrf) {
-                    const { nom, prenom } = fc.args as { nom?: string, prenom: string };
-                    confirmationText = `C'est noté ${prenom} ! Qu'est-ce qui t'amène ?`;
+                    const args = fc.args as unknown as ClientNameArgs;
+                    confirmationText = `C'est noté ${args.prenom} ! Qu'est-ce qui t'amène ?`;
                     await fetch(GRAPHQL_ENDPOINT, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
@@ -349,12 +424,12 @@ const Chatbot: React.FC = () => {
                             query: `mutation UpdateConversation($conversationId: String!, $clientName: String) {
                                 updateConversation(conversationId: $conversationId, clientName: $clientName) { id }
                             }`,
-                            variables: { conversationId, clientName: nom ? `${nom} ${prenom}` : prenom }
+                            variables: { conversationId, clientName: args.nom ? `${args.nom} ${args.prenom}` : args.prenom }
                         })
                     });
                 } else if (fc.name === 'collecterInfosClient' && csrf) {
-                    const { prenom, telephone, email } = fc.args as { prenom: string; telephone: string; email: string };
-                    confirmationText = `Merci ${prenom} ! Infos notées.`;
+                    const args = fc.args as unknown as ClientInfoArgs;
+                    confirmationText = `Merci ${args.prenom} ! Infos notées.`;
                     await fetch(GRAPHQL_ENDPOINT, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
@@ -362,7 +437,7 @@ const Chatbot: React.FC = () => {
                             query: `mutation UpdateConversation($conversationId: String!, $clientName: String, $clientEmail: String, $clientPhone: String) {
                                 updateConversation(conversationId: $conversationId, clientName: $clientName, clientEmail: $clientEmail, clientPhone: $clientPhone) { id }
                             }`,
-                            variables: { conversationId, clientName: prenom, clientEmail: email, clientPhone: telephone }
+                            variables: { conversationId, clientName: args.prenom, clientEmail: args.email, clientPhone: args.telephone }
                         }),
                     });
                 }
@@ -372,7 +447,7 @@ const Chatbot: React.FC = () => {
                 saveChatMessageToDb('model', confirmationText);
                 speakText(confirmationText);
             } else {
-                const modelText = parts.find(p => !!p.text)?.text || "Désolé.";
+                const modelText = parts.find((p: GeminiContentPart) => !!p.text)?.text || "Désolé.";
                 const modelMessage: ChatMessage = { id: Date.now(), role: 'model', text: modelText, type: 'text' };
                 setMessages(prev => [...prev, modelMessage]);
                 saveChatMessageToDb('model', modelText);
@@ -388,9 +463,12 @@ const Chatbot: React.FC = () => {
 
     useEffect(() => {
         if (isOpen) {
-            if (!aiRef.current && API_KEY) aiRef.current = new GoogleGenAI(API_KEY);
+            // Strong validation of API key before instantiation
+            if (!aiRef.current && API_KEY && API_KEY !== "undefined" && API_KEY !== "null" && API_KEY !== "") {
+                aiRef.current = new GoogleGenAI(API_KEY);
+            }
             if (!audioContextRef.current) {
-                const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
                 if (AudioContextClass) audioContextRef.current = new AudioContextClass({ sampleRate: 24000 });
             }
             if (messages.length === 0 && !conversationId && !isLoading) {
@@ -415,7 +493,7 @@ const Chatbot: React.FC = () => {
     }, [messages]);
 
     useEffect(() => {
-        const SR = (window.SpeechRecognition || (window as any).webkitSpeechRecognition) as SpeechRecognitionConstructor | undefined;
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SR) return;
         const recognition = new SR();
         recognition.lang = 'fr-FR';
