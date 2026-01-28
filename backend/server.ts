@@ -1,5 +1,4 @@
-
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { createServer } from 'http';
 import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
@@ -16,16 +15,13 @@ import { resolvers } from './graphql/resolvers.js';
 import { prisma } from './lib/prisma.js';
 import { AuthService } from './lib/auth.js';
 
-// Load environment variables from the root .env file
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// In development, load from ../.env (root). In production, env vars are injected.
 if (process.env.NODE_ENV !== 'production') {
     dotenv.config({ path: path.resolve(__dirname, '../.env') });
 }
 
-// Ensure critical variables are present
 if (!process.env.JWT_SECRET) {
     console.warn('JWT_SECRET is not set. Authentication will fail.');
 }
@@ -38,17 +34,14 @@ export async function bootstrap() {
     const app = express();
     const httpServer = createServer(app);
 
-    // Security Middleware
     app.use(helmet({
         contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
         crossOriginEmbedderPolicy: process.env.NODE_ENV === 'production' ? true : false,
     }));
 
-    // CORS
     const allowedOrigins = [FRONTEND_URL, 'http://localhost:3000', 'https://studio.apollographql.com'];
     app.use(cors({
         origin: (origin, callback) => {
-            // Allow requests with no origin (like mobile apps or curl requests)
             if (!origin) return callback(null, true);
             if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
                 callback(null, true);
@@ -59,16 +52,14 @@ export async function bootstrap() {
         credentials: true,
     }));
 
-    // Rate Limiting
     const limiter = rateLimit({
-        windowMs: 15 * 60 * 1000, // 15 minutes
-        max: 100, // Limit each IP to 100 requests per windowMs
+        windowMs: 15 * 60 * 1000,
+        max: 100,
         standardHeaders: true,
         legacyHeaders: false,
     });
     app.use('/graphql', limiter);
 
-    // Session Management
     app.use(session({
         secret: SESSION_SECRET,
         resave: false,
@@ -76,33 +67,25 @@ export async function bootstrap() {
         cookie: {
             secure: process.env.NODE_ENV === 'production',
             httpOnly: true,
-            maxAge: 24 * 60 * 60 * 1000 // 24 hours
+            maxAge: 24 * 60 * 60 * 1000
         }
     }));
 
     app.use(express.json());
 
-    // Health Check
-    app.get('/health', (req: Request, res: Response) => {
+    app.get('/health', (req: any, res: any) => {
         res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
     });
 
-    // CSRF Token Endpoint (Simple implementation)
-    app.get('/csrf-token', (req: Request, res: Response) => {
-        // In a stateless JWT setup, CSRF tokens might be handled differently,
-        // but here's a placeholder if the frontend expects it.
-        // Ideally use csurf middleware if using sessions.
+    app.get('/csrf-token', (req: any, res: any) => {
         res.json({ csrfToken: 'csrf-token-placeholder-or-uuid' });
     });
 
-    // GraphQL Schema
     const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-    // Apollo Server Setup
     const server = new ApolloServer({
         schema,
-        context: async ({ req, res }: { req: Request; res: Response }) => {
-            // Get the user token from the headers
+        context: async ({ req, res }: any) => {
             const token = req.headers.authorization || '';
             let user = null;
             if (token) {
@@ -110,7 +93,6 @@ export async function bootstrap() {
                     const bearerToken = token.replace('Bearer ', '');
                     user = AuthService.verifyToken(bearerToken);
                 } catch {
-                    // Ignore invalid tokens
                 }
             }
             return { req, res, prisma, user };
@@ -122,16 +104,13 @@ export async function bootstrap() {
     server.applyMiddleware({
         app: app as any,
         path: '/graphql',
-        cors: false // Handle CORS manually above
+        cors: false
     });
 
-    // Serve Static Frontend Files (Production)
     if (process.env.NODE_ENV === 'production') {
-        // Path from backend/dist/server.js to /app/dist (frontend build)
         const distPath = path.join(__dirname, '../../dist');
         app.use(express.static(distPath));
-        app.get('*', (req: Request, res: Response, next: NextFunction) => {
-            // Don't intercept API routes
+        app.get('*', (req: any, res: any, next: any) => {
             if (req.path.startsWith('/graphql') || req.path.startsWith('/health') || req.path.startsWith('/csrf-token')) {
                 return next();
             }

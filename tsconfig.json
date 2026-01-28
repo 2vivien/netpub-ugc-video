@@ -29,6 +29,9 @@
     "src",
     "api"
   ],
+  "exclude": [
+    "backend"
+  ],
   "references": [
     {
       "path": "./tsconfig.node.json"
