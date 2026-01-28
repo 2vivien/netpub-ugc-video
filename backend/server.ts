@@ -34,7 +34,7 @@ const PORT = process.env.PORT || 4000;
 const SESSION_SECRET = process.env.SESSION_SECRET || 'dev_session_secret';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
-async function startApolloServer() {
+export async function bootstrap() {
     const app = express();
     const httpServer = createServer(app);
 
@@ -139,11 +139,14 @@ async function startApolloServer() {
         });
     }
 
-    // Start Server
-    await new Promise<void>(resolve => httpServer.listen({ port: PORT }, resolve));
-    
+    return { app, httpServer };
 }
 
-startApolloServer().catch(err => {
-    console.error('Failed to start server:', err);
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    bootstrap().then(async ({ httpServer }) => {
+        await new Promise<void>(resolve => httpServer.listen({ port: PORT }, resolve));
+        console.log(`Server ready at http://localhost:${PORT}/graphql`);
+    }).catch(err => {
+        console.error('Failed to start server:', err);
+    });
+}
