@@ -1,5 +1,4 @@
-
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request as ExpressRequest, Response as ExpressResponse, NextFunction } from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { createServer } from 'http';
 import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
@@ -74,7 +73,7 @@ export async function bootstrap() {
 
     app.use(express.json());
 
-    app.get('/health', (req: Request, res: Response) => {
+    app.get('/health', (req: ExpressRequest, res: ExpressResponse) => {
         res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
     });
 
@@ -83,7 +82,7 @@ export async function bootstrap() {
     const server = new ApolloServer({
         schema,
         csrfPrevention: false,
-        context: async ({ req, res }: { req: Request; res: Response }) => {
+        context: async ({ req, res }: { req: ExpressRequest; res: ExpressResponse }) => {
             const token = req.headers.authorization || '';
             let user = null;
             if (token) {
@@ -109,7 +108,7 @@ export async function bootstrap() {
     if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
         const distPath = path.join(__dirname, '../../dist');
         app.use(express.static(distPath));
-        app.get('*', (req: Request, res: Response, next: NextFunction) => {
+        app.get('*', (req: ExpressRequest, res: ExpressResponse, next: NextFunction) => {
             if (req.path.startsWith('/graphql') || req.path.startsWith('/health')) {
                 return next();
             }

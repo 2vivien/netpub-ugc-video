@@ -10,7 +10,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       appPromise = bootstrap().then(data => data.app);
     }
     const app = await appPromise;
-    // L'application Express est compatible avec les types VercelRequest/Response
     return app(req, res);
   } catch (error) {
     console.error('Vercel Handler Error:', error);
