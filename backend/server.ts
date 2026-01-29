@@ -100,7 +100,7 @@ export async function bootstrap() {
 
     await server.start();
     server.applyMiddleware({
-        app: app as any,
+        app: app as express.Application,
         path: '/graphql',
         cors: false
     });

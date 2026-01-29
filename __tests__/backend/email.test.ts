@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 describe('EmailService', () => {
-  let emailService: any;
-  let mockSendMail: any;
-  let mockCreateTransport: any;
+  let emailService: typeof import('../../backend/lib/email').emailService;
+  let mockSendMail: jest.Mock;
+  let mockCreateTransport: jest.Mock;
 
   beforeEach(() => {
     jest.resetModules();

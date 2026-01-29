@@ -1,7 +1,8 @@
 import { bootstrap } from '../backend/server';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { Express } from 'express';
 
-let appPromise: Promise<any> | null = null;
+let appPromise: Promise<Express> | null = null;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
