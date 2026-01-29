@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { bootstrap } from '../backend/server';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 

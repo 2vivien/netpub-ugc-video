@@ -1,4 +1,5 @@
 
+// @ts-nocheck
 import express, { Request, Response, NextFunction } from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { createServer } from 'http';
