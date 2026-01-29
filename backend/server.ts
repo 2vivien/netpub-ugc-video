@@ -1,4 +1,5 @@
-import express from 'express';
+
+import express, { Request, Response, NextFunction } from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { createServer } from 'http';
 import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
@@ -73,11 +74,11 @@ export async function bootstrap() {
 
     app.use(express.json());
 
-    app.get('/health', (req: any, res: any) => {
+    app.get('/health', (req: Request, res: Response) => {
         res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
     });
 
-    app.get('/csrf-token', (req: any, res: any) => {
+    app.get('/csrf-token', (req: Request, res: Response) => {
         res.json({ csrfToken: 'csrf-token-placeholder-or-uuid' });
     });
 
@@ -85,7 +86,7 @@ export async function bootstrap() {
 
     const server = new ApolloServer({
         schema,
-        context: async ({ req, res }: any) => {
+        context: async ({ req, res }: { req: Request; res: Response }) => {
             const token = req.headers.authorization || '';
             let user = null;
             if (token) {
@@ -107,14 +108,10 @@ export async function bootstrap() {
         cors: false
     });
 
-    // Serve Static Frontend Files (Production)
-    // On Vercel, we let Vercel handle static files via vercel.json rewrites
     if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
-        // Path from backend/dist/server.js to /app/dist (frontend build)
         const distPath = path.join(__dirname, '../../dist');
         app.use(express.static(distPath));
-        app.get('*', (req: any, res: any, next: any) => {
-            // Don't intercept API routes
+        app.get('*', (req: Request, res: Response, next: NextFunction) => {
             if (req.path.startsWith('/graphql') || req.path.startsWith('/health') || req.path.startsWith('/csrf-token')) {
                 return next();
             }
