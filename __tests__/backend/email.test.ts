@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-require-imports */
 describe('EmailService', () => {
   let emailService: any;
   let mockSendMail: any;

@@ -1,4 +1,4 @@
-// @ts-nocheck
+// @ts-expect-error - Ignore type conflicts on Vercel build
 import { bootstrap } from '../backend/server';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 

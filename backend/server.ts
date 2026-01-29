@@ -1,5 +1,5 @@
 
-// @ts-nocheck
+// @ts-expect-error - Ignore type conflicts on Vercel build
 import express, { Request, Response, NextFunction } from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { createServer } from 'http';
@@ -95,6 +95,7 @@ export async function bootstrap() {
                     const bearerToken = token.replace('Bearer ', '');
                     user = AuthService.verifyToken(bearerToken);
                 } catch {
+                    // Ignore token verification errors
                 }
             }
             return { req, res, prisma, user };
