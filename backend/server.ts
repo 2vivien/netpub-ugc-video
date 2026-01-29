@@ -73,18 +73,17 @@ export async function bootstrap() {
 
     app.use(express.json());
 
+    // Health Check
     app.get('/health', (req: any, res: any) => {
         res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
     });
 
-    app.get('/csrf-token', (req: any, res: any) => {
-        res.json({ csrfToken: 'csrf-token-placeholder-or-uuid' });
-    });
+    // GraphQL Schema
 
-    const schema = makeExecutableSchema({ typeDefs, resolvers });
-
+    // Apollo Server Setup
     const server = new ApolloServer({
         schema,
+        csrfPrevention: false,
         context: async ({ req, res }: any) => {
             const token = req.headers.authorization || '';
             let user = null;
