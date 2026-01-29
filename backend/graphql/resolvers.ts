@@ -7,7 +7,7 @@ import { JSDOM } from 'jsdom';
 import { ResolverContext } from '../types/index.js';
 
 const window = new JSDOM('').window;
-const DOMPurify = createDOMPurify(window as unknown as Window);
+const DOMPurify = createDOMPurify(window as unknown as Parameters<typeof createDOMPurify>[0]);
 
 export const resolvers = {
   Query: {

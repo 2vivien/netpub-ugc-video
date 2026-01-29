@@ -1,8 +1,8 @@
 import { bootstrap } from '../backend/server';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import type { Express } from 'express';
 
-let appPromise: Promise<Express> | null = null;
+// Use any for the promise to handle mixed Express type versions during bootstrap
+let appPromise: Promise<any> | null = null;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -11,7 +11,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       appPromise = bootstrap().then(data => data.app);
     }
     const app = await appPromise;
-    return app(req, res);
+    // L'application Express est une fonction (req, res) => void
+    return (app as any)(req, res);
   } catch (error) {
     console.error('Vercel Handler Error:', error);
     res.status(500).json({ 
