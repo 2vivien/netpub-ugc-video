@@ -1,6 +1,4 @@
-
-// @ts-expect-error - Ignore type conflicts on Vercel build
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { createServer } from 'http';
 import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
@@ -75,11 +73,11 @@ export async function bootstrap() {
 
     app.use(express.json());
 
-    app.get('/health', (req: Request, res: Response) => {
+    app.get('/health', (req: any, res: any) => {
         res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
     });
 
-    app.get('/csrf-token', (req: Request, res: Response) => {
+    app.get('/csrf-token', (req: any, res: any) => {
         res.json({ csrfToken: 'csrf-token-placeholder-or-uuid' });
     });
 
@@ -87,7 +85,7 @@ export async function bootstrap() {
 
     const server = new ApolloServer({
         schema,
-        context: async ({ req, res }: { req: Request; res: Response }) => {
+        context: async ({ req, res }: any) => {
             const token = req.headers.authorization || '';
             let user = null;
             if (token) {
@@ -113,7 +111,7 @@ export async function bootstrap() {
     if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
         const distPath = path.join(__dirname, '../../dist');
         app.use(express.static(distPath));
-        app.get('*', (req: Request, res: Response, next: NextFunction) => {
+        app.get('*', (req: any, res: any, next: any) => {
             if (req.path.startsWith('/graphql') || req.path.startsWith('/health') || req.path.startsWith('/csrf-token')) {
                 return next();
             }
