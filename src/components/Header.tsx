@@ -33,7 +33,7 @@ const Header = () => {
 
     return (
         <header className={`main-header ${isScrolled ? 'scrolled' : ''} ${isMenuOpen ? 'menu-open' : ''}`}
-                style={{ backgroundColor: 'white', color: 'black' }}>
+            style={{ backgroundColor: 'white', color: 'black' }}>
             <div className="header-container" style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -44,12 +44,12 @@ const Header = () => {
                 minHeight: '40px'
             }}>
                 <Link to="/" className="logo" onClick={closeMenu} style={{ color: 'black', textDecoration: 'none', fontSize: '1.2em', fontWeight: 'bold' }}>Netpub</Link>
-                <nav className="main-nav" style={{ display: 'flex', gap: '15px' }}>
+                <nav className="main-nav">
                     {navItems.map(item => (
-                        <NavLink 
-                            key={item.to} 
-                            to={item.to} 
-                            onClick={closeMenu} 
+                        <NavLink
+                            key={item.to}
+                            to={item.to}
+                            onClick={closeMenu}
                             style={{ color: 'black', textDecoration: 'none !important', fontSize: '0.9em' }}
                         >
                             {item.label}
@@ -64,20 +64,20 @@ const Header = () => {
             {/* Mobile Navbar (fixed bottom bar) */}
             {isMobileHeader && ( // Conditionally render based on screen width
                 <div className={`mobile-navbar ${isMenuOpen ? 'open' : ''} ${isScrolled ? 'scrolled' : ''}`}>
-                {navItems.map(item => {
-                    const isActive = location.pathname === item.to;
-                    return (
-                        <NavLink 
-                            key={item.to} 
-                            to={item.to} 
-                            onClick={closeMenu} 
-                            className={`mobile-nav-item ${isActive ? 'active' : ''}`}
-                        >
-                            <item.icon size={24} />
-                            <span className="mobile-nav-label">{item.label}</span>
-                        </NavLink>
-                    );
-                })}
+                    {navItems.map(item => {
+                        const isActive = location.pathname === item.to;
+                        return (
+                            <NavLink
+                                key={item.to}
+                                to={item.to}
+                                onClick={closeMenu}
+                                className={`mobile-nav-item ${isActive ? 'active' : ''}`}
+                            >
+                                <item.icon size={24} />
+                                <span className="mobile-nav-label">{item.label}</span>
+                            </NavLink>
+                        );
+                    })}
                 </div>
             )}
         </header>

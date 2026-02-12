@@ -7,7 +7,8 @@ const __dirname = path.dirname(__filename);
 
 // Load .env from backend directory (default behavior)
 dotenv.config();
-// Additionally fallback to parent directory for development convenience
+// Additionally fallback to specific paths for robustness
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 

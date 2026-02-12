@@ -33,7 +33,18 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event: Smart caching strategy
 self.addEventListener('fetch', (event) => {
+    // Ignore non-GET requests and API calls
+    if (event.request.method !== 'GET' || event.request.url.includes('/graphql')) {
+        return;
+    }
+
     const url = new URL(event.request.url);
+
+    // Ignore Chrome extensions or other non-http schemes
+    if (!url.protocol.startsWith('http')) {
+        return;
+    }
+
     const isNavigation = event.request.mode === 'navigate';
     const isStaticAsset = url.origin === self.location.origin && 
                          (url.pathname.includes('/assets/') || url.pathname.endsWith('.js') || url.pathname.endsWith('.css'));

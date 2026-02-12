@@ -61,8 +61,9 @@ class EmailService {
       }
 
       const mailOptions = {
-        from: `"NetPub Contact" <${process.env.BREVO_SMTP_USER}>`,
+        from: `"NetPub Contact" <${process.env.ADMIN_EMAIL}>`,
         to: process.env.ADMIN_EMAIL,
+        replyTo: contactData.email,
         subject: `Nouveau message de contact - ${contactData.name}`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -110,6 +111,9 @@ Ce message a été envoyé automatiquement depuis le formulaire de contact NetPu
       return true;
     } catch (err) {
       console.error('SMTP Error (Contact Notification):', err);
+      if (err instanceof Error) {
+        console.error('Error Stack:', err.stack);
+      }
       return false;
     }
   }
@@ -118,6 +122,7 @@ Ce message a été envoyé automatiquement depuis le formulaire de contact NetPu
     try {
       // Validate required fields
       if (!contactData.name || !contactData.email) {
+        console.warn('Auto-reply validation failed: missing name or email', { name: contactData.name, email: contactData.email });
         return false;
       }
 
@@ -128,7 +133,7 @@ Ce message a été envoyé automatiquement depuis le formulaire de contact NetPu
       }
 
       const mailOptions = {
-        from: `"NetPub Agency" <${process.env.BREVO_SMTP_USER}>`,
+        from: `"NetPub Agency" <${process.env.ADMIN_EMAIL}>`,
         to: contactData.email,
         subject: 'Merci pour votre message - NetPub Agency',
         html: `

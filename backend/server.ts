@@ -1,4 +1,5 @@
-
+import './load-env.js';
+// Triggering restart to ensure env variables are loaded
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { createServer } from 'http';
@@ -10,7 +11,6 @@ import rateLimit from 'express-rate-limit';
 import session from 'express-session';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import dotenv from 'dotenv';
 import { typeDefs } from './graphql/schema.js';
 import { resolvers } from './graphql/resolvers.js';
 import { prisma } from './lib/prisma.js';
@@ -18,10 +18,6 @@ import { AuthService } from './lib/auth.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-if (process.env.NODE_ENV !== 'production') {
-    dotenv.config({ path: path.resolve(__dirname, '../.env') });
-}
 
 if (!process.env.JWT_SECRET) {
     console.warn('JWT_SECRET is not set. Authentication will fail.');

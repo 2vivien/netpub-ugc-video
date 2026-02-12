@@ -213,11 +213,9 @@ const Chatbot: React.FC = () => {
     const saveChatMessageToDb = useCallback(async (sender: string, text: string) => {
         if (!conversationId) return;
         try {
-            const csrf = await fetchCsrfToken();
-            if (!csrf) return;
             await fetch(GRAPHQL_ENDPOINT, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     query: `mutation AddChatMessage($conversationId: ID!, $sender: String!, $text: String!) {
                         addChatMessage(conversationId: $conversationId, sender: $sender, text: $text) { id }
@@ -232,14 +230,9 @@ const Chatbot: React.FC = () => {
         if (isLoading || conversationId) return;
         setIsLoading(true);
         try {
-            const csrf = await fetchCsrfToken();
-            if (!csrf) {
-                setIsLoading(false);
-                return;
-            }
             const response = await fetch(GRAPHQL_ENDPOINT, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     query: `mutation CreateConversation { createConversation { id userName userId } }`,
                 }),
@@ -335,14 +328,13 @@ const Chatbot: React.FC = () => {
             if (calls && calls.length > 0) {
                 const fc = calls[0];
                 let confirmationText = '';
-                const csrf = await fetchCsrfToken();
 
-                if (fc.name === 'prendreRendezVous' && csrf) {
+                if (fc.name === 'prendreRendezVous') {
                     const args = fc.args as unknown as AppointmentArgs;
                     confirmationText = `RDV noté pour ${args.service} le ${args.date} à ${args.heure}.`;
                     await fetch(GRAPHQL_ENDPOINT, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             query: `mutation CreateAppointment($service: String!, $date: String!, $time: String!, $conversationId: String!) {
                                 createAppointment(service: $service, date: $date, time: $time, conversationId: $conversationId) { id }
@@ -350,12 +342,12 @@ const Chatbot: React.FC = () => {
                             variables: { service: args.service, date: args.date, time: args.heure, conversationId }
                         }),
                     });
-                } else if (fc.name === 'enregistrerNomClient' && csrf) {
+                } else if (fc.name === 'enregistrerNomClient') {
                     const args = fc.args as unknown as ClientNameArgs;
                     confirmationText = `C'est noté ${args.prenom} ! Qu'est-ce qui t'amène ?`;
                     await fetch(GRAPHQL_ENDPOINT, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             query: `mutation UpdateConversation($conversationId: String!, $clientName: String) {
                                 updateConversation(conversationId: $conversationId, clientName: $clientName) { id }
@@ -363,12 +355,12 @@ const Chatbot: React.FC = () => {
                             variables: { conversationId, clientName: args.nom ? `${args.nom} ${args.prenom}` : args.prenom }
                         })
                     });
-                } else if (fc.name === 'collecterInfosClient' && csrf) {
+                } else if (fc.name === 'collecterInfosClient') {
                     const args = fc.args as unknown as ClientInfoArgs;
                     confirmationText = `Merci ${args.prenom} ! Infos notées.`;
                     await fetch(GRAPHQL_ENDPOINT, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             query: `mutation UpdateConversation($conversationId: String!, $clientName: String, $clientEmail: String, $clientPhone: String) {
                                 updateConversation(conversationId: $conversationId, clientName: $clientName, clientEmail: $clientEmail, clientPhone: $clientPhone) { id }
@@ -472,17 +464,14 @@ const Chatbot: React.FC = () => {
     const handleCloseChatbot = async () => {
         if (conversationId) {
             try {
-                const csrf = await fetchCsrfToken();
-                if (csrf) {
-                    await fetch(GRAPHQL_ENDPOINT, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
-                        body: JSON.stringify({
-                            query: `mutation NotifyEnded($id: ID!) { notifyConversationEnded(conversationId: $id) }`,
-                            variables: { id: conversationId }
-                        })
-                    });
-                }
+                await fetch(GRAPHQL_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        query: `mutation NotifyEnded($id: ID!) { notifyConversationEnded(conversationId: $id) }`,
+                        variables: { id: conversationId }
+                    })
+                });
             } catch { /* ignore silently */ }
         }
         closeChatbot();

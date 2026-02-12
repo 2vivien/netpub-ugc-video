@@ -84,16 +84,10 @@ const Contact = () => {
     setError(null);
 
     try {
-      const csrf = await fetchCsrfToken();
-      if (!csrf) {
-        throw new Error('CSRF token not available');
-      }
-
       const response = await fetch(GRAPHQL_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRF-Token': csrf,
         },
         body: JSON.stringify({
           query: `
@@ -122,10 +116,11 @@ const Contact = () => {
           message: '',
         });
       } else {
-        setError(result.errors ? result.errors[0].message : 'Une erreur est survenue lors de l\'envoi du message. Veuillez réessayer.');
+        const msg = result.errors ? result.errors[0].message : 'Erreur serveur';
+        setError(`Erreur: ${msg}`);
       }
-    } catch {
-      setError('Une erreur inattendue est survenue. Veuillez réessayer.');
+    } catch (err) {
+      setError(`Erreur de connexion: ${err instanceof Error ? err.message : 'Inconnue'}`);
     } finally {
       setLoading(false);
     }
@@ -157,13 +152,13 @@ const Contact = () => {
           <div className="contact-form-card">
             <form onSubmit={handleSubmit} className="contact-form">
               <div className="form-group">
-                <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required placeholder="Votre nom, parce qu’on aime savoir à qui on parle…" />
+                <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required placeholder="Votre nom, parce qu’on aime savoir à qui on parle…" autoComplete="name" />
               </div>
               <div className="form-group">
-                <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required placeholder="Un mail pour vous répondre (promis, pas de spam)" />
+                <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required placeholder="Un mail pour vous répondre (promis, pas de spam)" autoComplete="email" />
               </div>
               <div className="form-group">
-                <input type="text" id="company" name="company" value={formData.company} onChange={handleChange} placeholder="Votre entreprise (optionnel)" />
+                <input type="text" id="company" name="company" value={formData.company} onChange={handleChange} placeholder="Votre entreprise (optionnel)" autoComplete="organization" />
               </div>
               <div className="form-group">
                 <select id="service" name="service" value={formData.service} onChange={handleChange}>

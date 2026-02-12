@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 
 const useScreenWidth = () => {
-    // Initialise avec 0 au lieu de window.innerWidth
-    const [width, setWidth] = useState(0);
+    // Initialise avec une valeur par défaut de bureau au lieu de 0 pour éviter le flash mobile
+    const [width, setWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
 
     useEffect(() => {
         // Vérifie si on est côté client

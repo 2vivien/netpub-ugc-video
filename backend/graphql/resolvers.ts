@@ -237,12 +237,14 @@ export const resolvers = {
       message: string;
     }) => {
       try {
+        console.log('Received contact message request:', { name, email, company, service });
         const sanitizedName = DOMPurify.sanitize(name);
         const sanitizedCompany = company ? DOMPurify.sanitize(company) : company;
         const sanitizedService = service ? DOMPurify.sanitize(service) : service;
         const sanitizedMessage = DOMPurify.sanitize(message);
 
         // Send notification email
+        console.log('Sending notification email...');
         const notificationSent = await emailService.sendContactNotification({
           name: sanitizedName,
           email,
@@ -252,6 +254,7 @@ export const resolvers = {
         });
 
         // Send auto-reply
+        console.log('Sending auto-reply email...');
         const autoReplySent = await emailService.sendAutoReply({
           name: sanitizedName,
           email,
@@ -260,9 +263,11 @@ export const resolvers = {
           message: sanitizedMessage
         });
 
+        console.log('Email results:', { notificationSent, autoReplySent });
         return notificationSent && autoReplySent;
-      } catch {
-        throw new Error('Failed to send contact message');
+      } catch (error) {
+        console.error('Failed to send contact message resolver error:', error);
+        throw new Error('Failed to send contact message: ' + (error instanceof Error ? error.message : 'Unknown error'));
       }
     },
 

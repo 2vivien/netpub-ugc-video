@@ -298,8 +298,14 @@ main {
 }
 
 .main-nav {
-  display: flex;
+  display: flex !important; /* Force flex for desktop by default */
   justify-content: flex-end;
+}
+
+@media (max-width: 767px) {
+  .main-nav {
+    display: none !important;
+  }
 }
 .main-nav a {
     text-decoration: none;
@@ -341,6 +347,16 @@ main {
 }
 
 /* Mobile Nav */
+.mobile-navbar {
+    display: flex; /* Show by default if rendered */
+}
+
+@media (min-width: 768px) {
+    .mobile-navbar {
+        display: none !important; /* Hide on desktop even if rendered by JS */
+    }
+}
+
 .mobile-menu-toggle {
     display: none;
     background: none;
