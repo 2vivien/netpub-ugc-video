@@ -5,7 +5,6 @@ import { FaInstagram, FaTiktok, FaYoutube, FaFacebook, FaLinkedin } from 'react-
 import { useChatbot } from '../contexts/ChatbotContext'; // Import useChatbot
 import ThankYouModal from '../components/ThankYouModal'; // Import the new modal component
 import SEO from '../components/SEO';
-import { fetchCsrfToken } from '../utils/csrf';
 
 const GRAPHQL_ENDPOINT = `${import.meta.env.VITE_API_URL || ''}/graphql`;
 

@@ -3,7 +3,6 @@ import { GoogleGenerativeAI, FunctionDeclaration, SchemaType, Tool, GoogleGenera
 import { ChatMessage, PortfolioCategory } from '../types';
 import { useChatbot } from '../contexts/ChatbotContext';
 import { NotificationService } from '../lib/notifications';
-import { fetchCsrfToken } from '../utils/csrf';
 import { getAIContext } from '../lib/context-loader';
 
 // --- Interfaces pour le SDK Gemini ---
