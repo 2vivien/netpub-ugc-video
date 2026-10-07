@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { PortfolioProject } from '../types';
 import { useChatbot } from '../contexts/ChatbotContext';
 import { X, Play, Pause, Volume2, VolumeX, ChevronLeft, ChevronRight } from 'lucide-react';
+import { getWebpUrl } from '../utils/mediaUtils';
 import './InfluencerCard.css';
 
 interface InfluencerCardProps {
@@ -127,13 +128,16 @@ const InfluencerCard: React.FC<InfluencerCardProps> = ({ project, onMediaClick }
             );
         }
         return (
-            <img
-                src={media.url}
-                alt={project.title}
-                className={isMain ? "influencer-main-photo" : ""}
-                loading="lazy" // Native lazy loading
-                key={media.url}
-            />
+            <picture key={media.url}>
+                <source srcSet={getWebpUrl(media.url)} type="image/webp" />
+                <img
+                    src={media.url}
+                    alt={project.title}
+                    className={isMain ? "influencer-main-photo" : ""}
+                    loading="lazy"
+                    decoding="async"
+                />
+            </picture>
         );
     };
 
@@ -204,7 +208,10 @@ const InfluencerCard: React.FC<InfluencerCardProps> = ({ project, onMediaClick }
                                 {circle.item.type === 'video' ? (
                                     <video src={circle.item.url} muted playsInline preload="metadata" />
                                 ) : (
-                                    <img src={circle.item.url} alt="media preview" loading="lazy" />
+                                    <picture>
+                                        <source srcSet={getWebpUrl(circle.item.url)} type="image/webp" />
+                                        <img src={circle.item.url} alt="media preview" loading="lazy" decoding="async" />
+                                    </picture>
                                 )}
                                 {circle.index === activeIndex && idx === 1 && (
                                     <div className="circle-label">Projet #{circle.index + 1}</div>

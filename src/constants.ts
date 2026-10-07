@@ -2,51 +2,51 @@ import { PortfolioCategory, PortfolioProject } from './types';
 
 export const portfolioProjects: PortfolioProject[] = [
 
-  { id: 1, title: 'Photo UGC - 1', category: PortfolioCategory.PHOTO_UGC, mediaUrl: '/images/photo-ugc/1.png', mediaType: 'image', likes: [], comments: [], likeCount: 152, commentCount: 23, hashtags: ['UGC', 'Photo'] },
+  { id: 1, title: 'Photo UGC - 1', category: PortfolioCategory.PHOTO_UGC, mediaUrl: '/webp-images/photo-ugc/1.webp', mediaType: 'image', likes: [], comments: [], likeCount: 152, commentCount: 23, hashtags: ['UGC', 'Photo'] },
 
-  { id: 2, title: 'Photo UGC - 2', category: PortfolioCategory.PHOTO_UGC, mediaUrl: '/images/photo-ugc/2.png', mediaType: 'image', likes: [], comments: [], likeCount: 234, commentCount: 45, hashtags: ['UGC', 'Photo'] },
+  { id: 2, title: 'Photo UGC - 2', category: PortfolioCategory.PHOTO_UGC, mediaUrl: '/webp-images/photo-ugc/2.webp', mediaType: 'image', likes: [], comments: [], likeCount: 234, commentCount: 45, hashtags: ['UGC', 'Photo'] },
 
-  { id: 3, title: 'Photo UGC - 3', category: PortfolioCategory.PHOTO_UGC, mediaUrl: '/images/photo-ugc/3.png', mediaType: 'image', likes: [], comments: [], likeCount: 189, commentCount: 31, hashtags: ['UGC', 'Photo'] },
+  { id: 3, title: 'Photo UGC - 3', category: PortfolioCategory.PHOTO_UGC, mediaUrl: '/webp-images/photo-ugc/3.webp', mediaType: 'image', likes: [], comments: [], likeCount: 189, commentCount: 31, hashtags: ['UGC', 'Photo'] },
 
-  { id: 4, title: 'Photo UGC - 4', category: PortfolioCategory.PHOTO_UGC, mediaUrl: '/images/photo-ugc/4.png', mediaType: 'image', likes: [], comments: [], likeCount: 201, commentCount: 28, hashtags: ['UGC', 'Photo'] },
+  { id: 4, title: 'Photo UGC - 4', category: PortfolioCategory.PHOTO_UGC, mediaUrl: '/webp-images/photo-ugc/4.webp', mediaType: 'image', likes: [], comments: [], likeCount: 201, commentCount: 28, hashtags: ['UGC', 'Photo'] },
 
-  { id: 5, title: 'Photo UGC - 5', category: PortfolioCategory.PHOTO_UGC, mediaUrl: '/images/photo-ugc/5.png', mediaType: 'image', likes: [], comments: [], likeCount: 121, commentCount: 21, hashtags: ['UGC', 'Photo'] },
+  { id: 5, title: 'Photo UGC - 5', category: PortfolioCategory.PHOTO_UGC, mediaUrl: '/webp-images/photo-ugc/5.webp', mediaType: 'image', likes: [], comments: [], likeCount: 121, commentCount: 21, hashtags: ['UGC', 'Photo'] },
 
-  { id: 6, title: 'Photo UGC - 6', category: PortfolioCategory.PHOTO_UGC, mediaUrl: '/images/photo-ugc/6.png', mediaType: 'image', likes: [], comments: [], likeCount: 288, commentCount: 49, hashtags: ['UGC', 'Photo'] },
+  { id: 6, title: 'Photo UGC - 6', category: PortfolioCategory.PHOTO_UGC, mediaUrl: '/webp-images/photo-ugc/6.webp', mediaType: 'image', likes: [], comments: [], likeCount: 288, commentCount: 49, hashtags: ['UGC', 'Photo'] },
 
-  { id: 13, title: 'Photo Mode - 11', category: PortfolioCategory.PHOTO_MODE, mediaUrl: '/images/photo-mode/11.png', mediaType: 'image', likes: [], comments: [], likeCount: 198, commentCount: 32, hashtags: ['Mode', 'Photo', 'Studio'] },
+  { id: 13, title: 'Photo Mode - 11', category: PortfolioCategory.PHOTO_MODE, mediaUrl: '/webp-images/photo-mode/11.webp', mediaType: 'image', likes: [], comments: [], likeCount: 198, commentCount: 32, hashtags: ['Mode', 'Photo', 'Studio'] },
 
-  { id: 15, title: 'Photo Mode - 13', category: PortfolioCategory.PHOTO_MODE, mediaUrl: '/images/photo-mode/13.png', mediaType: 'image', likes: [], comments: [], likeCount: 158, commentCount: 25, hashtags: ['Mode', 'Photo'] },
+  { id: 15, title: 'Photo Mode - 13', category: PortfolioCategory.PHOTO_MODE, mediaUrl: '/webp-images/photo-mode/13.webp', mediaType: 'image', likes: [], comments: [], likeCount: 158, commentCount: 25, hashtags: ['Mode', 'Photo'] },
 
-  { id: 16, title: 'Photo Mode - 14', category: PortfolioCategory.PHOTO_MODE, mediaUrl: '/images/photo-mode/14.png', mediaType: 'image', likes: [], comments: [], likeCount: 261, commentCount: 43, hashtags: ['Mode', 'Photo'] },
+  { id: 16, title: 'Photo Mode - 14', category: PortfolioCategory.PHOTO_MODE, mediaUrl: '/webp-images/photo-mode/14.webp', mediaType: 'image', likes: [], comments: [], likeCount: 261, commentCount: 43, hashtags: ['Mode', 'Photo'] },
 
-  { id: 18, title: 'Photo Mode - 16', category: PortfolioCategory.PHOTO_MODE, mediaUrl: '/images/photo-mode/16.png', mediaType: 'image', likes: [], comments: [], likeCount: 293, commentCount: 50, hashtags: ['Mode', 'Photo'] },
+  { id: 18, title: 'Photo Mode - 16', category: PortfolioCategory.PHOTO_MODE, mediaUrl: '/webp-images/photo-mode/16.webp', mediaType: 'image', likes: [], comments: [], likeCount: 293, commentCount: 50, hashtags: ['Mode', 'Photo'] },
 
-  { id: 19, title: 'Photo Mode - 17', category: PortfolioCategory.PHOTO_MODE, mediaUrl: '/images/photo-mode/17.png', mediaType: 'image', likes: [], comments: [], likeCount: 167, commentCount: 27, hashtags: ['Mode', 'Photo'] },
+  { id: 19, title: 'Photo Mode - 17', category: PortfolioCategory.PHOTO_MODE, mediaUrl: '/webp-images/photo-mode/17.webp', mediaType: 'image', likes: [], comments: [], likeCount: 167, commentCount: 27, hashtags: ['Mode', 'Photo'] },
 
-  { id: 20, title: 'Photo Mode - 18', category: PortfolioCategory.PHOTO_MODE, mediaUrl: '/images/photo-mode/18.png', mediaType: 'image', likes: [], comments: [], likeCount: 240, commentCount: 40, hashtags: ['Mode', 'Photo'] },
+  { id: 20, title: 'Photo Mode - 18', category: PortfolioCategory.PHOTO_MODE, mediaUrl: '/webp-images/photo-mode/18.webp', mediaType: 'image', likes: [], comments: [], likeCount: 240, commentCount: 40, hashtags: ['Mode', 'Photo'] },
 
-  { id: 24, title: 'Photo Mode - 3', category: PortfolioCategory.PHOTO_MODE, mediaUrl: '/images/photo-mode/3.png', mediaType: 'image', likes: [], comments: [], likeCount: 299, commentCount: 47, hashtags: ['Mode', 'Photo'] },
+  { id: 24, title: 'Photo Mode - 3', category: PortfolioCategory.PHOTO_MODE, mediaUrl: '/webp-images/photo-mode/3.webp', mediaType: 'image', likes: [], comments: [], likeCount: 299, commentCount: 47, hashtags: ['Mode', 'Photo'] },
 
-  { id: 25, title: 'Photo Mode - 4', category: PortfolioCategory.PHOTO_MODE, mediaUrl: '/images/photo-mode/4.png', mediaType: 'image', likes: [], comments: [], likeCount: 148, commentCount: 24, hashtags: ['Mode', 'Photo'] },
+  { id: 25, title: 'Photo Mode - 4', category: PortfolioCategory.PHOTO_MODE, mediaUrl: '/webp-images/photo-mode/4.webp', mediaType: 'image', likes: [], comments: [], likeCount: 148, commentCount: 24, hashtags: ['Mode', 'Photo'] },
 
-  { id: 28, title: 'Photo Mode - 7', category: PortfolioCategory.PHOTO_MODE, mediaUrl: '/images/photo-mode/7.png', mediaType: 'image', likes: [], comments: [], likeCount: 218, commentCount: 37, hashtags: ['Mode', 'Photo'] },
+  { id: 28, title: 'Photo Mode - 7', category: PortfolioCategory.PHOTO_MODE, mediaUrl: '/webp-images/photo-mode/7.webp', mediaType: 'image', likes: [], comments: [], likeCount: 218, commentCount: 37, hashtags: ['Mode', 'Photo'] },
 
-  { id: 29, title: 'Photo Mode - 8', category: PortfolioCategory.PHOTO_MODE, mediaUrl: '/images/photo-mode/8.png', mediaType: 'image', likes: [], comments: [], likeCount: 129, commentCount: 26, hashtags: ['Mode', 'Photo'] },
+  { id: 29, title: 'Photo Mode - 8', category: PortfolioCategory.PHOTO_MODE, mediaUrl: '/webp-images/photo-mode/8.webp', mediaType: 'image', likes: [], comments: [], likeCount: 129, commentCount: 26, hashtags: ['Mode', 'Photo'] },
 
-  { id: 31, title: 'Photo Spot Publicitaire - 1', category: PortfolioCategory.PHOTO_SPOT_PUBLICITAIRE, mediaUrl: '/images/photo-spot-4k/spot-new-1.jpg', mediaType: 'image', likes: [], comments: [], likeCount: 162, commentCount: 25, hashtags: ['Spot', 'Photo', '4K'] },
+  { id: 31, title: 'Photo Spot Publicitaire - 1', category: PortfolioCategory.PHOTO_SPOT_PUBLICITAIRE, mediaUrl: '/webp-images/photo-spot-4k/spot-new-1.webp', mediaType: 'image', likes: [], comments: [], likeCount: 162, commentCount: 25, hashtags: ['Spot', 'Photo', '4K'] },
 
-  { id: 32, title: 'Photo Spot Publicitaire - 2', category: PortfolioCategory.PHOTO_SPOT_PUBLICITAIRE, mediaUrl: '/images/photo-spot-4k/spot-new-2.jpg', mediaType: 'image', likes: [], comments: [], likeCount: 273, commentCount: 49, hashtags: ['Spot', 'Photo', '4K'] },
+  { id: 32, title: 'Photo Spot Publicitaire - 2', category: PortfolioCategory.PHOTO_SPOT_PUBLICITAIRE, mediaUrl: '/webp-images/photo-spot-4k/spot-new-2.webp', mediaType: 'image', likes: [], comments: [], likeCount: 273, commentCount: 49, hashtags: ['Spot', 'Photo', '4K'] },
 
-  { id: 33, title: 'Photo Spot Publicitaire - 3', category: PortfolioCategory.PHOTO_SPOT_PUBLICITAIRE, mediaUrl: '/images/photo-spot-4k/spot-new-3.jpg', mediaType: 'image', likes: [], comments: [], likeCount: 188, commentCount: 34, hashtags: ['Spot', 'Photo', '4K'] },
+  { id: 33, title: 'Photo Spot Publicitaire - 3', category: PortfolioCategory.PHOTO_SPOT_PUBLICITAIRE, mediaUrl: '/webp-images/photo-spot-4k/spot-new-3.webp', mediaType: 'image', likes: [], comments: [], likeCount: 188, commentCount: 34, hashtags: ['Spot', 'Photo', '4K'] },
 
-  { id: 34, title: 'Photo Spot Publicitaire - 4', category: PortfolioCategory.PHOTO_SPOT_PUBLICITAIRE, mediaUrl: '/images/photo-spot-4k/spot-new-4.jpg', mediaType: 'image', likes: [], comments: [], likeCount: 211, commentCount: 38, hashtags: ['Spot', 'Photo', '4K'] },
+  { id: 34, title: 'Photo Spot Publicitaire - 4', category: PortfolioCategory.PHOTO_SPOT_PUBLICITAIRE, mediaUrl: '/webp-images/photo-spot-4k/spot-new-4.webp', mediaType: 'image', likes: [], comments: [], likeCount: 211, commentCount: 38, hashtags: ['Spot', 'Photo', '4K'] },
 
-  { id: 35, title: 'Photo Spot Publicitaire - 5', category: PortfolioCategory.PHOTO_SPOT_PUBLICITAIRE, mediaUrl: '/images/photo-spot-4k/spot-new-5.jpg', mediaType: 'image', likes: [], comments: [], likeCount: 138, commentCount: 22, hashtags: ['Spot', 'Photo', '4K'] },
+  { id: 35, title: 'Photo Spot Publicitaire - 5', category: PortfolioCategory.PHOTO_SPOT_PUBLICITAIRE, mediaUrl: '/webp-images/photo-spot-4k/spot-new-5.webp', mediaType: 'image', likes: [], comments: [], likeCount: 138, commentCount: 22, hashtags: ['Spot', 'Photo', '4K'] },
 
-  { id: 36, title: 'Photo Spot Publicitaire - 6', category: PortfolioCategory.PHOTO_SPOT_PUBLICITAIRE, mediaUrl: '/images/photo-spot-4k/spot-new-6.png', mediaType: 'image', likes: [], comments: [], likeCount: 291, commentCount: 48, hashtags: ['Spot', 'Photo', '4K'] },
+  { id: 36, title: 'Photo Spot Publicitaire - 6', category: PortfolioCategory.PHOTO_SPOT_PUBLICITAIRE, mediaUrl: '/webp-images/photo-spot-4k/spot-new-6.webp', mediaType: 'image', likes: [], comments: [], likeCount: 291, commentCount: 48, hashtags: ['Spot', 'Photo', '4K'] },
 
-  { id: 37, title: 'Photo Spot Publicitaire - 7', category: PortfolioCategory.PHOTO_SPOT_PUBLICITAIRE, mediaUrl: '/images/photo-spot-4k/spot-new-7.png', mediaType: 'image', likes: [], comments: [], likeCount: 171, commentCount: 28, hashtags: ['Spot', 'Photo', 'Social Media'] },
+  { id: 37, title: 'Photo Spot Publicitaire - 7', category: PortfolioCategory.PHOTO_SPOT_PUBLICITAIRE, mediaUrl: '/webp-images/photo-spot-4k/spot-new-7.webp', mediaType: 'image', likes: [], comments: [], likeCount: 171, commentCount: 28, hashtags: ['Spot', 'Photo', 'Social Media'] },
 
   { id: 39, title: 'Vidéo UGC - 1', category: PortfolioCategory.VIDEO_UGC, mediaUrl: '/Video/vidéo-ugc/ugc-new-1.mp4', videoUrl: '/Video/vidéo-ugc/ugc-new-1.mp4', mediaType: 'video', likes: [], comments: [], likeCount: 195, commentCount: 31, hashtags: ['UGC', 'Vidéo'] },
 
@@ -83,7 +83,7 @@ export const portfolioProjects: PortfolioProject[] = [
     id: 101,
     title: 'Iliana',
     category: PortfolioCategory.INFLUENCEUSES,
-    mediaUrl: '/images/influencers/iliana/1.jpg',
+    mediaUrl: '/webp-images/influencers/iliana/1.webp',
     mediaType: 'image',
     age: 20,
     bio: 'Partage ses looks tendances et ses routines beauté au quotidien.',
@@ -99,7 +99,7 @@ export const portfolioProjects: PortfolioProject[] = [
     id: 102,
     title: 'Faeza',
     category: PortfolioCategory.INFLUENCEUSES,
-    mediaUrl: '/images/influencers/faeza/1.jpg',
+    mediaUrl: '/webp-images/influencers/faeza/1.webp',
     mediaType: 'image',
     age: 22,
     bio: 'Spécialisée dans la beauté, le sport et les services modernes.',
@@ -115,7 +115,7 @@ export const portfolioProjects: PortfolioProject[] = [
     id: 103,
     title: 'Anouk',
     category: PortfolioCategory.INFLUENCEUSES,
-    mediaUrl: '/images/influencers/anouk/1.jpg',
+    mediaUrl: '/webp-images/influencers/anouk/1.webp',
     mediaType: 'image',
     age: 21,
     bio: 'Passionnée par la mode et les collaborations innovantes.',
@@ -131,7 +131,7 @@ export const portfolioProjects: PortfolioProject[] = [
     id: 104,
     title: 'Maëlys',
     category: PortfolioCategory.INFLUENCEUSES,
-    mediaUrl: '/images/influencers/maelys/1.jpg',
+    mediaUrl: '/webp-images/influencers/maelys/1.webp',
     mediaType: 'image',
     age: 22,
     bio: 'Met en avant les produits tendance et la beauté naturelle.',
@@ -147,7 +147,7 @@ export const portfolioProjects: PortfolioProject[] = [
     id: 105,
     title: 'Tayla',
     category: PortfolioCategory.INFLUENCEUSES,
-    mediaUrl: '/images/influencers/tayla/1.jpg',
+    mediaUrl: '/webp-images/influencers/tayla/1.webp',
     mediaType: 'image',
     age: 23,
     bio: 'Dynamique et axée sur la mode et le bien-être.',

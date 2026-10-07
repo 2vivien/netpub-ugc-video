@@ -1,5 +1,6 @@
 import React from 'react';
 import { PortfolioProject } from '../types';
+import { getOptimizedVideoUrls } from '../utils/mediaUtils';
 
 interface VideoModalProps {
   project: PortfolioProject;
@@ -7,6 +8,8 @@ interface VideoModalProps {
 }
 
 const VideoModal: React.FC<VideoModalProps> = ({ project, onClose }) => {
+  const { webm, mp4 } = getOptimizedVideoUrls(project.videoUrl);
+
   return (
     <div className="video-modal-backdrop" onClick={onClose}>
       <div className="video-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -16,15 +19,17 @@ const VideoModal: React.FC<VideoModalProps> = ({ project, onClose }) => {
           </svg>
         </button>
         <div className="video-wrapper">
-            <video controls autoPlay src={project.videoUrl}>
-              Votre navigateur ne supporte pas la balise vidéo.
-            </video>
+          <video controls autoPlay preload="metadata" playsInline>
+            {webm && <source src={webm} type="video/webm" />}
+            {mp4 && <source src={mp4} type="video/mp4" />}
+            Votre navigateur ne supporte pas la balise vidéo.
+          </video>
         </div>
         <div className="project-details">
-            <h3>{project.title}</h3>
-            <p className="client-name">{project.client}</p>
-            <p><strong>Objectif:</strong> {project.objective}</p>
-            <p><strong>Rôle:</strong> {project.role}</p>
+          <h3>{project.title}</h3>
+          <p className="client-name">{project.client}</p>
+          <p><strong>Objectif:</strong> {project.objective}</p>
+          <p><strong>Rôle:</strong> {project.role}</p>
         </div>
       </div>
     </div>

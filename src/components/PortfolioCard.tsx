@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { PortfolioProject } from '../types';
 import { X, Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import { getWebpUrl, getOptimizedVideoUrls } from '../utils/mediaUtils';
 import './PortfolioCard.css';
 
 interface PortfolioCardProps {
@@ -59,13 +60,16 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ project, onClick }) => {
       );
     } else {
       return (
-        <img
-          src={currentMedia.url}
-          alt={project.title}
-          className="influencer-main-photo"
-          loading="lazy"
-          key={currentMedia.url}
-        />
+        <picture key={currentMedia.url}>
+          <source srcSet={getWebpUrl(currentMedia.url)} type="image/webp" />
+          <img
+            src={currentMedia.url}
+            alt={project.title}
+            className="influencer-main-photo"
+            loading="lazy"
+            decoding="async"
+          />
+        </picture>
       );
     }
   };
@@ -127,7 +131,10 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ project, onClick }) => {
                   {circle.item.type === 'video' ? (
                     <video src={circle.item.url} muted playsInline preload="metadata" />
                   ) : (
-                    <img src={circle.item.url} alt="media preview" loading="lazy" />
+                    <picture>
+                      <source srcSet={getWebpUrl(circle.item.url)} type="image/webp" />
+                      <img src={circle.item.url} alt="media preview" loading="lazy" decoding="async" />
+                    </picture>
                   )}
                   {circle.index === activeIndex && idx === 1 && (
                     <div className="circle-label">Projet #{circle.index + 1}</div>
