@@ -1,9 +1,15 @@
 // Enregistrer le Service Worker
 if ('serviceWorker' in navigator) {
-  // Ne pas enregistrer le service worker en mode dev
-  const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  // Toujours désactiver le SW en mode développement pour éviter conflits HMR/WebSocket
+  const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '0.0.0.0';
   if (isDev) {
-    console.log('Mode dev: Service Worker non enregistré');
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
+    });
+    console.log('Mode dev: Service Worker désactivé');
+    return;
   } else {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js')

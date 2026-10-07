@@ -17,7 +17,15 @@ root.render(
 );
 
 // Register Service Worker for advanced caching
-  if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator) {
+  const isDev = import.meta.env.DEV || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '0.0.0.0';
+  if (isDev) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      registrations.forEach((registration) => {
+        registration.unregister();
+      });
+    });
+  } else {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js').then(() => {
         // Registration successful
@@ -26,3 +34,4 @@ root.render(
       });
     });
   }
+}
