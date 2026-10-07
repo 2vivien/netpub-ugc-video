@@ -44,6 +44,10 @@ export default defineConfig(({ command, mode }: { command: string, mode: string 
     server: {
       port: 3000,
       host: '0.0.0.0',
+      hmr: {
+        port: 3000,
+        host: 'localhost'
+      },
       proxy: {
         '/graphql': {
           target: 'http://127.0.0.1:4000',
