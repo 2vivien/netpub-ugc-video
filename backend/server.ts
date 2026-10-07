@@ -26,6 +26,10 @@ if (!process.env.JWT_SECRET) {
 const PORT = process.env.PORT || 4000;
 const SESSION_SECRET = process.env.SESSION_SECRET || 'dev_session_secret';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+const configuredOrigins = process.env.ALLOWED_ORIGINS
+    ?.split(',')
+    .map(origin => origin.trim())
+    .filter(Boolean);
 
 export async function bootstrap() {
     const app = express();
@@ -36,7 +40,9 @@ export async function bootstrap() {
         crossOriginEmbedderPolicy: process.env.NODE_ENV === 'production' ? true : false,
     }));
 
-    const allowedOrigins = [FRONTEND_URL, 'http://localhost:3000', 'https://studio.apollographql.com'];
+    const allowedOrigins = configuredOrigins?.length
+        ? configuredOrigins
+        : [FRONTEND_URL, 'http://localhost:3000', 'https://studio.apollographql.com'];
     app.use(cors({
         origin: (origin, callback) => {
             if (!origin) return callback(null, true);

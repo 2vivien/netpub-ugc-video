@@ -1,6 +1,6 @@
 # Configuration et Variables d'Environnement
 
-Le projet utilise un fichier `.env` à la racine pour gérer la configuration sensible et spécifique à l'environnement.
+Le projet utilise un fichier `.env` à la racine pour gérer la configuration sensible et spécifique à l'environnement. Copiez `.env.example` vers `.env`, puis remplacez les valeurs d'exemple. Le backend charge ce fichier depuis la racine ou depuis `backend/.env`.
 
 ## 📄 Fichier `.env`
 
@@ -32,7 +32,8 @@ Créez un fichier `.env` basé sur `.env.example`.
 
 | Variable | Description |
 |----------|-------------|
-| `ALLOWED_ORIGINS` | Liste des origines autorisées (CORS), séparées par des virgules |
+| `FRONTEND_URL` | Origine frontend utilisée par défaut pour CORS | `http://localhost:3000` |
+| `ALLOWED_ORIGINS` | Liste des origines autorisées pour CORS, séparées par des virgules. Si définie, cette liste remplace les valeurs par défaut. | `http://localhost:3000` |
 
 ## ⚠️ Sécurité
 
