@@ -17,8 +17,8 @@ const benefits = [
   },
   {
     icon: <Coins size={22} />,
-    title: 'Commission de 12%',
-    description: 'Sur la première année de chaque contrat apporté et signé. Payable à l’encaissement.',
+    title: 'Commission jusqu’à 12%',
+    description: 'De 7% à 12% selon votre statut, sur la première année de chaque contrat apporté. Payable à l’encaissement.',
   },
   {
     icon: <Percent size={22} />,
@@ -65,7 +65,7 @@ const steps = [
     number: '04',
     title: 'La commission est versée',
     description:
-      '12% de la première année, payables dès l’encaissement du premier paiement du client.',
+      'Le taux dépend de votre statut : 7%, 10% ou 12% de la première année, payables dès l’encaissement du premier paiement.',
   },
 ];
 
@@ -73,25 +73,25 @@ const levels = [
   {
     name: 'Partenaire',
     condition: 'Accord signé',
-    commission: '12%',
-    bonus: 'Lien de referral + avantages',
+    commission: '0%',
+    bonus: 'Lien de referral + remises',
   },
   {
     name: 'Partenaire Actif',
     condition: '1 client apporté et signé',
-    commission: '12%',
-    bonus: 'Bonus de 50 000 FCFA',
+    commission: '7%',
+    bonus: 'Accès prioritaire production',
   },
   {
     name: 'Partenaire Premium',
     condition: '3+ clients apportés',
-    commission: '15%',
+    commission: '10%',
     bonus: 'Accès prioritaire étendu',
   },
   {
     name: 'Partenaire Stratégique',
     condition: '5+ clients apportés',
-    commission: '15%',
+    commission: '12%',
     bonus: 'Projets spécifiques + cas client',
   },
 ];
@@ -144,11 +144,14 @@ const PartnerProgram: React.FC = () => {
           <p className="partner-example-label">Exemple concret</p>
           <p className="partner-example-text">
             Vous recommandez une PME qui signe un contrat{' '}
-            <strong>Performance à 450 000 FCFA/mois</strong>.
+            <strong>Performance à 450 000 FCFA/mois</strong>, au statut Stratégique.
           </p>
           <p className="partner-example-math">
             450 000 × 12 mois × 12% ={' '}
             <span className="partner-example-result">648 000 FCFA</span>
+          </p>
+          <p className="partner-example-note">
+            Partenaire Stratégique — le taux le plus élevé du programme.
           </p>
           <p className="partner-example-note">
             Payables à l’encaissement du premier paiement du client recommandé.
