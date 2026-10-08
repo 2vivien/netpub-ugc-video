@@ -34,3 +34,9 @@ config/
 *.njsproj
 *.sln
 *.sw?
+
+# HyperFrames build artifacts
+video-partenaires/node_modules
+video-partenaires/renders
+video-partenaires/snapshots
+video-partenaires/.hyperframes
