@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Info, Briefcase, Camera, MessageSquare } from 'lucide-react';
+import { Home, Info, Briefcase, Camera, MessageSquare, Handshake } from 'lucide-react';
 import './PillNavBar.css'; // Import the stylesheet
 
 const PillNavBar = () => {
@@ -22,6 +22,7 @@ const PillNavBar = () => {
         { to: "/about", icon: Info, label: "À Propos" },
         { to: "/services", icon: Briefcase, label: "Services" },
         { to: "/portfolio", icon: Camera, label: "Portfolio" },
+        { to: "/partners", icon: Handshake, label: "Partenaires" },
         { to: "/contact", icon: MessageSquare, label: "Contact" },
     ];
 
