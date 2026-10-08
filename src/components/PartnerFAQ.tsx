@@ -9,7 +9,7 @@ interface FAQItem {
 const faqItems: FAQItem[] = [
   {
     question: "Qu'est-ce que le Programme Partenaires ?",
-    answer: "C'est un dispositif qui permet à nos clients de devenir des prescripteurs rémunérés. En signant un accord de partenariat, votre entreprise reçoit un lien de referral unique et touche une commission de 12% sur chaque contrat apporté et signé via ce lien.",
+    answer: "C'est un dispositif qui permet à nos clients de devenir des prescripteurs. En signant un accord de partenariat, votre entreprise reçoit un lien de referral unique, des remises sur vos prestations additionnelles et un accès prioritaire à la production. La commission démarre dès votre premier client apporté.",
   },
   {
     question: "Est-ce que je dois être client Netpub pour devenir partenaire ?",
@@ -17,7 +17,7 @@ const faqItems: FAQItem[] = [
   },
   {
     question: "Comment sont calculées et versées les commissions ?",
-    answer: "La commission est de 12% du montant total de la première année de contrat du client apporté (exemple : un contrat Performance à 450 000 FCFA/mois génère 648 000 FCFA de commission sur 12 mois). Elle est versée à l'encaissement du premier paiement du client recommandé, par virement ou mobile money.",
+    answer: "Le taux dépend de votre statut : 7% au statut Actif (1 client), 10% au Premium (3 clients), 12% au Stratégique (5 clients). Le taux s'applique sur la première année du contrat apporté. Exemple : un contrat Performance à 450 000 FCFA/mois au statut Stratégique génère 648 000 FCFA de commission. Elle est versée à l'encaissement du premier paiement du client recommandé.",
   },
   {
     question: "Comment fonctionne le lien de referral ?",
@@ -33,7 +33,7 @@ const faqItems: FAQItem[] = [
   },
   {
     question: "Comment puis-je devenir Premium ou Stratégique ?",
-    answer: "Le statut évolue selon vos recommandations. À 1 client apporté et signé, vous devenez Partenaire Actif (bonus de 50 000 FCFA). À 3 clients, vous passez à Premium (commission de 15%). À 5 clients ou plus, vous devenez Partenaire Stratégique, avec la possibilité de collaborer sur des projets spécifiques.",
+    answer: "Signer l'accord ne vous rapporte rien en commission — vous ne nous devez rien et nous ne vous devons rien. La commission démarre uniquement quand vous apportez un client qui signe. À 1 client : 7%. À 3 clients : 10%. À 5 clients ou plus : 12%, plus la possibilité de collaborer sur des projets spécifiques.",
   },
   {
     question: "Y a-t-il un risque de conflit d'intérêt ?",
