@@ -12,6 +12,7 @@ const Home = lazy(() => import('../pages/Home'));
 const Services = lazy(() => import('../pages/Services'));
 const Portfolio = lazy(() => import('../pages/Portfolio'));
 const About = lazy(() => import('../pages/About'));
+const Partners = lazy(() => import('../pages/Partners'));
 const Contact = lazy(() => import('../pages/Contact'));
 const LegalMentions = lazy(() => import('../pages/LegalMentions'));
 const PrivacyPolicy = lazy(() => import('../pages/PrivacyPolicy'));
@@ -43,7 +44,7 @@ const AppContent: React.FC = () => {
   const location = useLocation();
   const isDashboardRoute = location.pathname.startsWith('/dashboard');
   const isLoginPage = location.pathname === '/login';
-  const is404Page = !['/', '/services', '/portfolio', '/about', '/contact', '/legal-mentions', '/privacy-policy', '/terms-of-service', '/login', '/admin-login'].includes(location.pathname) && !location.pathname.startsWith('/dashboard');
+  const is404Page = !['/', '/services', '/portfolio', '/about', '/partners', '/contact', '/legal-mentions', '/privacy-policy', '/terms-of-service', '/login', '/admin-login'].includes(location.pathname) && !location.pathname.startsWith('/dashboard');
 
   return (
     <>
@@ -56,6 +57,7 @@ const AppContent: React.FC = () => {
             <Route path="/services" element={<Services />} />
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/about" element={<About />} />
+            <Route path="/partners" element={<Partners />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/legal-mentions" element={<LegalMentions />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
