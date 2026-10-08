@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #fdfdfd;
+      }
+
+      #main-root {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        font-family: sans-serif;
+        color: #16161a;
+        background: #fdfdfd;
+      }
+
+      .clip {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* ---------- fond partagé ---------- */
+      /* Le fond opaque est porté par #main ; cette couche ne contient
+         que des textures non opaques pour ne masquer aucun texte. */
+      #bg-layer {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      .grain {
+        position: absolute;
+        inset: 0;
+        opacity: 0.035;
+        background-image: radial-gradient(#16161a 0.5px, transparent 0.5px);
+        background-size: 4px 4px;
+      }
+
+      .vignette {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at center, transparent 55%, rgba(22,22,26,0.06) 100%);
+      }
+
+      /* ---------- typographie ---------- */
+      .eyebrow {
+        font-family: monospace;
+        font-size: 22px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #6e6e73;
+        margin-bottom: 34px;
+      }
+
+      .display {
+        font-size: 116px;
+        font-weight: 700;
+        letter-spacing: -0.045em;
+        line-height: 1.02;
+        text-align: center;
+      }
+
+      .display-sm {
+        font-size: 92px;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        line-height: 1.05;
+        text-align: center;
+      }
+
+      .sub {
+        font-size: 34px;
+        color: #6e6e73;
+        margin-top: 34px;
+        text-align: center;
+        line-height: 1.5;
+        max-width: 1200px;
+      }
+
+      .mono {
+        font-family: monospace;
+      }
+
+      /* ---------- scène 1 : titre ---------- */
+      #s1 .display { max-width: 1500px; }
+      #s1 .display .dim { color: #707076; }
+
+      .rule {
+        width: 0;
+        height: 3px;
+        background: #16161a;
+        margin-top: 46px;
+      }
+
+      /* ---------- scène 2/3 : étapes ---------- */
+      .step-badge {
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        border: 3px solid #16161a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: monospace;
+        font-size: 40px;
+        font-weight: 700;
+        margin-bottom: 42px;
+      }
+
+      /* ---------- scène 4 : compteur ---------- */
+      #s4 { background: #16161a; color: #fdfdfd; }
+      #s4 .eyebrow { color: rgba(253,253,253,0.5); }
+      #s4 .display { font-size: 148px; letter-spacing: -0.05em; }
+      #s4 .sub { color: rgba(253,253,253,0.55); }
+
+      .math {
+        font-family: monospace;
+        font-size: 30px;
+        color: rgba(253,253,253,0.42);
+        margin-top: 40px;
+        letter-spacing: 0.04em;
+      }
+
+      /* ---------- scène 5 : paliers ---------- */
+      #s5 .tiers {
+        display: flex;
+        gap: 26px;
+        margin-top: 20px;
+      }
+
+      .tier {
+        width: 292px;
+        padding: 38px 22px;
+        border: 2px solid #e4e4e7;
+        border-radius: 22px;
+        text-align: center;
+        background: #ffffff;
+      }
+
+      .tier.dark { background: #16161a; border-color: #16161a; }
+
+      .tier-name { font-size: 25px; font-weight: 700; margin-bottom: 10px; }
+      .tier.dark .tier-name { color: #fdfdfd; }
+      .tier-cond { font-size: 19px; color: #6e6e73; margin-bottom: 26px; min-height: 52px; }
+      .tier.dark .tier-cond { color: rgba(253,253,253,0.55); }
+      .tier-pct { font-family: monospace; font-size: 66px; font-weight: 700; letter-spacing: -0.04em; }
+      .tier.dark .tier-pct { color: #fdfdfd; }
+
+      /* ---------- scène 6 : outro ---------- */
+      #s6 { background: #16161a; color: #fdfdfd; }
+      #s6 .eyebrow { color: rgba(253,253,253,0.66); }
+      #s6 .sub { color: rgba(253,253,253,0.55); }
+
+      .loop-ring {
+        position: absolute;
+        width: 900px;
+        height: 900px;
+        border: 2px solid rgba(253,253,253,0.1);
+        border-radius: 50%;
+      }
+
+      .cta-pill {
+        margin-top: 52px;
+        padding: 24px 62px;
+        border-radius: 999px;
+        background: #fdfdfd;
+        color: #16161a;
+        font-size: 30px;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- ============ SCÈNE 1 — TITRE (0 → 3.4) ============ -->
+    <div id="main-root" data-composition-id="main" data-start="0" data-duration="15" data-width="1920" data-height="1080">
+      <div id="bg-layer">
+        <div class="grain"></div>
+        <div class="vignette"></div>
+      </div>
+
+    <div id="s1" class="clip" data-start="0" data-duration="3.4" data-track-index="0">
+      <div class="eyebrow">Programme Partenaires</div>
+      <div class="display">
+        <span class="l1">Votre réseau vaut plus</span><br />
+        <span class="l2 dim">que votre portefeuille</span>
+      </div>
+      <div class="rule"></div>
+    </div>
+
+    <!-- ============ SCÈNE 2 — DEVENIR PARTENAIRE (3.2 → 6.0) ============ -->
+    <div id="s2" class="clip" data-start="3.2" data-duration="2.8" data-track-index="1">
+      <div class="step-badge">01</div>
+      <div class="display-sm">Vous devenez partenaire</div>
+      <div class="sub">Lien de referral unique, remises et accès prioritaire à la production.</div>
+    </div>
+
+    <!-- ============ SCÈNE 3 — RECOMMANDER (5.8 → 8.6) ============ -->
+    <div id="s3" class="clip" data-start="5.8" data-duration="2.8" data-track-index="2">
+      <div class="step-badge">02</div>
+      <div class="display-sm">Vous recommandez</div>
+      <div class="sub">Un contrat signé, une commission déclenchée dès le premier paiement.</div>
+    </div>
+
+    <!-- ============ SCÈNE 4 — COMPTEUR (8.4 → 11.6) ============ -->
+    <div id="s4" class="clip" data-start="8.4" data-duration="3.2" data-track-index="3">
+      <div class="eyebrow">Exemple concret</div>
+      <div class="display mono" id="counter">0 FCFA</div>
+      <div class="math">450 000 × 12 mois × 12 %</div>
+      <div class="sub">Partenaire Stratégique — le taux le plus élevé du programme.</div>
+    </div>
+
+    <!-- ============ SCÈNE 5 — PALIERS (11.4 → 13.8) ============ -->
+    <div id="s5" class="clip" data-start="11.4" data-duration="2.4" data-track-index="4">
+      <div class="eyebrow">La commission monte avec vous</div>
+      <div class="tiers">
+        <div class="tier">
+          <div class="tier-name">Partenaire</div>
+          <div class="tier-cond">Accord signé</div>
+          <div class="tier-pct">0 %</div>
+        </div>
+        <div class="tier">
+          <div class="tier-name">Actif</div>
+          <div class="tier-cond">1 client</div>
+          <div class="tier-pct">7 %</div>
+        </div>
+        <div class="tier">
+          <div class="tier-name">Premium</div>
+          <div class="tier-cond">3 clients</div>
+          <div class="tier-pct">10 %</div>
+        </div>
+        <div class="tier dark">
+          <div class="tier-name">Stratégique</div>
+          <div class="tier-cond">5 clients</div>
+          <div class="tier-pct">12 %</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCÈNE 6 — OUTRO (13.6 → 15) ============ -->
+    <div id="s6" class="clip" data-start="13.6" data-duration="1.4" data-track-index="5">
+      <div class="loop-ring"></div>
+      <div class="eyebrow">Netpub</div>
+      <div class="display-sm">Rejoignez le programme</div>
+      <div class="cta-pill mono">netpub.eurinhash.com/#/partners</div>
+    </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      const fmt = (n) => Math.floor(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+
+      /* ============ SCÈNE 1 — TITRE (0 → 3.4) ============ */
+      tl.fromTo("#s1 .eyebrow",
+        { opacity: 0, y: 18 },
+        { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0);
+
+      tl.fromTo("#s1 .l1",
+        { opacity: 0, y: 64 },
+        { opacity: 1, y: 0, duration: 0.85, ease: "power4.out" }, 0.28);
+
+      tl.fromTo("#s1 .l2",
+        { opacity: 0, y: 64 },
+        { opacity: 1, y: 0, duration: 0.85, ease: "power4.out" }, 0.44);
+
+      tl.fromTo("#s1 .rule", { width: 0 }, { width: 420, duration: 0.9, ease: "power3.inOut" }, 0.85);
+      tl.to("#s1", { opacity: 0, duration: 0.45, ease: "power2.inOut" }, 2.95);
+
+      /* ============ SCÈNES 2 & 3 — ÉTAPES ============ */
+      [[3.2, 2.8], [5.8, 2.8]].forEach(([t]) => {
+        const id = t === 3.2 ? "#s2" : "#s3";
+        tl.fromTo(id + " .step-badge",
+          { opacity: 0, scale: 0.55 },
+          { opacity: 1, scale: 1, duration: 0.65, ease: "back.out(1.7)" }, t + 0.12);
+        tl.fromTo(id + " .display-sm",
+          { opacity: 0, y: 46 },
+          { opacity: 1, y: 0, duration: 0.75, ease: "power4.out" }, t + 0.24);
+        tl.fromTo(id + " .sub",
+          { opacity: 0, y: 24 },
+          { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, t + 0.42);
+        tl.to(id, { opacity: 0, duration: 0.4, ease: "power2.inOut" }, t + 2.35);
+      });
+
+      /* ============ SCÈNE 4 — COMPTEUR (8.4 → 11.6) ============ */
+      tl.set("#s4 .eyebrow", { opacity: 0, y: 16 }, 8.4);
+      tl.to("#s4 .eyebrow", { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, 8.5);
+
+      tl.set("#s4 .math", { opacity: 0 }, 8.4);
+      tl.to("#s4 .math", { opacity: 1, duration: 0.6, ease: "power2.out" }, 11.0);
+
+      tl.set("#counter", { opacity: 0, scale: 0.86 }, 8.4);
+      tl.to("#counter", { opacity: 1, scale: 1, duration: 0.6, ease: "power3.out" }, 8.62);
+
+      const state = { v: 0 };
+      tl.set("#counter", { textContent: "0 FCFA" }, 0);
+      tl.to(state, {
+        v: 648000,
+        duration: 1.9,
+        ease: "power2.out",
+        onUpdate: () => {
+          document.getElementById("counter").textContent = fmt(state.v) + " FCFA";
+        },
+      }, 8.75);
+
+      tl.set("#s4 .sub", { opacity: 0, y: 22 }, 8.4);
+      tl.to("#s4 .sub", { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 10.95);
+      tl.to("#s4", { opacity: 0, duration: 0.42, ease: "power2.inOut" }, 11.18);
+
+      /* ============ SCÈNE 5 — PALIERS (11.4 → 13.8) ============ */
+      tl.set("#s5 .eyebrow", { opacity: 0, y: 16 }, 11.4);
+      tl.to("#s5 .eyebrow", { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 11.5);
+
+      tl.set("#s5 .tier", { opacity: 0, y: 40, scale: 0.94 }, 11.4);
+      tl.to("#s5 .tier", {
+        opacity: 1, y: 0, scale: 1,
+        duration: 0.6, ease: "back.out(1.4)", stagger: 0.11,
+      }, 11.66);
+
+      tl.to("#s5", { opacity: 0, duration: 0.38, ease: "power2.inOut" }, 13.4);
+
+      /* ============ SCÈNE 6 — OUTRO (13.6 → 15) ============ */
+      tl.set("#s6 .loop-ring", { opacity: 0, scale: 0.7 }, 13.6);
+      tl.to("#s6 .loop-ring", { opacity: 1, scale: 1, duration: 1.0, ease: "power3.out" }, 13.72);
+
+      tl.set("#s6 .eyebrow", { opacity: 0, y: 14 }, 13.6);
+      tl.to("#s6 .eyebrow", { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 13.82);
+
+      tl.set("#s6 .display-sm", { opacity: 0, y: 38 }, 13.6);
+      tl.to("#s6 .display-sm", { opacity: 1, y: 0, duration: 0.7, ease: "power4.out" }, 13.92);
+
+      tl.set("#s6 .cta-pill", { opacity: 0, y: 22, scale: 0.92 }, 13.6);
+      tl.to("#s6 .cta-pill", { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.6)" }, 14.12);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
