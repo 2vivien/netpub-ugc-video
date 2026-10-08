@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
-import { Home, Info, Briefcase, Camera, MessageSquare } from 'lucide-react'; // Import Lucide icons
+import { Home, Info, Briefcase, Camera, MessageSquare, Handshake } from 'lucide-react'; // Import Lucide icons
 import useScreenWidth from '../hooks/useScreenWidth'; // Import the hook
 
 const Header = () => {
@@ -28,6 +28,7 @@ const Header = () => {
         { to: "/about", icon: Info, label: "À Propos" },
         { to: "/services", icon: Briefcase, label: "Services" },
         { to: "/portfolio", icon: Camera, label: "Portfolio" },
+        { to: "/partners", icon: Handshake, label: "Partenaires" },
         { to: "/contact", icon: MessageSquare, label: "Contact" },
     ];
 
