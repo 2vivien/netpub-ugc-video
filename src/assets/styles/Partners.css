@@ -677,3 +677,78 @@
     border-radius: 14px;
   }
 }
+
+/* ============================================================
+   SONAR GRID — fond décoratif du hero
+   ============================================================ */
+
+.sonar-grid {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.sonar-grid.is-interactive {
+  cursor: crosshair;
+}
+
+.sonar-grid-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  /* 0 : au-dessus du fond, sous le dégradé et le texte */
+  z-index: 0;
+  /* Résolu par le canvas puis lu en JS via getComputedStyle */
+  color: var(--pnk-ink);
+}
+
+/* Le hero est enveloppé par SonarGrid : le champ doit déborder du
+   conteneur pour couvrir toute la largeur, le texte reste centré. */
+.partner-hero-sonar {
+  margin-bottom: calc(var(--spacing-unit) * 14);
+  border-radius: 24px;
+  border: 1px solid var(--pnk-line);
+  background: var(--pnk-surface);
+}
+
+.partner-hero-sonar .partner-hero {
+  margin-bottom: 0;
+  padding: calc(var(--spacing-unit) * 14) var(--container-padding);
+  max-width: 100%;
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Léger dégradé sous le texte pour garantir le contraste
+   pendant que les anneaux passent derrière. */
+.partner-hero-sonar .partner-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 46% 38% at 50% 50%,
+    rgba(253, 253, 253, 1) 0%,
+    rgba(253, 253, 253, 0.99) 55%,
+    rgba(253, 253, 253, 0.92) 78%,
+    rgba(253, 253, 253, 0.55) 92%,
+    transparent 100%
+  );
+  pointer-events: none;
+  /* 1 : au-dessus du canvas (0), en dessous du texte (2) */
+  z-index: 1;
+}
+
+.partner-hero {
+  position: relative;
+}
+
+/* Le contenu est au-dessus du dégradé de lisibilité */
+.partner-hero-sonar .partner-hero > * {
+  position: relative;
+  z-index: 2;
+}

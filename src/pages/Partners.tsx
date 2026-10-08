@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PartnerProgram from '../components/PartnerProgram';
 import PartnerVideo from '../components/PartnerVideo';
+import { SonarGrid } from '../components/ui';
 import PartnerFAQ from '../components/PartnerFAQ';
 import { usePartnersAnimations } from '../hooks/usePartnersAnimations';
 import { useChatbot } from '../contexts/ChatbotContext';
@@ -31,28 +32,40 @@ const Partners = () => {
         keywords="programme partenaires, affiliation, commission, prescripteur, réseau entreprises, netpub, marketing externe"
       />
 
-      {/* Hero */}
-      <section className="partner-hero">
-        <span className="partner-hero-eyebrow">Programme Partenaires</span>
-        <h1 className="partner-hero-title">
-          Votre réseau vaut plus<br />
-          que votre portefeuille
-        </h1>
-        <p className="partner-hero-subtitle">
-          Netpub ne fonctionne pas comme une agence où la relation s'arrête après la
-          prestation. Chaque client peut devenir prescripteur, toucher une commission,
-          et construire un réseau d'opportunités avec nous.
-        </p>
+      {/* Hero — le champ SonarGrid sert de fond, le texte passe au-dessus */}
+      <SonarGrid
+        className="partner-hero-sonar"
+        spacing={26}
+        dotRadius={1.4}
+        baseOpacity={0.22}
+        pingEvery={2.6}
+        speed={260}
+        ringWidth={90}
+        amplitude={2.2}
+        pingArea={[0.2, 0.18, 0.8, 0.82]}
+      >
+        <section className="partner-hero">
+          <span className="partner-hero-eyebrow">Programme Partenaires</span>
+          <h1 className="partner-hero-title">
+            Votre réseau vaut plus<br />
+            que votre portefeuille
+          </h1>
+          <p className="partner-hero-subtitle">
+            Netpub ne fonctionne pas comme une agence où la relation s'arrête après la
+            prestation. Chaque client peut devenir prescripteur, toucher une commission,
+            et construire un réseau d'opportunités avec nous.
+          </p>
 
-        <div className="partner-hero-actions">
-          <a href="#devenir-partenaire" className="cta-button">
-            Rejoindre le programme
-          </a>
-          <Link to="/contact" className="cta-button-secondary">
-            Nous contacter
-          </Link>
-        </div>
-      </section>
+          <div className="partner-hero-actions">
+            <a href="#devenir-partenaire" className="cta-button">
+              Rejoindre le programme
+            </a>
+            <Link to="/contact" className="cta-button-secondary">
+              Nous contacter
+            </Link>
+          </div>
+        </section>
+      </SonarGrid>
 
       {/* Vidéo de présentation */}
       <PartnerVideo />
