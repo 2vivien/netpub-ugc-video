@@ -153,6 +153,49 @@ interface ClientNameArgs {
     prenom: string;
 }
 
+// --- Utilitaires Gemini ---
+
+const MODEL_ID = 'gemini-2.5-flash-lite';
+
+/**
+ * Extrait un diagnostic lisible d'une erreur Gemini.
+ * Le SDK masque la cause derrière un message générique : sans ça,
+ * une clé invalide se manifeste uniquement par « petit hoquet ».
+ */
+const describeGeminiError = (err: unknown): string => {
+    if (err instanceof GoogleGenerativeAIFetchError) {
+        const status = (err as { status?: number }).status;
+        const message = err.message || '';
+        if (status === 400 && /API key not valid|API_KEY_INVALID/i.test(message)) {
+            return 'Clé API invalide (API_KEY_INVALID) — génère-en une sur aistudio.google.com/apikey et remplace VITE_API_KEY dans .env';
+        }
+        if (status === 400 && /API_KEY_INVALID/.test(message)) {
+            return 'Clé API invalide — vérifie VITE_API_KEY dans .env';
+        }
+        if (status === 403) return `Accès refusé (403) — la clé n'a pas la permission Generative Language API. ${message}`;
+        if (status === 404) return `Modèle introuvable (404) — vérifie ${MODEL_ID}. ${message}`;
+        if (status === 429) return 'Quota dépassé (429) — réessaie plus tard.';
+        return `Erreur Gemini ${status ?? '?'} : ${message}`;
+    }
+    return err instanceof Error ? err.message : String(err);
+};
+
+/** Message utilisateur selon la cause réelle de l'échec. */
+const userFacingError = (err: unknown): string => {
+    if (err instanceof GoogleGenerativeAIFetchError) {
+        const status = (err as { status?: number }).status;
+        const message = err.message || '';
+        if (status === 400 && /API key not valid|API_KEY_INVALID/i.test(message)) {
+            return "Je ne peux pas répondre pour le moment : ma configuration IA n'est pas valide. Écris-nous à contact@netpub.eurinhash.com et on répond directement 😊";
+        }
+        if (status === 403) return "J'ai accès à Internet mais pas encore la permission de répondre. Écris-nous à contact@netpub.eurinhash.com 😊";
+        if (status === 429) return "Oups ! Je suis un peu trop sollicitée en ce moment. Attends quelques secondes et réessaie 😊";
+        if (status === 503) return "Le serveur est un peu fatigué (503). Réessaie dans un instant, je suis là ! 🔋";
+        if (status && status >= 500) return "Il y a un petit souci technique de mon côté. Re-tente ta chance ! 🛠️";
+    }
+    return "Oups, Naïla a eu un petit hoquet. Peux-tu reformuler ta question ? 😊";
+};
+
 // --- Composant Principal ---
 
 const Chatbot: React.FC = () => {
@@ -170,6 +213,13 @@ const Chatbot: React.FC = () => {
     const inputValueRef = useRef(inputValue);
     const messagesRef = useRef(messages);
 
+    /**
+     * Statut de la clé Gemini, vérifié par un appel réel à l'API.
+     * 'pending' = pas encore testée · 'valid' · 'invalid' · 'missing'
+     */
+    const [keyStatus, setKeyStatus] = useState<'pending' | 'valid' | 'invalid' | 'missing'>('pending');
+    const keyCheckedRef = useRef(false);
+
     useEffect(() => {
         inputValueRef.current = inputValue;
     }, [inputValue]);
@@ -182,12 +232,41 @@ const Chatbot: React.FC = () => {
     const envProcess = (process.env as unknown) as Record<string, string | undefined>;
     const API_KEY = (import.meta.env.VITE_API_KEY || envProcess.VITE_API_KEY || envProcess.GEMINI_API_KEY || "").trim();
 
-    const isApiKeyValid = API_KEY !== "" &&
+    const hasKeyShape = API_KEY !== "" &&
         API_KEY !== "undefined" &&
         API_KEY !== "null" &&
         API_KEY.length > 20;
 
+    /**
+     * Vrai seulement après validation réussie par l'API.
+     * Une clé de bonne forme mais rejetée par Google ne passe pas.
+     */
+    const isApiKeyValid = hasKeyShape && keyStatus === 'valid';
+
     const GRAPHQL_ENDPOINT = '/graphql';
+
+    /**
+     * Teste réellement la clé contre l'API Gemini.
+     * Sans ça, une clé invalide passe le contrôle de forme, Naïla
+     * accueille l'utilisateur, puis échoue à chaque message.
+     */
+    const verifyApiKey = useCallback(async (): Promise<boolean> => {
+        if (!hasKeyShape) {
+            setKeyStatus('missing');
+            console.error('[Chatbot] VITE_API_KEY absente ou mal formée — ajoute-la dans .env');
+            return false;
+        }
+        try {
+            const probe = new GoogleGenerativeAI(API_KEY);
+            await probe.getGenerativeModel({ model: MODEL_ID }).generateContent('ping');
+            setKeyStatus('valid');
+            return true;
+        } catch (err) {
+            setKeyStatus('invalid');
+            console.error("[Chatbot] Clé Gemini rejetée par l'API —", describeGeminiError(err));
+            return false;
+        }
+    }, [hasKeyShape]);
 
     const stopSpeaking = useCallback(() => {
         if (window.speechSynthesis) {
@@ -228,6 +307,19 @@ const Chatbot: React.FC = () => {
     const createConversation = useCallback(async () => {
         if (isLoading || conversationId) return;
         setIsLoading(true);
+
+        const initialGreeting = keyStatus === 'valid'
+            ? "Salut ! 😊 Je suis Naïla, Community Manager chez Netpub. Comment dois-je t'appeler ?"
+            : keyStatus === 'missing'
+                ? "Hé ! On m'a oublié une configuration côté serveur. Écris-nous à contact@netpub.eurinhash.com et on te répond avec le sourire 😊"
+                : keyStatus === 'invalid'
+                    ? "Je ne peux pas répondre pour le moment : ma clé d'IA n'est pas valide. Écris-nous à contact@netpub.eurinhash.com et on s'occupe de tout 😊"
+                    : "Salut ! 😊 Je suis Naïla, Community Manager chez Netpub. Comment dois-je t'appeler ?";
+
+        // Afficher l'accueil AVANT tout appel réseau : si la persistance
+        // échoue, l'utilisateur doit quand même voir un message.
+        setMessages([{ id: Date.now(), role: 'model', text: initialGreeting, type: 'text' }]);
+
         try {
             const response = await fetch(GRAPHQL_ENDPOINT, {
                 method: 'POST',
@@ -248,19 +340,14 @@ const Chatbot: React.FC = () => {
             }
 
             const result = await response.json() as CreateConversationResponse;
+
             if (result.data?.createConversation) {
                 const conversation = result.data.createConversation;
                 setConversationId(conversation.id);
 
-                const initialGreeting = isApiKeyValid
-                    ? "Salut ! 😊 Je suis Naïla, Community Manager chez Netpub. Comment dois-je t'appeler ?"
-                    : "Désolé, le chatbot n'est pas entièrement configuré.";
-
-                setMessages([{ id: Date.now(), role: 'model', text: initialGreeting, type: 'text' }]);
-
                 await fetch(GRAPHQL_ENDPOINT, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         query: `mutation AddChatMessage($conversationId: ID!, $sender: String!, $text: String!) {
                             addChatMessage(conversationId: $conversationId, sender: $sender, text: $text) { id }
@@ -275,10 +362,13 @@ const Chatbot: React.FC = () => {
                     userId: conversation.userId
                 });
             }
-        } catch { /* ignore */ } finally {
+        } catch (err) {
+            // Le salon reste utilisable même si la sauvegarde échoue
+            console.error('[Chatbot] createConversation a échoué —', err);
+        } finally {
             setIsLoading(false);
         }
-    }, [conversationId, isLoading, isApiKeyValid]);
+    }, [conversationId, isLoading, keyStatus]);
 
     const handleSendMessage = useCallback(async (e: React.FormEvent | null, textOverride?: string) => {
         if (e) e.preventDefault();
@@ -310,7 +400,7 @@ const Chatbot: React.FC = () => {
 
         try {
             const model = aiRef.current.getGenerativeModel({
-                model: 'gemini-2.5-flash-lite',
+                model: MODEL_ID,
                 systemInstruction: systemPrompt,
             });
 
@@ -381,20 +471,14 @@ const Chatbot: React.FC = () => {
                 speakText(modelText);
             }
         } catch (err) {
-            console.error('Chatbot error:', err);
-            let errorMessage = "Oups, Naïla a eu un petit hoquet. Peux-tu reformuler ta question ? 😊";
+            console.error('[Chatbot] Échec de la génération —', describeGeminiError(err));
 
             if (err instanceof GoogleGenerativeAIFetchError) {
                 const status = (err as { status?: number }).status;
-                if (status === 429) {
-                    errorMessage = "Oups ! Je suis un peu trop sollicitée en ce moment. Attends quelques secondes et réessaie 😊";
-                } else if (status === 503) {
-                    errorMessage = "Le serveur est un peu fatigué (503). Réessaie dans un instant, je suis là ! 🔋";
-                } else if (status && status >= 500) {
-                    errorMessage = "Il y a un petit souci technique de mon côté (500). Re-tente ta chance ! 🛠️";
-                }
+                if (status === 400 || status === 403) setKeyStatus('invalid');
             }
 
+            const errorMessage = userFacingError(err);
             setMessages(prev => [...prev, { id: Date.now(), role: 'model', text: errorMessage, type: 'text' }]);
         } finally {
             setIsLoading(false);
@@ -403,14 +487,29 @@ const Chatbot: React.FC = () => {
 
     useEffect(() => {
         if (isOpen) {
-            if (!aiRef.current && isApiKeyValid) {
+            // 1. Vérifier la clé une seule fois par session, sur un vrai appel API
+            if (!keyCheckedRef.current) {
+                keyCheckedRef.current = true;
+                verifyApiKey().then((ok) => {
+                    if (ok && !aiRef.current) {
+                        try {
+                            aiRef.current = new GoogleGenerativeAI(API_KEY);
+                        } catch (err) {
+                            console.error('[Chatbot] Initialisation Gemini impossible —', describeGeminiError(err));
+                        }
+                    }
+                });
+            } else if (keyStatus === 'valid' && !aiRef.current) {
                 try {
                     aiRef.current = new GoogleGenerativeAI(API_KEY);
                 } catch (err) {
-                    console.error('Failed to initialize GoogleGenAI:', err);
+                    console.error('[Chatbot] Initialisation Gemini impossible —', describeGeminiError(err));
                 }
             }
-            if (messages.length === 0 && !conversationId && !isLoading) {
+
+            // 2. La conversation démarre une fois le statut de la clé connu,
+            //    pour que l'accueil reflète la réalité
+            if (keyStatus !== 'pending' && messages.length === 0 && !conversationId && !isLoading) {
                 createConversation();
             }
 
@@ -425,7 +524,7 @@ const Chatbot: React.FC = () => {
             if (messages.length > 0) setMessages([]);
             if (conversationId !== null) setConversationId(null);
         }
-    }, [isOpen, API_KEY, messages.length, conversationId, isLoading, createConversation, handleSendMessage, isApiKeyValid]);
+    }, [isOpen, API_KEY, messages.length, conversationId, isLoading, createConversation, handleSendMessage, keyStatus, verifyApiKey]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
