@@ -4,5 +4,6 @@ import { Badge } from './Badge';
 import { Button } from './Button';
 import { Table, TableRow, TableCell } from './Table';
 import { EmptyState } from './EmptyState';
+import { SonarGrid } from './SonarGrid';
 
-export { Card, StatCard, Badge, Button, Table, TableRow, TableCell, EmptyState };
+export { Card, StatCard, Badge, Button, Table, TableRow, TableCell, EmptyState, SonarGrid };
