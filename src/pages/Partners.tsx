@@ -1,23 +1,17 @@
 import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import useOnScreen from '../hooks/useOnScreen';
 import PartnerProgram from '../components/PartnerProgram';
 import PartnerFAQ from '../components/PartnerFAQ';
+import { usePartnersAnimations } from '../hooks/usePartnersAnimations';
 import { useChatbot } from '../contexts/ChatbotContext';
 import SEO from '../components/SEO';
 import '../assets/styles/Partners.css';
 
 const Partners = () => {
   const { openChatbot } = useChatbot();
+  const rootRef = useRef<HTMLDivElement>(null);
 
-  const heroRef = useRef<HTMLElement>(null);
-  const isHeroVisible = useOnScreen(heroRef as React.RefObject<HTMLElement>, { threshold: 0.05 });
-
-  const programRef = useRef<HTMLDivElement>(null);
-  const isProgramVisible = useOnScreen(programRef, { threshold: 0.05 });
-
-  const faqRef = useRef<HTMLDivElement>(null);
-  const isFaqVisible = useOnScreen(faqRef, { threshold: 0.05 });
+  usePartnersAnimations(rootRef);
 
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
@@ -29,27 +23,24 @@ const Partners = () => {
   };
 
   return (
-    <div className="page-container partners-page">
+    <div className="page-container partners-page" ref={rootRef}>
       <SEO
         title="Programme Partenaires - Devenir prescripteur & touché une commission"
-        description="Le Programme Partenaires Netpub : recommandez Netpub à votre réseau, touchez 12% de commission sur chaque contrat signé, et bénéficiez de tarifs préférentiels et de l'accès prioritaire à la production."
+        description="Le Programme Partenaires Netpub : recommandez Netpub à votre réseau, touchez jusqu'à 12% de commission sur chaque contrat signé, et bénéficiez de remises et de l'accès prioritaire à la production."
         keywords="programme partenaires, affiliation, commission, prescripteur, réseau entreprises, netpub, marketing externe"
       />
 
       {/* Hero */}
-      <section
-        ref={heroRef}
-        className={`partner-hero fade-up-section ${isHeroVisible ? 'is-visible' : ''}`}
-      >
+      <section className="partner-hero">
         <span className="partner-hero-eyebrow">Programme Partenaires</span>
         <h1 className="partner-hero-title">
           Votre réseau vaut plus<br />
           que votre portefeuille
         </h1>
         <p className="partner-hero-subtitle">
-          Netpub ne fonctionne pas comme une agence où la relation s’arrête après la
+          Netpub ne fonctionne pas comme une agence où la relation s'arrête après la
           prestation. Chaque client peut devenir prescripteur, toucher une commission,
-          et construire un réseau d’opportunités avec nous.
+          et construire un réseau d'opportunités avec nous.
         </p>
 
         <div className="partner-hero-actions">
@@ -63,9 +54,7 @@ const Partners = () => {
       </section>
 
       {/* Programme */}
-      <div ref={programRef} className={`fade-up-section ${isProgramVisible ? 'is-visible' : ''}`}>
-        <PartnerProgram />
-      </div>
+      <PartnerProgram />
 
       {/* Devenir partenaire */}
       <section id="devenir-partenaire" className="partner-join">
@@ -78,7 +67,7 @@ const Partners = () => {
 
           {sent ? (
             <div className="partner-join-success">
-              <p>Demande reçuse. Notre équipe vous recontacte sous 48h.</p>
+              <p>Demande reçue. Notre équipe vous recontacte sous 48h.</p>
               <button className="cta-button-secondary" onClick={() => setSent(false)}>
                 Envoyer une autre demande
               </button>
@@ -104,20 +93,17 @@ const Partners = () => {
             <Link to="/services" onClick={() => setTimeout(openChatbot, 300)}>
               Découvrir nos offres
             </Link>{' '}
-            et choisissons votre niveau d’accompagnement.
+            et choisissons votre niveau d'accompagnement.
           </p>
         </div>
       </section>
 
       {/* FAQ */}
-      <section
-        ref={faqRef}
-        className={`partner-faq-section fade-up-section ${isFaqVisible ? 'is-visible' : ''}`}
-      >
+      <section className="partner-faq-section">
         <div className="partner-section-header">
           <h2 className="section-title">Questions fréquentes</h2>
           <p className="section-subtitle">
-            Tout ce qu’il faut savoir avant de rejoindre le programme.
+            Tout ce qu'il faut savoir avant de rejoindre le programme.
           </p>
         </div>
 
