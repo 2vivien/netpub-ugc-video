@@ -600,3 +600,41 @@
     transition: none;
   }
 }
+/* ============================================================
+   MOTION — Support des animations GSAP
+   ============================================================ */
+
+/* Hero : split-text reveal */
+.hero-line-mask {
+  display: block;
+  overflow: hidden;
+}
+
+.hero-line-inner {
+  display: block;
+  will-change: transform;
+}
+
+/* Étapes : ligne verticale qui se dessine au scroll */
+.partner-steps-grid {
+  position: relative;
+}
+
+.partner-steps-line {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: 100%;
+  background: var(--pnk-line);
+  transform-origin: top center;
+  transform: scaleY(0);
+  z-index: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 1024px) {
+  .partner-steps-line {
+    display: none;
+  }
+}
