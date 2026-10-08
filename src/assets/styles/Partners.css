@@ -638,3 +638,42 @@
     display: none;
   }
 }
+
+/* ============================================================
+   VIDÉO DE PRÉSENTATION
+   ============================================================ */
+
+.partner-video {
+  position: relative;
+  margin-bottom: calc(var(--spacing-unit) * 14);
+}
+
+.partner-video-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 20px;
+  border: 1px solid var(--pnk-line);
+  background: var(--pnk-ink);
+}
+
+.partner-video-el {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.partner-video-caption {
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--pnk-grey);
+  margin-top: calc(var(--spacing-unit) * 2.5);
+}
+
+@media (max-width: 640px) {
+  .partner-video-frame {
+    border-radius: 14px;
+  }
+}
