@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PartnerProgram from '../components/PartnerProgram';
+import PartnerVideo from '../components/PartnerVideo';
 import PartnerFAQ from '../components/PartnerFAQ';
 import { usePartnersAnimations } from '../hooks/usePartnersAnimations';
 import { useChatbot } from '../contexts/ChatbotContext';
@@ -52,6 +53,9 @@ const Partners = () => {
           </Link>
         </div>
       </section>
+
+      {/* Vidéo de présentation */}
+      <PartnerVideo />
 
       {/* Programme */}
       <PartnerProgram />
