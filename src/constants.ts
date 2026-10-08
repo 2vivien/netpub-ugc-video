@@ -89,10 +89,10 @@ export const portfolioProjects: PortfolioProject[] = [
     bio: 'Partage ses looks tendances et ses routines beauté au quotidien.',
     hashtags: ['Mode', 'Beauté', 'Lifestyle'],
     mediaItems: [
-      { url: '/images/influencers/iliana/1.jpg', type: 'image' },
-      { url: '/images/influencers/iliana/2.jpg', type: 'image' },
-      { url: '/images/influencers/iliana/3.jpg', type: 'image' },
-      { url: '/images/influencers/iliana/4.jpg', type: 'image' }
+      { url: '/webp-images/influencers/iliana/1.webp', type: 'image' },
+      { url: '/webp-images/influencers/iliana/2.webp', type: 'image' },
+      { url: '/webp-images/influencers/iliana/3.webp', type: 'image' },
+      { url: '/webp-images/influencers/iliana/4.webp', type: 'image' }
     ]
   },
   {
@@ -105,10 +105,10 @@ export const portfolioProjects: PortfolioProject[] = [
     bio: 'Spécialisée dans la beauté, le sport et les services modernes.',
     hashtags: ['Beauté', 'Sport', 'Lifestyle'],
     mediaItems: [
-      { url: '/images/influencers/faeza/1.jpg', type: 'image' },
-      { url: '/images/influencers/faeza/2.jpg', type: 'image' },
-      { url: '/images/influencers/faeza/3.jpg', type: 'image' },
-      { url: '/images/influencers/faeza/4.jpg', type: 'image' }
+      { url: '/webp-images/influencers/faeza/1.webp', type: 'image' },
+      { url: '/webp-images/influencers/faeza/2.webp', type: 'image' },
+      { url: '/webp-images/influencers/faeza/3.webp', type: 'image' },
+      { url: '/webp-images/influencers/faeza/4.webp', type: 'image' }
     ]
   },
   {
@@ -121,10 +121,10 @@ export const portfolioProjects: PortfolioProject[] = [
     bio: 'Passionnée par la mode et les collaborations innovantes.',
     hashtags: ['Mode', 'Soins', 'Innovation'],
     mediaItems: [
-      { url: '/images/influencers/anouk/1.jpg', type: 'image' },
-      { url: '/images/influencers/anouk/2.jpg', type: 'image' },
-      { url: '/images/influencers/anouk/3.jpg', type: 'image' },
-      { url: '/images/influencers/anouk/4.jpg', type: 'image' }
+      { url: '/webp-images/influencers/anouk/1.webp', type: 'image' },
+      { url: '/webp-images/influencers/anouk/2.webp', type: 'image' },
+      { url: '/webp-images/influencers/anouk/3.webp', type: 'image' },
+      { url: '/webp-images/influencers/anouk/4.webp', type: 'image' }
     ]
   },
   {
@@ -137,10 +137,10 @@ export const portfolioProjects: PortfolioProject[] = [
     bio: 'Met en avant les produits tendance et la beauté naturelle.',
     hashtags: ['Lifestyle', 'Beauté', 'Tendance'],
     mediaItems: [
-      { url: '/images/influencers/maelys/1.jpg', type: 'image' },
-      { url: '/images/influencers/maelys/2.jpg', type: 'image' },
-      { url: '/images/influencers/maelys/3.jpg', type: 'image' },
-      { url: '/images/influencers/maelys/4.jpg', type: 'image' }
+      { url: '/webp-images/influencers/maelys/1.webp', type: 'image' },
+      { url: '/webp-images/influencers/maelys/2.webp', type: 'image' },
+      { url: '/webp-images/influencers/maelys/3.webp', type: 'image' },
+      { url: '/webp-images/influencers/maelys/4.webp', type: 'image' }
     ]
   },
   {
@@ -153,10 +153,10 @@ export const portfolioProjects: PortfolioProject[] = [
     bio: 'Dynamique et axée sur la mode et le bien-être.',
     hashtags: ['Mode', 'Bien-être', 'Lifestyle'],
     mediaItems: [
-      { url: '/images/influencers/tayla/1.jpg', type: 'image' },
-      { url: '/images/influencers/tayla/2.jpg', type: 'image' },
-      { url: '/images/influencers/tayla/3.jpg', type: 'image' },
-      { url: '/images/influencers/tayla/4.jpg', type: 'image' }
+      { url: '/webp-images/influencers/tayla/1.webp', type: 'image' },
+      { url: '/webp-images/influencers/tayla/2.webp', type: 'image' },
+      { url: '/webp-images/influencers/tayla/3.webp', type: 'image' },
+      { url: '/webp-images/influencers/tayla/4.webp', type: 'image' }
     ]
   }
 ];
