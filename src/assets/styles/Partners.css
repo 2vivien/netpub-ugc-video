@@ -761,3 +761,236 @@
   position: relative;
   z-index: 2;
 }
+
+/* ============================================================
+   CARTES DE PALIER — courbe d'évolution
+   ============================================================ */
+
+.tier-chart-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--pnk-surface);
+  border: 1px solid var(--pnk-line);
+  border-radius: 20px;
+  padding: calc(var(--spacing-unit) * 3.5) calc(var(--spacing-unit) * 3);
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+/* Halo coloré propre à chaque carte, révélé au survol */
+.tier-chart-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    160deg,
+    var(--tier-glow, rgba(124, 92, 255, 0.5)),
+    transparent 62%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.tier-chart-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 22px 48px -14px rgba(22, 22, 26, 0.16);
+  border-color: transparent;
+}
+
+.tier-chart-card:hover::before {
+  opacity: 1;
+}
+
+/* --- en-tête --- */
+.tier-chart-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: calc(var(--spacing-unit) * 1.5);
+  margin-bottom: calc(var(--spacing-unit) * 2.5);
+}
+
+.tier-chart-name {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--pnk-ink);
+  letter-spacing: -0.2px;
+  margin-bottom: 4px;
+}
+
+.tier-chart-condition {
+  font-size: 0.76rem;
+  color: var(--pnk-grey);
+  line-height: 1.4;
+}
+
+.tier-chart-flag {
+  flex-shrink: 0;
+  background: var(--pnk-ink);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* --- chiffre clé --- */
+.tier-chart-rate {
+  display: flex;
+  align-items: baseline;
+  gap: calc(var(--spacing-unit) * 1.25);
+  margin-bottom: calc(var(--spacing-unit) * 1.5);
+}
+
+.tier-chart-count {
+  font-family: var(--font-mono);
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.055em;
+  color: var(--tier-ink, var(--pnk-ink));
+}
+
+.tier-chart-rate-label {
+  font-size: 0.76rem;
+  color: var(--pnk-grey);
+}
+
+/* --- graphique --- */
+.tier-chart-plot {
+  margin: 0 calc(var(--spacing-unit) * -1) calc(var(--spacing-unit) * 1.5);
+  position: relative;
+}
+
+/* --- légende --- */
+.tier-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--spacing-unit) * 1.75);
+  list-style: none;
+  padding: 0 0 calc(var(--spacing-unit) * 2);
+  margin: 0;
+  border-bottom: 1px solid var(--pnk-line);
+}
+
+.tier-chart-legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  color: var(--pnk-grey);
+  font-family: var(--font-mono);
+}
+
+.tier-chart-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* --- avantage --- */
+.tier-chart-bonus {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--pnk-ink-soft, #3d3d42);
+  padding-top: calc(var(--spacing-unit) * 1.75);
+}
+
+/* --- carte mise en avant --- */
+.tier-chart-card.is-featured {
+  background: var(--pnk-ink);
+  border-color: var(--pnk-ink);
+  --tier-ink: #fff;
+  --tier-glow: rgba(245, 158, 11, 0.65);
+}
+
+.tier-chart-card.is-featured .tier-chart-name {
+  color: #fff;
+}
+
+.tier-chart-card.is-featured .tier-chart-condition,
+.tier-chart-card.is-featured .tier-chart-rate-label,
+.tier-chart-card.is-featured .tier-chart-legend li {
+  color: rgba(253, 253, 253, 0.6);
+}
+
+.tier-chart-card.is-featured .tier-chart-bonus {
+  color: rgba(253, 253, 253, 0.85);
+}
+
+.tier-chart-card.is-featured .tier-chart-legend {
+  border-bottom-color: rgba(253, 253, 253, 0.16);
+}
+
+.tier-chart-card.is-featured .tier-chart-flag {
+  background: #f59e0b;
+  color: #1a1408;
+}
+
+@media (max-width: 640px) {
+  .tier-chart-count {
+    font-size: 2.2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tier-chart-card,
+  .tier-chart-card::before {
+    transition: none;
+  }
+}
+
+/* --- Ajustements d'alignement entre les 4 cartes --- */
+
+/* Légende sur une seule ligne : les 4 cartes gardent la même hauteur */
+.tier-chart-legend {
+  gap: calc(var(--spacing-unit) * 1.4);
+  flex-wrap: nowrap;
+}
+
+.tier-chart-legend li {
+  font-size: 0.64rem;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+/* Le titre de la carte mise en avant peut courir sur 2 lignes :
+   on réserve la hauteur pour que la grille reste alignée. */
+.tier-chart-head {
+  min-height: 62px;
+}
+
+.tier-chart-card.is-featured .tier-chart-name {
+  font-size: 0.98rem;
+}
+
+.tier-chart-plot {
+  margin-bottom: calc(var(--spacing-unit) * 2);
+}
+
+/* La carte "Partenaire Stratégique" a un titre sur 2 lignes : on réserve
+   la hauteur maximale pour que les 4 graphiques démarre à la même ligne. */
+.tier-chart-head {
+  min-height: 78px;
+}
+
+.tier-chart-card.is-featured .tier-chart-name {
+  line-height: 1.25;
+}
+
+/* Le bas des 4 cartes s'aligne même si le contenu diffère en hauteur */
+.tier-chart-bonus {
+  margin-top: auto;
+}
