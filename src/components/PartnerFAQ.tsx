@@ -26,12 +26,12 @@ const faqItems: FAQItem[] = [
   {
     question: "Comment sont calculées les commissions ?",
     answer:
-      "Le taux dépend de votre statut : 7% au statut Actif (1 client), 10% au Premium (3 clients), 12% au Stratégique (5 clients). Le taux s'applique sur la première année du contrat apporté. Exemple : un contrat Performance à 450 000 FCFA/mois au statut Stratégique génère 648 000 FCFA de commission.",
+      "Le taux dépend de votre statut : 7% au statut Actif (1 client), 10% au Premium (3 clients), 12% au Stratégique (5 clients). Le taux s'applique sur le montant du contrat annuel apporté. Exemple : un contrat Performance ferme de 12 mois à 450 000 FCFA/mois, soit 5 400 000 FCFA par an, génère 648 000 FCFA de commission au statut Stratégique.",
   },
   {
     question: "Quand et comment suis-je payé ?",
     answer:
-      "La commission est versée à l'encaissement du premier paiement du client recommandé, par virement ou mobile money. Vous n'attendez pas 12 mois : dès que votre client règle sa première facture, votre commission est déclenchée.",
+      "La commission porte sur le contrat annuel du client recommandé, versée en une fois par virement ou mobile money. Dès que le client règle sa facture annuelle, votre commission est déclenchée.",
   },
   {
     question: "Comment fonctionne le lien de referral ?",
