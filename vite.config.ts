@@ -76,9 +76,12 @@ export default defineConfig(({ command, mode }: { command: string, mode: string 
     },
     plugins: [react()],
     define: {
-      'process.env.VITE_API_KEY': JSON.stringify(env.VITE_API_KEY),
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || env.VITE_API_KEY),
-      'process.env.API_KEY': JSON.stringify(env.API_KEY || env.VITE_API_KEY || env.GEMINI_API_KEY)
+      // Aucune clé API n'est injectée dans le bundle.
+    // L'IA (Naïla) est appelée via le backend : la clé Gemini y reste confinée.
+    // Toute define ici se retrouve dans le JS public, donc lisible par un visiteur.
+    'process.env.VITE_API_KEY': JSON.stringify(''),
+    'process.env.GEMINI_API_KEY': JSON.stringify(''),
+    'process.env.API_KEY': JSON.stringify('')
     },
     resolve: {
       alias: {

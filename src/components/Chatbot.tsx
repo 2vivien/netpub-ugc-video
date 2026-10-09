@@ -1,16 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { GoogleGenerativeAI, FunctionDeclaration, SchemaType, Tool, GoogleGenerativeAIFetchError } from '@google/generative-ai';
 import { ChatMessage, PortfolioCategory } from '../types';
 import { useChatbot } from '../contexts/ChatbotContext';
 import { NotificationService } from '../lib/notifications';
 import { getAIContext } from '../lib/context-loader';
-
-// --- Interfaces pour le SDK Gemini ---
-
-interface GeminiResponse {
-    text(): string;
-    functionCalls(): Array<{ name: string; args: object }> | undefined;
-}
+import { askNaila, fetchNailaStatus, NailaTurn } from '../lib/nailaClient';
 
 // --- Interfaces pour Speech Recognition ---
 
@@ -48,155 +41,137 @@ interface SpeechRecognitionEvent extends Event {
     };
 }
 
-// --- Déclarations des fonctions Gemini ---
-
-const prendreRendezVous: FunctionDeclaration = {
-    name: 'prendreRendezVous',
-    description: "Prendre un rendez-vous pour un service spécifique à une date et une heure données.",
-    parameters: {
-        type: SchemaType.OBJECT,
-        properties: {
-            service: {
-                type: SchemaType.STRING,
-                description: `Le service qui intéresse le client. Doit être l'une des options suivantes : '${PortfolioCategory.VIDEO_UGC}' ou '${PortfolioCategory.VIDEO_SPOT_PUBLICITAIRE}'.`,
-            },
-            date: {
-                type: SchemaType.STRING,
-                description: "La date souhaitée pour le rendez-vous, au format 'JJ/MM/AAAA' ou une description textuelle comme 'demain' ou 'mardi prochain'.",
-            },
-            heure: {
-                type: SchemaType.STRING,
-                description: "L'heure souhaitée pour le rendez-vous, au format 'HH:MM' ou une description textuelle comme 'l'après-midi' ou '15h'.",
-            },
-        },
-        required: ['service', 'date', 'heure'],
-    },
-};
-
-const passerCommande: FunctionDeclaration = {
-    name: 'passerCommande',
-    description: "Passer une commande pour un service spécifique avec des détails additionnels.",
-    parameters: {
-        type: SchemaType.OBJECT,
-        properties: {
-            service: {
-                type: SchemaType.STRING,
-                description: `Le service que le client souhaite commander. Doit être l'une des options suivantes : '${PortfolioCategory.VIDEO_UGC}' ou '${PortfolioCategory.VIDEO_SPOT_PUBLICITAIRE}'.`,
-            },
-            details: {
-                type: SchemaType.STRING,
-                description: "Un bref résumé des besoins ou des détails spécifiques pour la commande.",
-            },
-        },
-        required: ['service', 'details'],
-    },
-};
-
-const collecterInfosClient: FunctionDeclaration = {
-    name: 'collecterInfosClient',
-    description: "Collecter les informations du client pour le contacter.",
-    parameters: {
-        type: SchemaType.OBJECT,
-        properties: {
-            nom: { type: SchemaType.STRING, description: "Le nom complet du client." },
-            prenom: { type: SchemaType.STRING, description: "Le prénom du client." },
-            telephone: { type: SchemaType.STRING, description: "Le numéro de téléphone du client." },
-            email: { type: SchemaType.STRING, description: "L'adresse email du client." },
-        },
-    },
-};
-
-const collecterFeedbackSite: FunctionDeclaration = {
-    name: 'collecterFeedbackSite',
-    description: "Collecter le feedback du client sur comment il a trouvé le site.",
-    parameters: {
-        type: SchemaType.OBJECT,
-        properties: {
-            feedback: {
-                type: SchemaType.STRING,
-                description: "Comment le client a trouvé le site.",
-            },
-        },
-        required: ['feedback'],
-    },
-};
-
-const enregistrerNomClient: FunctionDeclaration = {
-    name: 'enregistrerNomClient',
-    description: "Enregistrer le nom du client.",
-    parameters: {
-        type: SchemaType.OBJECT,
-        properties: {
-            nom: { type: SchemaType.STRING, description: "Le nom de famille du client." },
-            prenom: { type: SchemaType.STRING, description: "Le prénom du client." },
-        },
-        required: ['prenom'],
-    },
-};
-
-// --- Types pour les Arguments de Fonction ---
-
-interface AppointmentArgs {
-    service: string;
-    date: string;
-    heure: string;
-}
-
-interface ClientInfoArgs {
-    prenom: string;
-    telephone: string;
-    email: string;
-}
-
-interface ClientNameArgs {
-    nom?: string;
-    prenom: string;
-}
-
-// --- Utilitaires Gemini ---
-
-const MODEL_ID = 'gemini-2.5-flash-lite';
+// --- Utilitaires Naïla ---
+//
+// L'appel au modèle passe par le backend (mutation `askNaila`).
+// Aucune clé API n'est lue ni exposée dans le navigateur.
 
 /**
- * Extrait un diagnostic lisible d'une erreur Gemini.
- * Le SDK masque la cause derrière un message générique : sans ça,
- * une clé invalide se manifeste uniquement par « petit hoquet ».
+ * Traduit un motif renvoyé par le serveur en diagnostic lisible.
+ * Le serveur classifie déjà ses erreurs : le front ne fait que les nommer.
  */
-const describeGeminiError = (err: unknown): string => {
-    if (err instanceof GoogleGenerativeAIFetchError) {
-        const status = (err as { status?: number }).status;
-        const message = err.message || '';
-        if (status === 400 && /API key not valid|API_KEY_INVALID/i.test(message)) {
-            return 'Clé API invalide (API_KEY_INVALID) — génère-en une sur aistudio.google.com/apikey et remplace VITE_API_KEY dans .env';
-        }
-        if (status === 400 && /API_KEY_INVALID/.test(message)) {
-            return 'Clé API invalide — vérifie VITE_API_KEY dans .env';
-        }
-        if (status === 403) return `Accès refusé (403) — la clé n'a pas la permission Generative Language API. ${message}`;
-        if (status === 404) return `Modèle introuvable (404) — vérifie ${MODEL_ID}. ${message}`;
-        if (status === 429) return 'Quota dépassé (429) — réessaie plus tard.';
-        return `Erreur Gemini ${status ?? '?'} : ${message}`;
+const describeNailaError = (err: unknown): string => {
+    const reason = err instanceof Error ? err.message : String(err);
+
+    switch (reason) {
+        case 'MISSING_KEY':
+            return 'Clé API absente côté serveur — ajoute GEMINI_API_KEY dans .env puis relance le backend';
+        case 'API_KEY_INVALID':
+            return 'Clé API invalide — génère-en une sur aistudio.google.com/apikey et remplace GEMINI_API_KEY dans .env';
+        case 'PERMISSION_DENIED':
+            return 'Accès refusé (403) — active la Generative Language API sur le projet Google Cloud';
+        case 'MODEL_NOT_FOUND':
+            return `Modèle introuvable (404) — ajuste GEMINI_MODEL_ID dans .env`;
+        case 'QUOTA_EXCEEDED':
+            return 'Quota Gemini dépassé (429) — réessaie plus tard';
+        case 'SERVER_ERROR':
+            return 'Erreur serveur Gemini (5xx) — réessaie dans un instant';
+        case 'NETWORK_ERROR':
+            return 'Serveur injoignable — vérifie que le backend tourne';
+        default:
+            return reason;
     }
-    return err instanceof Error ? err.message : String(err);
 };
 
 /** Message utilisateur selon la cause réelle de l'échec. */
 const userFacingError = (err: unknown): string => {
-    if (err instanceof GoogleGenerativeAIFetchError) {
-        const status = (err as { status?: number }).status;
-        const message = err.message || '';
-        if (status === 400 && /API key not valid|API_KEY_INVALID/i.test(message)) {
+    const reason = err instanceof Error ? err.message : String(err);
+
+    switch (reason) {
+        case 'MISSING_KEY':
+        case 'API_KEY_INVALID':
+        case 'PERMISSION_DENIED':
+        case 'MODEL_NOT_FOUND':
             return "Je ne peux pas répondre pour le moment : ma configuration IA n'est pas valide. Écris-nous à contact@netpub.eurinhash.com et on répond directement 😊";
-        }
-        if (status === 403) return "J'ai accès à Internet mais pas encore la permission de répondre. Écris-nous à contact@netpub.eurinhash.com 😊";
-        if (status === 429) return "Oups ! Je suis un peu trop sollicitée en ce moment. Attends quelques secondes et réessaie 😊";
-        if (status === 503) return "Le serveur est un peu fatigué (503). Réessaie dans un instant, je suis là ! 🔋";
-        if (status && status >= 500) return "Il y a un petit souci technique de mon côté. Re-tente ta chance ! 🛠️";
+        case 'QUOTA_EXCEEDED':
+            return "Oups ! Je suis un peu trop sollicitée en ce moment. Attends quelques secondes et réessaie 😊";
+        case 'SERVER_ERROR':
+            return "Le serveur est un peu fatigué. Réessaie dans un instant, je suis là ! 🔋";
+        case 'NETWORK_ERROR':
+        case 'HTTP_502':
+        case 'HTTP_503':
+            return "J'ai du mal à joindre mon cerveau là. Réessaie dans un instant 🛠️";
+        default:
+            return "Oups, Naïla a eu un petit hoquet. Peux-tu reformuler ta question ? 😊";
     }
-    return "Oups, Naïla a eu un petit hoquet. Peux-tu reformuler ta question ? 😊";
 };
 
 // --- Composant Principal ---
+
+/**
+ * Exécute l'appel de fonction demandé par le modèle et renvoie le texte de
+ * confirmation à afficher. Les mutations GraphQL restent côté client comme
+ * auparavant : seule l'appel au modèle est passé côté serveur.
+ */
+const applyNailaFunction = async (
+  name: string,
+  args: Record<string, unknown>,
+  conversationId: string | null
+): Promise<string> => {
+    const post = async (query: string, variables: Record<string, unknown>) => {
+        await fetch(GRAPHQL_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query, variables }),
+        });
+    };
+
+    switch (name) {
+        case 'prendreRendezVous': {
+            const service = String(args.service ?? '');
+            const date = String(args.date ?? '');
+            const heure = String(args.heure ?? '');
+            await post(
+                `mutation CreateAppointment($service: String!, $date: String!, $time: String!, $conversationId: String!) {
+                    createAppointment(service: $service, date: $date, time: $time, conversationId: $conversationId) { id }
+                }`,
+                { service, date, time: heure, conversationId }
+            );
+            return `RDV noté pour ${service} le ${date} à ${heure}.`;
+        }
+
+        case 'enregistrerNomClient': {
+            const prenom = String(args.prenom ?? '');
+            const nom = args.nom ? String(args.nom) : '';
+            await post(
+                `mutation UpdateConversation($conversationId: String!, $clientName: String) {
+                    updateConversation(conversationId: $conversationId, clientName: $clientName) { id }
+                }`,
+                { conversationId, clientName: nom ? `${nom} ${prenom}` : prenom }
+            );
+            return `C'est noté ${prenom} ! Qu'est-ce qui t'amène ?`;
+        }
+
+        case 'collecterInfosClient': {
+            const prenom = String(args.prenom ?? '');
+            await post(
+                `mutation UpdateConversation($conversationId: String!, $clientName: String, $clientEmail: String, $clientPhone: String) {
+                    updateConversation(conversationId: $conversationId, clientName: $clientName, clientEmail: $clientEmail, clientPhone: $clientPhone) { id }
+                }`,
+                {
+                    conversationId,
+                    clientName: prenom,
+                    clientEmail: args.email ? String(args.email) : null,
+                    clientPhone: args.telephone ? String(args.telephone) : null,
+                }
+            );
+            return `Merci ${prenom} ! Infos notées.`;
+        }
+
+        case 'collecterFeedbackSite': {
+            const message = String(args.message ?? '');
+            return `Merci pour ton retour, on le note : « ${message} »`;
+        }
+
+        case 'passerCommande': {
+            const service = String(args.service ?? '');
+            return `Commande enregistrée pour « ${service} ». On te recontacte pour finaliser.`;
+        }
+
+        default:
+            return "C'est noté !";
+    }
+};
 
 const Chatbot: React.FC = () => {
     const { isOpen, toggleChatbot, closeChatbot } = useChatbot();
@@ -206,7 +181,6 @@ const Chatbot: React.FC = () => {
     const [isRecording, setIsRecording] = useState(false);
     const [conversationId, setConversationId] = useState<string | null>(null);
 
-    const aiRef = useRef<GoogleGenerativeAI | null>(null);
     const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
     const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -214,8 +188,8 @@ const Chatbot: React.FC = () => {
     const messagesRef = useRef(messages);
 
     /**
-     * Statut de la clé Gemini, vérifié par un appel réel à l'API.
-     * 'pending' = pas encore testée · 'valid' · 'invalid' · 'missing'
+     * Statut de la configuration IA, demandé au serveur.
+     * 'pending' = pas encore testé · 'valid' · 'invalid' · 'missing'
      */
     const [keyStatus, setKeyStatus] = useState<'pending' | 'valid' | 'invalid' | 'missing'>('pending');
     const keyCheckedRef = useRef(false);
@@ -228,45 +202,36 @@ const Chatbot: React.FC = () => {
         messagesRef.current = messages;
     }, [messages]);
 
-    // Robust API Key retrieval with fallbacks
-    const envProcess = (process.env as unknown) as Record<string, string | undefined>;
-    const API_KEY = (import.meta.env.VITE_API_KEY || envProcess.VITE_API_KEY || envProcess.GEMINI_API_KEY || "").trim();
-
-    const hasKeyShape = API_KEY !== "" &&
-        API_KEY !== "undefined" &&
-        API_KEY !== "null" &&
-        API_KEY.length > 20;
-
-    /**
-     * Vrai seulement après validation réussie par l'API.
-     * Une clé de bonne forme mais rejetée par Google ne passe pas.
-     */
-    const isApiKeyValid = hasKeyShape && keyStatus === 'valid';
-
     const GRAPHQL_ENDPOINT = '/graphql';
 
     /**
-     * Teste réellement la clé contre l'API Gemini.
-     * Sans ça, une clé invalide passe le contrôle de forme, Naïla
-     * accueille l'utilisateur, puis échoue à chaque message.
+     * Demande au serveur si sa clé Gemini est opérationnelle.
+     * La clé n'est jamais lue ici : le front ne fait que lire un statut.
      */
     const verifyApiKey = useCallback(async (): Promise<boolean> => {
-        if (!hasKeyShape) {
-            setKeyStatus('missing');
-            console.error('[Chatbot] VITE_API_KEY absente ou mal formée — ajoute-la dans .env');
-            return false;
-        }
         try {
-            const probe = new GoogleGenerativeAI(API_KEY);
-            await probe.getGenerativeModel({ model: MODEL_ID }).generateContent('ping');
+            const status = await fetchNailaStatus();
+
+            if (!status.configured) {
+                setKeyStatus('missing');
+                console.error('[Chatbot] GEMINI_API_KEY absente côté serveur — ajoute-la dans .env');
+                return false;
+            }
+
+            if (!status.valid) {
+                setKeyStatus('invalid');
+                console.error('[Chatbot] Clé Gemini rejetée —', status.reason);
+                return false;
+            }
+
             setKeyStatus('valid');
             return true;
         } catch (err) {
             setKeyStatus('invalid');
-            console.error("[Chatbot] Clé Gemini rejetée par l'API —", describeGeminiError(err));
+            console.error('[Chatbot] Impossible de vérifier la configuration IA —', err);
             return false;
         }
-    }, [hasKeyShape]);
+    }, []);
 
     const stopSpeaking = useCallback(() => {
         if (window.speechSynthesis) {
@@ -373,7 +338,7 @@ const Chatbot: React.FC = () => {
     const handleSendMessage = useCallback(async (e: React.FormEvent | null, textOverride?: string) => {
         if (e) e.preventDefault();
         const textToSend = textOverride || inputValueRef.current;
-        if (!textToSend.trim() || isLoading || !aiRef.current) return;
+        if (!textToSend.trim() || isLoading) return;
 
         const userMessage: ChatMessage = { id: Date.now(), role: 'user', text: textToSend, type: 'text' };
         setMessages(prev => [...prev, userMessage]);
@@ -382,100 +347,59 @@ const Chatbot: React.FC = () => {
         stopSpeaking();
         saveChatMessageToDb('user', textToSend);
 
-        const history = messagesRef.current
+        // L'historique part au serveur, qui construit l'appel au modèle.
+        // Le premier message (accueil) n'est pas de l'utilisateur : on l'exclut.
+        const history: NailaTurn[] = messagesRef.current
             .filter((msg, index) => !(index === 0 && msg.role === 'model'))
-            .map(msg => ({ role: msg.role, parts: [{ text: msg.text }] }));
-
-        const aiContext = getAIContext();
-        const systemPrompt = `Tu es Naïla, assistante chez Netpub. Discussion humaine, Emojis 😊. COURTE ET DIRECTE.
-        
-        UTILISE LE CONTEXTE SUIVANT POUR RÉPONDRE :
-        ${aiContext}
-        
-        RÈGLES CRITIQUES :
-        1. Sois indulgente avec les fautes de frappe ou les abréviations.
-        2. Utilise 'collecterInfosClient' dès que l'utilisateur veut un service, un devis ou un RDV.
-        3. Ne sois pas trop technique, reste chaleureuse.
-        4. Une question à la fois. Max 2 phrases par réponse.`;
+            .map((msg) => ({ role: msg.role, text: msg.text }));
 
         try {
-            const model = aiRef.current.getGenerativeModel({
-                model: MODEL_ID,
-                systemInstruction: systemPrompt,
-            });
+            // Le contexte métier est fourni par le front puis transféré côté serveur,
+            // qui le joint à l'instruction système.
+            const answer = await askNaila(textToSend, history, getAIContext());
 
-            const tools: Tool[] = [{ functionDeclarations: [prendreRendezVous, passerCommande, collecterInfosClient, collecterFeedbackSite, enregistrerNomClient] }];
-
-            const result = await model.generateContent({
-                contents: [...history, { role: 'user', parts: [{ text: textToSend }] }],
-                tools,
-            });
-
-            const response = result.response as GeminiResponse;
-            const calls = response.functionCalls?.();
-
-            if (calls && calls.length > 0) {
-                const fc = calls[0];
-                let confirmationText = '';
-
-                if (fc.name === 'prendreRendezVous') {
-                    const args = fc.args as unknown as AppointmentArgs;
-                    confirmationText = `RDV noté pour ${args.service} le ${args.date} à ${args.heure}.`;
-                    await fetch(GRAPHQL_ENDPOINT, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            query: `mutation CreateAppointment($service: String!, $date: String!, $time: String!, $conversationId: String!) {
-                                createAppointment(service: $service, date: $date, time: $time, conversationId: $conversationId) { id }
-                            }`,
-                            variables: { service: args.service, date: args.date, time: args.heure, conversationId }
-                        }),
-                    });
-                } else if (fc.name === 'enregistrerNomClient') {
-                    const args = fc.args as unknown as ClientNameArgs;
-                    confirmationText = `C'est noté ${args.prenom} ! Qu'est-ce qui t'amène ?`;
-                    await fetch(GRAPHQL_ENDPOINT, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            query: `mutation UpdateConversation($conversationId: String!, $clientName: String) {
-                                updateConversation(conversationId: $conversationId, clientName: $clientName) { id }
-                            }`,
-                            variables: { conversationId, clientName: args.nom ? `${args.nom} ${args.prenom}` : args.prenom }
-                        })
-                    });
-                } else if (fc.name === 'collecterInfosClient') {
-                    const args = fc.args as unknown as ClientInfoArgs;
-                    confirmationText = `Merci ${args.prenom} ! Infos notées.`;
-                    await fetch(GRAPHQL_ENDPOINT, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            query: `mutation UpdateConversation($conversationId: String!, $clientName: String, $clientEmail: String, $clientPhone: String) {
-                                updateConversation(conversationId: $conversationId, clientName: $clientName, clientEmail: $clientEmail, clientPhone: $clientPhone) { id }
-                            }`,
-                            variables: { conversationId, clientName: args.prenom, clientEmail: args.email, clientPhone: args.telephone }
-                        }),
-                    });
+            if (answer.functionName) {
+                let args: Record<string, unknown> = {};
+                try {
+                    args = JSON.parse(answer.functionArgs || '{}');
+                } catch {
+                    args = {};
                 }
 
-                const functionMessage: ChatMessage = { id: Date.now(), role: 'model', text: confirmationText, type: 'function_confirmation' };
+                const confirmationText = await applyNailaFunction(
+                    answer.functionName,
+                    args,
+                    conversationId
+                );
+
+                const functionMessage: ChatMessage = {
+                    id: Date.now(),
+                    role: 'model',
+                    text: confirmationText,
+                    type: 'function_confirmation',
+                };
                 setMessages(prev => [...prev, functionMessage]);
                 saveChatMessageToDb('model', confirmationText);
                 speakText(confirmationText);
             } else {
-                const modelText = response.text() || "Désolé.";
+                const modelText = answer.text || "Désolé.";
                 const modelMessage: ChatMessage = { id: Date.now(), role: 'model', text: modelText, type: 'text' };
                 setMessages(prev => [...prev, modelMessage]);
                 saveChatMessageToDb('model', modelText);
                 speakText(modelText);
             }
         } catch (err) {
-            console.error('[Chatbot] Échec de la génération —', describeGeminiError(err));
+            console.error('[Chatbot] Échec de la génération —', describeNailaError(err));
 
-            if (err instanceof GoogleGenerativeAIFetchError) {
-                const status = (err as { status?: number }).status;
-                if (status === 400 || status === 403) setKeyStatus('invalid');
+            // Une erreur de configuration court terme la session :
+            // inutile de laisser l'utilisateur réessayer en boucle.
+            const reason = err instanceof Error ? err.message : '';
+            if (
+                reason === 'MISSING_KEY' ||
+                reason === 'API_KEY_INVALID' ||
+                reason === 'PERMISSION_DENIED'
+            ) {
+                setKeyStatus(reason === 'MISSING_KEY' ? 'missing' : 'invalid');
             }
 
             const errorMessage = userFacingError(err);
@@ -483,31 +407,17 @@ const Chatbot: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [aiRef, conversationId, isLoading, saveChatMessageToDb, speakText, stopSpeaking]);
+    }, [conversationId, isLoading, saveChatMessageToDb, speakText, stopSpeaking]);
 
     useEffect(() => {
         if (isOpen) {
-            // 1. Vérifier la clé une seule fois par session, sur un vrai appel API
+            // 1. Demander au serveur si sa configuration IA est opérationnelle
             if (!keyCheckedRef.current) {
                 keyCheckedRef.current = true;
-                verifyApiKey().then((ok) => {
-                    if (ok && !aiRef.current) {
-                        try {
-                            aiRef.current = new GoogleGenerativeAI(API_KEY);
-                        } catch (err) {
-                            console.error('[Chatbot] Initialisation Gemini impossible —', describeGeminiError(err));
-                        }
-                    }
-                });
-            } else if (keyStatus === 'valid' && !aiRef.current) {
-                try {
-                    aiRef.current = new GoogleGenerativeAI(API_KEY);
-                } catch (err) {
-                    console.error('[Chatbot] Initialisation Gemini impossible —', describeGeminiError(err));
-                }
+                verifyApiKey();
             }
 
-            // 2. La conversation démarre une fois le statut de la clé connu,
+            // 2. La conversation démarre une fois le statut connu,
             //    pour que l'accueil reflète la réalité
             if (keyStatus !== 'pending' && messages.length === 0 && !conversationId && !isLoading) {
                 createConversation();
@@ -524,7 +434,7 @@ const Chatbot: React.FC = () => {
             if (messages.length > 0) setMessages([]);
             if (conversationId !== null) setConversationId(null);
         }
-    }, [isOpen, API_KEY, messages.length, conversationId, isLoading, createConversation, handleSendMessage, keyStatus, verifyApiKey]);
+    }, [isOpen, messages.length, conversationId, isLoading, createConversation, handleSendMessage, keyStatus, verifyApiKey]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

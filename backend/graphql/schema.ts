@@ -1,6 +1,32 @@
 import { gql } from 'apollo-server-express';
 
 export const typeDefs = gql`
+  """
+  Un tour de conversation transmis au modèle.
+  """
+  input ChatTurnInput {
+    role: String!
+    text: String!
+  }
+
+  """
+  Réponse du modèle, éventuellement accompanied d'un appel de fonction.
+  """
+  type NailaAnswer {
+    text: String
+    functionName: String
+    functionArgs: String
+  }
+
+  """
+  État de la configuration IA côté serveur.
+  """
+  type NailaStatus {
+    configured: Boolean!
+    valid: Boolean!
+    reason: String
+  }
+
   type User {
     id: ID!
     email: String!
@@ -183,6 +209,12 @@ export const typeDefs = gql`
     conversation(id: ID!): Conversation
     allOrders(limit: Int, offset: Int, status: String, date: String): PaginatedOrders!
     allAppointments(limit: Int, offset: Int, status: String, date: String): PaginatedAppointments!
+
+    """
+    Vérifie que la clé Gemini est opérationnelle côté serveur.
+    Permet au front d'afficher un accueil honnête au lieu de mentir.
+    """
+    nailedStatus: NailaStatus!
   }
 
   # Mutations
@@ -235,6 +267,16 @@ export const typeDefs = gql`
       service: String
       message: String!
     ): Boolean!
+
+    """
+    Appel au modèle Gemini côté serveur.
+    La clé API reste côté serveur : elle n'est jamais exposée au navigateur.
+    """
+    askNaila(
+      message: String!
+      history: [ChatTurnInput!]
+      context: String
+    ): NailaAnswer!
 
     # Comment mutations
     addComment(

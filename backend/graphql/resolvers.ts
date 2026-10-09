@@ -5,6 +5,7 @@ import { DashboardService } from '../lib/dashboard.js';
 import createDOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
 import { ResolverContext } from '../types/index.js';
+import { nailaService, ChatTurn } from '../lib/naila.js';
 
 const window = new JSDOM('').window;
 const DOMPurify = createDOMPurify(window as unknown as Parameters<typeof createDOMPurify>[0]);
@@ -57,9 +58,24 @@ export const resolvers = {
     conversation: (_parent: unknown, { id }: { id: string }) => DashboardService.getConversationById(id),
     allOrders: (_parent: unknown, { limit, offset, status, date }: { limit?: number; offset?: number; status?: string; date?: string }) => DashboardService.getAllOrders(limit, offset, status, date),
     allAppointments: (_parent: unknown, { limit, offset, status, date }: { limit?: number; offset?: number; status?: string; date?: string }) => DashboardService.getAllAppointments(limit, offset, status, date),
+
+    // État de la configuration IA — la clé ne quitte jamais le serveur
+    nailedStatus: async () => nailaService.checkStatus(),
   },
 
   Mutation: {
+    // Appel au modèle via le serveur : la clé API reste côté serveur
+    askNaila: async (
+      _parent: unknown,
+      { message, history, context }: { message: string; history?: ChatTurn[]; context?: string }
+    ) => {
+      if (!message || !message.trim()) {
+        throw new Error('EMPTY_MESSAGE');
+      }
+
+      // La clé API reste côté serveur : le client ne la voit jamais.
+      return nailaService.ask(message, history ?? [], context ?? '');
+    },
     // Auth mutations
     login: async (_parent: unknown, { email, password }: { email: string; password: string }, context: ResolverContext) => {
       const ip = context.req.ip || context.req.connection.remoteAddress;
