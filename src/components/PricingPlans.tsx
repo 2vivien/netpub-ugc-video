@@ -8,6 +8,8 @@ interface Plan {
   pitch: string;
   /** Ce que le palier ajoute au palier précédent. */
   inherits?: string;
+  /** Seul le dernier palier affiche un prix. Absent = aucun prix affiché. */
+  priceLabel?: string;
   /** Les libellés suivent les sections du PDF, qui diffèrent par palier. */
   groups: { title: string; items: string[] }[];
   /** Met la carte en avant : fond sombre, pour le dernier palier. */
@@ -26,7 +28,7 @@ const plans: Plan[] = [
     groups: [
       {
         title: 'Contenu',
-        items: ['6 affiches / mois', '1 vidéo UGC / mois', 'Jusqu’à 12 contenus / mois'],
+        items: ['4 affiches / mois', '1 vidéo UGC / mois', 'Jusqu’à 12 contenus / mois'],
       },
       {
         title: 'Présence & communauté',
@@ -52,7 +54,7 @@ const plans: Plan[] = [
         items: [
           '10 affiches / mois',
           '4 vidéos UGC / mois',
-          '2 vidéos comédie / mois',
+          '2 vidéos court métrage / mois',
           '1 podcast et 1 présentation produit / mois',
         ],
       },
@@ -79,7 +81,7 @@ const plans: Plan[] = [
         items: [
           '12 affiches / mois',
           '6 vidéos UGC / mois',
-          '4 vidéos comédie / mois',
+          '4 vidéos court métrage / mois',
           '4 présentations produit et 2 podcasts / mois',
           'Une séance de tournage par mois',
         ],
@@ -102,15 +104,39 @@ const plans: Plan[] = [
     name: 'Netpub Business',
     pitch: 'Nous construisons votre système marketing.',
     inherits: 'Netpub Performance + extension de votre équipe marketing',
+    priceLabel: 'Sur devis',
     highlighted: true,
     groups: [
       {
-        title: 'Stratégie',
+        title: 'Contenu',
         items: [
-          'Stratégie marketing globale et positionnement',
+          'Affiches illimitées, sur demande',
+          '10 vidéos UGC / mois',
+          '8 vidéos court métrage / mois',
+          '8 présentations produit / mois',
+          '2 podcasts / mois',
+          '2 séances de tournage par mois',
+        ],
+      },
+      {
+        title: 'Tout Netpub Performance',
+        items: [
+          'Concepts publicitaires, scripts et storyboards',
+          'Tournage, direction artistique et comédiens',
+          'Montage, sous-titrage, formats TikTok / Reels / Shorts',
+          'Publicité Meta, TikTok et Google/YouTube Ads',
+          'Optimisation des créations selon les performances',
+        ],
+      },
+      {
+        title: 'Stratégie & accompagnement',
+        items: [
+          'Stratégie marketing globale, positionnement et plan trimestriel',
           'Stratégie d’acquisition et de conversion',
-          'Plan marketing trimestriel',
           'Réunion stratégique mensuelle',
+          'Direction marketing externalisée',
+          'Construction de CRM sur demande',
+          'Création de site et d’application sur demande',
         ],
       },
       {
@@ -119,15 +145,15 @@ const plans: Plan[] = [
           'Assistant IA / chatbot site web, assistant WhatsApp',
           'Réponses automatiques et FAQ automatisée',
           'Qualification des prospects et collecte de leads',
+          'Organisation du pipeline commercial et relances',
         ],
       },
       {
-        title: 'CRM & formation',
+        title: 'Formation de l’équipe',
         items: [
-          'Organisation du pipeline commercial et relances',
-          'Analyse du parcours client et orientation vers un commercial',
-          'Formation de l’équipe',
-          'Direction marketing externalisée',
+          'Formation marketing digital et outils',
+          'Formation à l’intelligence artificielle appliquée',
+          'Formation à la cybersécurité',
         ],
       },
     ],
@@ -162,6 +188,8 @@ const PricingPlans: React.FC = () => {
         {plan.popular && <span className="pp-card__flag">Le plus choisi</span>}
         <h3 className="pp-card__name">{plan.name}</h3>
         <p className="pp-card__pitch">{plan.pitch}</p>
+        {/* Seul le dernier palier affiche un prix, sous forme de devis */}
+        {plan.priceLabel && <p className="pp-card__price">{plan.priceLabel}</p>}
         {plan.inherits && <p className="pp-card__inherits">{plan.inherits}</p>}
       </header>
 

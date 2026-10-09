@@ -160,7 +160,17 @@
   color: #565d68;
 }
 
-/* Mention d'héritage : chaque palierinclut tous les précédents */
+/* Prix : affiché uniquement sur le dernier palier */
+.pp-card__price {
+  margin-top: 16px;
+  font-family: var(--font-sans);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #14161a;
+}
+
+/* Mention d'héritage : chaque palier inclut tous les précédents */
 .pp-card__inherits {
   margin-top: 12px;
   padding-top: 12px;
@@ -177,6 +187,26 @@
   flex-direction: column;
   gap: calc(var(--spacing-unit) * 2.5);
   flex: 1;
+  min-height: 0;
+}
+
+/* Le palier sombre liste beaucoup plus de prestations : on borne sa
+   hauteur et on laisse défiler, pour que les 4 cartes restent alignées. */
+.pp-card--dark .pp-card__groups {
+  max-height: 30rem;
+  overflow-y: auto;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
+
+.pp-card--dark .pp-card__groups::-webkit-scrollbar {
+  width: 4px;
+}
+
+.pp-card--dark .pp-card__groups::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
 }
 
 .pp-card__group-title {
@@ -256,6 +286,10 @@
 
 .pp-card--dark .pp-card__pitch {
   color: #9aa1ac;
+}
+
+.pp-card--dark .pp-card__price {
+  color: #ffffff;
 }
 
 .pp-card--dark .pp-card__inherits {
