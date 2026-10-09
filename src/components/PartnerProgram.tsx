@@ -1,4 +1,5 @@
 import React from 'react';
+import PartnerTierChart, { PartnerTier } from './PartnerTierChart';
 import {
   Handshake,
   Link2,
@@ -69,30 +70,35 @@ const steps = [
   },
 ];
 
-const levels = [
+const levels: PartnerTier[] = [
   {
     name: 'Partenaire',
     condition: 'Accord signé',
-    commission: '0%',
+    rate: 0,
     bonus: 'Lien de referral + remises',
+    colors: ['#c7cbd1', '#9aa1aa', '#6b7280'],
   },
   {
     name: 'Partenaire Actif',
     condition: '1 client apporté et signé',
-    commission: '7%',
+    rate: 7,
     bonus: 'Accès prioritaire production',
+    colors: ['#a5e3ff', '#38bdf8', '#0284c7'],
   },
   {
     name: 'Partenaire Premium',
     condition: '3+ clients apportés',
-    commission: '10%',
+    rate: 10,
     bonus: 'Accès prioritaire étendu',
+    colors: ['#cfc0ff', '#8b7cf6', '#6d4fe0'],
   },
   {
     name: 'Partenaire Stratégique',
     condition: '5+ clients apportés',
-    commission: '12%',
+    rate: 12,
     bonus: 'Projets spécifiques + cas client',
+    colors: ['#ffd88a', '#f59e0b', '#d97706'],
+    featured: true,
   },
 ];
 
@@ -169,17 +175,11 @@ const PartnerProgram: React.FC = () => {
         </div>
 
         <div className="partner-levels-grid">
-          {levels.map((level, index) => (
-            <div
+          {levels.map((level) => (
+            <PartnerTierChart
               key={level.name}
-              className={`partner-level-card ${index === 3 ? 'highlight' : ''}`}
-            >
-              {index === 3 && <span className="partner-level-flag">Statut maximal</span>}
-              <h3>{level.name}</h3>
-              <p className="partner-level-condition">{level.condition}</p>
-              <p className="partner-level-commission">{level.commission}</p>
-              <p className="partner-level-bonus">{level.bonus}</p>
-            </div>
+              tier={level}
+            />
           ))}
         </div>
       </section>
