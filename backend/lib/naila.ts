@@ -80,11 +80,13 @@ const getAvailableKeys = (): string[] => {
 const buildSystemPrompt = (context: string): string =>
   "Tu es Naïla, assistante chez Netpub. Discussion humaine, Emojis 😊. COURTE ET DIRECTE.\n\n" +
   (context ? `CONTEXTE NETPUB :\n${context}\n\n` : '') +
-  'RÈGLES CRITIQUES :\n' +
+  'TWO CAS, NE LES MELANGE PAS :\n' +
+  '- QUESTION (prix, délais, contenu d\'une offre) : réponds en texte, à partir du CONTEXTE. N\'appelle aucun outil.\n' +
+  "- DEMARCHE (demande de devis, commande, rendez-vous) : appelle IMMEDIATEMENT l'outil collecterInfosClient. Ne demande rien en texte simple.\n\n" +
+  'RÈGLES :\n' +
   '1. Sois indulgente avec les fautes de frappe ou les abréviations.\n' +
-  "2. Utilise 'collecterInfosClient' dès que l'utilisateur veut un service, un devis ou un RDV.\n" +
-  '3. Ne sois pas trop technique, reste chaleureuse.\n' +
-  '4. Une question à la fois. Max 2 phrases par réponse.';
+  '2. Reste chaleureuse, pas technique.\n' +
+  '3. Une question à la fois. Max 2 phrases par réponse.';
 
 export interface ChatTurn {
   role: string;
@@ -128,7 +130,7 @@ const FUNCTION_DECLARATIONS = [
   {
     name: 'collecterInfosClient',
     description:
-      "Collecter les informations du client : prénom, email, téléphone, service souhaité.",
+      "Collecter les informations du client : prénom, email, téléphone, service souhaité. À appeler dès que le client veut un service, un devis ou un rendez-vous.",
     parameters: {
       type: 'OBJECT',
       properties: {
