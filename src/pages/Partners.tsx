@@ -5,6 +5,7 @@ import PartnerVideo from '../components/PartnerVideo';
 import { SonarGrid } from '../components/ui';
 import PartnerFAQ from '../components/PartnerFAQ';
 import { usePartnersAnimations } from '../hooks/usePartnersAnimations';
+import { useSmoothScroll } from '../hooks/useSmoothScroll';
 import { useChatbot } from '../contexts/ChatbotContext';
 import SEO from '../components/SEO';
 import '../assets/styles/Partners.css';
@@ -13,6 +14,8 @@ const Partners = () => {
   const { openChatbot } = useChatbot();
   const rootRef = useRef<HTMLDivElement>(null);
 
+  // Défilement lissé, couplé aux déclencheurs de scroll
+  useSmoothScroll();
   usePartnersAnimations(rootRef);
 
   const [email, setEmail] = useState('');
