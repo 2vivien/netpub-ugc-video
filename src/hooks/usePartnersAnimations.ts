@@ -78,8 +78,10 @@ export const usePartnersAnimations = (rootRef: React.RefObject<HTMLElement | nul
       /* ---------- 3. ÉTAPES : fade in / fade out au scroll ---------- */
       const stepCards = gsap.utils.toArray<HTMLElement>('.partner-step');
 
-      stepCards.forEach((card, i) => {
+      stepCards.forEach((card) => {
         const content = card.querySelector('.partner-step-inner');
+        // Garde-fou : sans ce noeud, GSAP émettrait « target not found »
+        if (!content) return;
 
         // Entrée quand la carte arrive dans le tiers bas du viewport
         gsap.fromTo(
@@ -116,7 +118,7 @@ export const usePartnersAnimations = (rootRef: React.RefObject<HTMLElement | nul
           }
         );
 
-        void i;
+
       });
 
       /* ---------- 4. COMPTEUR ANIMÉ 648 000 FCFA ---------- */
@@ -154,18 +156,24 @@ export const usePartnersAnimations = (rootRef: React.RefObject<HTMLElement | nul
         });
       }
 
-      /* ---------- 5. STATUTS : reveal progressif ---------- */
-      gsap.from('.partner-level-card', {
-        scrollTrigger: {
-          trigger: '.partner-levels-grid',
-          start: 'top 82%',
-        },
-        opacity: 0,
-        y: 36,
-        duration: 0.8,
-        ease: 'power3.out',
-        stagger: 0.11,
-      });
+      /* ---------- 5. CARTES DE PALIER : reveal progressif ---------- */
+      // Les cartes sont rendues par PartnerTierChart (classe .tier-chart-card).
+      // On n'anime que si le noeud existe : sinon GSAP émet un warning
+      // « target not found » sans rien animer.
+      const tierCards = gsap.utils.toArray<HTMLElement>('.tier-chart-card');
+      if (tierCards.length) {
+        gsap.from(tierCards, {
+          scrollTrigger: {
+            trigger: '.partner-levels-grid',
+            start: 'top 82%',
+          },
+          opacity: 0,
+          y: 36,
+          duration: 0.8,
+          ease: 'power3.out',
+          stagger: 0.11,
+        });
+      }
 
       /* ---------- 6. BOUCLE : apparition du rail ---------- */
       const rail = rootRef.current?.querySelector('.loop-rail');
