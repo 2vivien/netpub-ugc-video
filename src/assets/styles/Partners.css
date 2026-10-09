@@ -706,22 +706,31 @@
 
 /* Le hero est enveloppé par SonarGrid : le champ doit déborder du
    conteneur pour couvrir toute la largeur, le texte reste centré. */
+/* Le champ de fond occupe toute la largeur de l'écran : on sort du
+   conteneur .page-container (max-width 1200px) via un marge négative
+   compensée par le padding latéral du parent. */
 .partner-hero-sonar {
+  position: relative;
+  width: 100vw;
+  margin-left: 50%;
+  transform: translateX(-50%);
   margin-bottom: calc(var(--spacing-unit) * 14);
-  border-radius: 24px;
-  border: 1px solid var(--pnk-line);
+  border-top: 1px solid var(--pnk-line);
+  border-bottom: 1px solid var(--pnk-line);
   background: var(--pnk-surface);
 }
 
 .partner-hero-sonar .partner-hero {
   margin-bottom: 0;
-  padding: calc(var(--spacing-unit) * 14) var(--container-padding);
-  max-width: 100%;
-  min-height: 520px;
+  padding: calc(var(--spacing-unit) * 16) var(--container-padding);
+  max-width: 900px;
+  margin-inline: auto;
+  min-height: 620px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  text-align: center;
 }
 
 /* Léger dégradé sous le texte pour garantir le contraste
@@ -731,11 +740,11 @@
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    ellipse 46% 38% at 50% 50%,
+    ellipse 42% 36% at 50% 50%,
     rgba(253, 253, 253, 1) 0%,
-    rgba(253, 253, 253, 0.99) 55%,
-    rgba(253, 253, 253, 0.92) 78%,
-    rgba(253, 253, 253, 0.55) 92%,
+    rgba(253, 253, 253, 0.98) 58%,
+    rgba(253, 253, 253, 0.86) 80%,
+    rgba(253, 253, 253, 0.45) 93%,
     transparent 100%
   );
   pointer-events: none;
