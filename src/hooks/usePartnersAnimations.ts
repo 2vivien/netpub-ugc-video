@@ -62,54 +62,62 @@ export const usePartnersAnimations = (rootRef: React.RefObject<HTMLElement | nul
         delay: 0.6,
       });
 
-      /* ---------- 2. CARTES AVANTAGES : stagger cascade ---------- */
+      /* ---------- 2. AVANTAGES : cascade + halo ---------- */
       gsap.from('.partner-benefit-card', {
         scrollTrigger: {
           trigger: '.partner-benefits-grid',
           start: 'top 82%',
         },
         opacity: 0,
-        y: 40,
+        y: 36,
         duration: 0.85,
         ease: 'power3.out',
-        stagger: 0.09,
+        stagger: 0.08,
       });
 
-      /* ---------- 3. ÉTAPES : ligne verticale qui se dessine ---------- */
-      const stepsGrid = rootRef.current?.querySelector('.partner-steps-grid');
-      if (stepsGrid) {
-        // Crée la ligne verticale reliant les étapes
-        const line = document.createElement('div');
-        line.className = 'partner-steps-line';
-        stepsGrid.appendChild(line);
+      /* ---------- 3. ÉTAPES : fade in / fade out au scroll ---------- */
+      const stepCards = gsap.utils.toArray<HTMLElement>('.partner-step');
 
+      stepCards.forEach((card, i) => {
+        const content = card.querySelector('.partner-step-inner');
+
+        // Entrée quand la carte arrive dans le tiers bas du viewport
         gsap.fromTo(
-          line,
-          { scaleY: 0 },
+          content,
+          { opacity: 0, y: 26 },
           {
-            scaleY: 1,
-            ease: 'none',
+            opacity: 1,
+            y: 0,
+            duration: 0.7,
+            ease: 'power3.out',
             scrollTrigger: {
-              trigger: '.partner-steps-grid',
-              start: 'top 70%',
-              end: 'bottom 60%',
-              scrub: 0.6,
+              trigger: card,
+              start: 'top 88%',
+              toggleActions: 'play none none reverse',
             },
           }
         );
 
-        gsap.from('.partner-step-card', {
-          scrollTrigger: {
-            trigger: '.partner-steps-grid',
-            start: 'top 78%',
-          },
-          opacity: 0,
-          y: 32,
-          duration: 0.75,
-          ease: 'power3.out',
-          stagger: 0.14,
-        });
-      }
+        // Léger décalage entre les cartes, pour un rythme
+        /* Barre verticale : grandit de 0 à 1 pendant que la carte
+           monte dans le viewport, puis se fige. */
+        gsap.fromTo(
+          card,
+          { '--step-progress': 0 },
+          {
+            '--step-progress': 1,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 88%',
+              end: 'top 42%',
+              scrub: 0.4,
+            },
+          }
+        );
+
+        void i;
+      });
 
       /* ---------- 4. COMPTEUR ANIMÉ 648 000 FCFA ---------- */
       const resultEl = rootRef.current?.querySelector('.partner-example-result');
@@ -159,35 +167,18 @@ export const usePartnersAnimations = (rootRef: React.RefObject<HTMLElement | nul
         stagger: 0.11,
       });
 
-      /* ---------- 6. BOUCLE : pulsation séquentielle sur les flèches ---------- */
-      const arrows = gsap.utils.toArray<HTMLElement>('.partner-loop-arrow');
-      if (arrows.length) {
-        arrows.forEach((arrow, index) => {
-          gsap.fromTo(
-            arrow,
-            { opacity: 0.2, x: -4 },
-            {
-              opacity: 1,
-              x: 0,
-              duration: 0.6,
-              ease: 'power2.inOut',
-              repeat: -1,
-              yoyo: true,
-              delay: index * 0.25,
-            }
-          );
-        });
-
-        gsap.from('.partner-loop-node', {
+      /* ---------- 6. BOUCLE : apparition du rail ---------- */
+      const rail = rootRef.current?.querySelector('.loop-rail');
+      if (rail) {
+        gsap.from(rail, {
           scrollTrigger: {
-            trigger: '.partner-loop-chain',
-            start: 'top 82%',
+            trigger: '.partner-loop',
+            start: 'top 85%',
           },
           opacity: 0,
-          scale: 0.9,
-          duration: 0.7,
-          ease: 'back.out(1.4)',
-          stagger: 0.1,
+          y: 30,
+          duration: 0.85,
+          ease: 'power3.out',
         });
       }
 
