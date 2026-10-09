@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { useImageTrail } from '../hooks/useImageTrail';
 import './ImageTrail.css';
+import OptimizedVideo from './OptimizedVideo';
 
 interface MediaItem {
   url: string;
@@ -23,7 +24,7 @@ const ImageTrail = ({ media, className }: ImageTrailProps) => {
       {media.map((item, i) => (
         <div className="content__img" key={i}>
           {item.type === 'video' ? (
-            <video
+            <OptimizedVideo
               src={item.url}
               className="content__img-inner"
               autoPlay

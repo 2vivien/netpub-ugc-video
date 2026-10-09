@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { PortfolioProject } from '../types';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import './ProjectLightbox.css';
+import OptimizedVideo from './OptimizedVideo';
 
 interface ProjectLightboxProps {
   projects: PortfolioProject[];
@@ -45,7 +46,7 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ projects, initialInde
       <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
         <div className="lightbox-media-container">
           {isVideo ? (
-            <video
+            <OptimizedVideo
               src={mediaUrl}
               className="lightbox-media"
               autoPlay={isPlaying}

@@ -4,6 +4,7 @@ import { useChatbot } from '../contexts/ChatbotContext';
 import { X, Play, Pause, Volume2, VolumeX, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getWebpUrl } from '../utils/mediaUtils';
 import './InfluencerCard.css';
+import OptimizedVideo from './OptimizedVideo';
 
 interface InfluencerCardProps {
     project: PortfolioProject;
@@ -114,7 +115,7 @@ const InfluencerCard: React.FC<InfluencerCardProps> = ({ project, onMediaClick }
     const renderMedia = (media: { type: 'video' | 'image'; url: string }, isMain: boolean) => {
         if (media.type === 'video') {
             return (
-                <video
+                <OptimizedVideo
                     ref={isMain ? videoRef : null}
                     src={media.url}
                     className={isMain ? "influencer-main-photo" : ""}
@@ -206,7 +207,7 @@ const InfluencerCard: React.FC<InfluencerCardProps> = ({ project, onMediaClick }
                                 }}
                             >
                                 {circle.item.type === 'video' ? (
-                                    <video src={circle.item.url} muted playsInline preload="metadata" />
+                                    <OptimizedVideo src={circle.item.url} muted playsInline preload="metadata" />
                                 ) : (
                                     <picture>
                                         <source srcSet={getWebpUrl(circle.item.url)} type="image/webp" />

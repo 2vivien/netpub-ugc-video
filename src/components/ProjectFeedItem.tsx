@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import './ProjectFeedItem.css';
 import { PortfolioProject } from '../types';
+import OptimizedVideo from './OptimizedVideo';
 
 interface ProjectFeedItemProps {
   project: PortfolioProject;
@@ -27,7 +28,7 @@ const ProjectFeedItem: React.FC<ProjectFeedItemProps> = ({ project, isActive }) 
     <div className={`project-feed-item ${isActive ? 'is-active' : ''}`}>
       <div className="media-container">
         {project.mediaType === 'video' ? (
-          <video
+          <OptimizedVideo
             ref={videoRef}
             key={project.id}
             src={project.mediaUrl}

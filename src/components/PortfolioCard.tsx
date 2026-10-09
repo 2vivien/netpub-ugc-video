@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { PortfolioProject } from '../types';
 import { X, Play, Pause, Volume2, VolumeX } from 'lucide-react';
 import { getWebpUrl, getOptimizedVideoUrls } from '../utils/mediaUtils';
+import OptimizedVideo from './OptimizedVideo';
 import './PortfolioCard.css';
 
 interface PortfolioCardProps {
@@ -47,7 +48,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ project, onClick }) => {
   const renderMedia = () => {
     if (currentMedia.type === 'video') {
       return (
-        <video
+        <OptimizedVideo
           ref={videoRef}
           src={currentMedia.url}
           className="influencer-main-photo"
@@ -129,7 +130,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ project, onClick }) => {
                   }}
                 >
                   {circle.item.type === 'video' ? (
-                    <video src={circle.item.url} muted playsInline preload="metadata" />
+                    <OptimizedVideo src={circle.item.url} muted playsInline preload="metadata" />
                   ) : (
                     <picture>
                       <source srcSet={getWebpUrl(circle.item.url)} type="image/webp" />

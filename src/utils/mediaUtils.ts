@@ -18,7 +18,12 @@ export const getWebpUrl = (originalUrl: string): string => {
 export const getVideoWebmUrl = (mp4Url?: string): string | undefined => {
   if (!mp4Url) return undefined;
   if (mp4Url.endsWith('.webm')) return mp4Url;
-  return mp4Url.replace(/\.mp4$/i, '.webm');
+  // Les WebM sont dans un sous-dossier /webm/ à côté des MP4. Sans ce
+  // segment, la source pointait vers un fichier inexistant, le navigateur
+  // faisait un 404 et retombait sur le MP4 — donc sur 12 Mo au lieu de 3,6.
+  const dir = mp4Url.slice(0, mp4Url.lastIndexOf('/') + 1);
+  const name = mp4Url.slice(dir.length).replace(/\.mp4$/i, '.webm');
+  return `${dir}webm/${name}`;
 };
 
 export const getOptimizedImageUrl = (originalUrl: string): string => {

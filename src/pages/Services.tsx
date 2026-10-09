@@ -6,6 +6,7 @@ import TestimonialCarousel from '../components/TestimonialCarousel';
 import CallToAction from '../components/CallToAction';
 import { useChatbot } from '../contexts/ChatbotContext'; // Import useChatbot
 import SEO from '../components/SEO';
+import OptimizedVideo from '../components/OptimizedVideo';
 
 
 const Services: React.FC = () => {
@@ -74,7 +75,7 @@ const Services: React.FC = () => {
                                 transition: 'transform 0.1s ease-out' // Smoother immediate response
                             }}
                         >
-                            <video className="service-card-video-bg" src={service.videoUrl} autoPlay loop muted playsInline></video>
+                            <OptimizedVideo className="service-card-video-bg" src={service.videoUrl} autoPlay loop muted playsInline></OptimizedVideo>
                             <div className="service-card-overlay">
                                 <div className="service-card-content">
                                     <h3>{service.title}</h3>
