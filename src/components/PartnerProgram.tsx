@@ -1,6 +1,7 @@
 import React from 'react';
 import PartnerTierChart, { PartnerTier } from './PartnerTierChart';
 import LoopRail from './LoopRail';
+import CommissionFlip from './CommissionFlip';
 import {
   Handshake,
   Link2,
@@ -154,22 +155,40 @@ const PartnerProgram: React.FC = () => {
 
       {/* Exemple de commission */}
       <section className="partner-example">
-        <div className="partner-example-inner">
-          <Coins size={28} />
+        <div className="partner-example-head">
           <p className="partner-example-label">Exemple concret</p>
+          <h2 className="partner-example-title">
+            Ce que vaut<br />un client apporté
+          </h2>
           <p className="partner-example-text">
             Vous recommandez une PME qui signe un contrat{' '}
             <strong>Performance à 450 000 FCFA/mois</strong>, au statut Stratégique.
           </p>
-          <p className="partner-example-math">
-            450 000 × 12 mois × 12% ={' '}
-            <span className="partner-example-result">648 000 FCFA</span>
-          </p>
+        </div>
+
+        <div className="partner-example-calc">
+          <div className="partner-example-operands">
+            <div>
+              <span className="partner-example-op-value">450 000</span>
+              <span className="partner-example-op-label">FCFA / mois</span>
+            </div>
+            <span className="partner-example-op">×</span>
+            <div>
+              <span className="partner-example-op-value">12</span>
+              <span className="partner-example-op-label">mois</span>
+            </div>
+            <span className="partner-example-op">×</span>
+            <div>
+              <span className="partner-example-op-value">12 %</span>
+              <span className="partner-example-op-label">commission</span>
+            </div>
+          </div>
+
+          <CommissionFlip value={648000} />
+
           <p className="partner-example-note">
             Partenaire Stratégique — le taux le plus élevé du programme.
-          </p>
-          <p className="partner-example-note">
-            Payables à l’encaissement du premier paiement du client recommandé.
+            Payable à l’encaissement du premier paiement du client recommandé.
           </p>
         </div>
       </section>
