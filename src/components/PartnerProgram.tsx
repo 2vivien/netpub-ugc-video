@@ -1,5 +1,6 @@
 import React from 'react';
 import PartnerTierChart, { PartnerTier } from './PartnerTierChart';
+import LoopRail from './LoopRail';
 import {
   Handshake,
   Link2,
@@ -134,10 +135,18 @@ const PartnerProgram: React.FC = () => {
 
         <div className="partner-steps-grid">
           {steps.map((step) => (
-            <div key={step.number} className="partner-step-card">
-              <span className="partner-step-number">{step.number}</span>
-              <h3>{step.title}</h3>
-              <p>{step.description}</p>
+            <div className="partner-step" key={step.number}>
+              <div className="partner-step-inner">
+                <span className="partner-step-tag">
+                  Step {parseInt(step.number, 10)}
+                  <em>.</em>
+                </span>
+
+                <div className="partner-step-body">
+                  <h3>{step.title}</h3>
+                  <p>{step.description}</p>
+                </div>
+              </div>
             </div>
           ))}
         </div>
@@ -184,7 +193,7 @@ const PartnerProgram: React.FC = () => {
         </div>
       </section>
 
-      {/* Boucle */}
+      {/* Boucle — rail horizontal entrant par la droite */}
       <section className="partner-loop">
         <div className="partner-section-header">
           <h2 className="section-title">La boucle Netpub</h2>
@@ -193,19 +202,7 @@ const PartnerProgram: React.FC = () => {
           </p>
         </div>
 
-        <div className="partner-loop-chain">
-          {['Vous devenez partenaire', 'Vous recommandez', 'Le client signe', 'Il devient partenaire'].map(
-            (label, index) => (
-              <React.Fragment key={label}>
-                <div className="partner-loop-node">
-                  <Handshake size={20} />
-                  <span>{label}</span>
-                </div>
-                {index < 3 && <span className="partner-loop-arrow">→</span>}
-              </React.Fragment>
-            )
-          )}
-        </div>
+        <LoopRail />
       </section>
     </>
   );
