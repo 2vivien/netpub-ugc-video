@@ -6,11 +6,13 @@ import { PortfolioProject, PortfolioCategory } from '../types';
 import StatsSection from '../components/StatsSection';
 import { Link } from 'react-router-dom';
 import MasonryGrid from '../components/MasonryGrid';
+import PricingPlans from '../components/PricingPlans';
 
 import SEO from '../components/SEO';
 
-// Lazy load components that are below the fold
-const PricingPlans = lazy(() => import('../components/PricingPlans'));
+// Lazy load components that are below the fold.
+// PricingPlans n'est pas chargé en différé : c'est du contenu statique sans
+// dépendance lourde, et le lazy affichait « Chargement... » à chaque visite.
 const TestimonialCarousel = lazy(() => import('../components/TestimonialCarousel'));
 const CallToAction = lazy(() => import('../components/CallToAction'));
 
@@ -62,8 +64,8 @@ const Home: React.FC = () => {
       </div>
       <MasonryGrid projects={groupedProjects} onProjectClick={handleProjectClick} />
       <StatsSection />
-      <Suspense fallback={<div>Chargement...</div>}>
-        <PricingPlans />
+      <PricingPlans />
+      <Suspense fallback={null}>
         <TestimonialCarousel />
         <CallToAction />
       </Suspense>
