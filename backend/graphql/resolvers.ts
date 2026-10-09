@@ -259,6 +259,21 @@ export const resolvers = {
         const sanitizedService = service ? DOMPurify.sanitize(service) : service;
         const sanitizedMessage = DOMPurify.sanitize(message);
 
+        // Le message est enregistré en base AVANT tout envoi SMTP. Un
+        // serveur mail en panne ne doit plus faire perdre un contact :
+        // la notification part en best-effort, la sauvegarde non.
+        const conversation = await prisma.conversation.create({
+          data: {
+            userName: sanitizedName,
+            clientEmail: email,
+            discovery: [sanitizedCompany, sanitizedService].filter(Boolean).join(' — ') || null,
+            messages: {
+              create: { sender: 'user', text: sanitizedMessage },
+            },
+          },
+        });
+        console.log('Contact message saved, conversation id:', conversation.id);
+
         // Send notification email
         console.log('Sending notification email...');
         const notificationSent = await emailService.sendContactNotification({
@@ -280,7 +295,12 @@ export const resolvers = {
         });
 
         console.log('Email results:', { notificationSent, autoReplySent });
-        return notificationSent && autoReplySent;
+        if (!notificationSent || !autoReplySent) {
+          console.warn('Contact enregistré en base mais email non envoyé', conversation.id);
+        }
+        // La réussite se juge sur la sauvegarde, pas sur le SMTP : le
+        // message est chez nous, l'email n'est qu'un bonus.
+        return true;
       } catch (error) {
         console.error('Failed to send contact message resolver error:', error);
         throw new Error('Failed to send contact message: ' + (error instanceof Error ? error.message : 'Unknown error'));
