@@ -1,0 +1,332 @@
+/* ==========================================================================
+   Pricing Plans — 4 paliers, sans prix ni icônes
+   ========================================================================== */
+
+.pp-section {
+  padding: calc(var(--spacing-unit) * 12) var(--container-padding);
+  background: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Halo très discret derrière l'en-tête, reprend le geste du SonarGrid */
+.pp-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to right, rgba(74, 74, 74, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(74, 74, 74, 0.045) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 42% at 50% 0%, #000 55%, transparent 100%);
+  mask-image: radial-gradient(ellipse 70% 42% at 50% 0%, #000 55%, transparent 100%);
+}
+
+.pp-container {
+  position: relative;
+  max-width: var(--container-width);
+  margin: 0 auto;
+}
+
+/* ---------- En-tête ---------- */
+
+.pp-header {
+  text-align: center;
+  margin-bottom: calc(var(--spacing-unit) * 7);
+}
+
+.pp-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.85rem, 3.4vw, 2.8rem);
+  font-weight: 600;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  color: #16181c;
+  max-width: 18ch;
+  margin: 0 auto 14px;
+}
+
+.pp-subtitle {
+  font-size: 1.05rem;
+  color: #6b7280;
+  max-width: 46ch;
+  margin: 0 auto;
+}
+
+/* ---------- Grille ---------- */
+
+.pp-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: calc(var(--spacing-unit) * 2.5);
+  align-items: stretch;
+}
+
+/* ---------- Carte ---------- */
+
+.pp-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing-unit) * 3);
+  padding: calc(var(--spacing-unit) * 4) calc(var(--spacing-unit) * 3);
+  background: #fff;
+  border: 1px solid #e8eaee;
+  border-radius: 18px;
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease;
+}
+
+.pp-card:hover {
+  transform: translateY(-6px);
+  border-color: #d5d8de;
+  box-shadow: 0 22px 48px -24px rgba(16, 24, 40, 0.28);
+}
+
+/* Halo radial sur le palier mis en avant */
+.pp-card--featured {
+  border-color: #cfd4dc;
+  box-shadow: 0 18px 44px -28px rgba(16, 24, 40, 0.32);
+}
+
+.pp-card--featured::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 80% 55% at 50% -18%, rgba(124, 92, 255, 0.07), rgba(255, 255, 255, 0) 70%);
+}
+
+/* Palier « Sur devis » : carte sombre, texture grille */
+.pp-card--dark {
+  background: #14161a;
+  border-color: #14161a;
+  color: #f2f3f5;
+}
+
+.pp-card--dark:hover {
+  border-color: #14161a;
+  box-shadow: 0 26px 54px -26px rgba(0, 0, 0, 0.55);
+}
+
+.pp-card--dark::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to right, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 40px 40px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 45% at 50% 0%, #000 45%, transparent 100%);
+  mask-image: radial-gradient(ellipse 70% 45% at 50% 0%, #000 45%, transparent 100%);
+}
+
+/* ---------- En-tête de carte ---------- */
+
+.pp-card__head {
+  position: relative;
+  padding-top: calc(var(--spacing-unit) * 2.5);
+}
+
+.pp-card__flag {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5b45d0;
+}
+
+.pp-card__name {
+  font-family: var(--font-sans);
+  font-size: 1.24rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  color: #14161a;
+}
+
+.pp-card__pitch {
+  margin-top: 8px;
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #565d68;
+}
+
+/* Mention d'héritage : chaque palierinclut tous les précédents */
+.pp-card__inherits {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #eef0f3;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: #9aa1ac;
+}
+
+/* ---------- Groupes de prestations ---------- */
+
+.pp-card__groups {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing-unit) * 2.5);
+  flex: 1;
+}
+
+.pp-card__group-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #9aa1ac;
+  margin-bottom: 10px;
+}
+
+.pp-card__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+/* Marqueur dessiné en CSS — aucun icon SVG */
+.pp-card__list li {
+  position: relative;
+  padding-left: 16px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #3f4650;
+}
+
+.pp-card__list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.6em;
+  width: 6px;
+  height: 1.5px;
+  background: #14161a;
+}
+
+/* ---------- Pied de carte ---------- */
+
+.pp-card__foot {
+  padding-top: calc(var(--spacing-unit) * 2.5);
+  border-top: 1px solid #eef0f3;
+}
+
+.pp-card__cta {
+  width: 100%;
+  margin-top: calc(var(--spacing-unit) * 1);
+  padding: 13px 18px;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #fff;
+  background: #14161a;
+  border: 1px solid #14161a;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+}
+
+.pp-card__cta:hover {
+  background: #2a2e35;
+  border-color: #2a2e35;
+  transform: translateY(-1px);
+}
+
+.pp-card__cta:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 3px;
+}
+
+/* ---------- Variante sombre ---------- */
+
+.pp-card--dark .pp-card__name {
+  color: #ffffff;
+}
+
+.pp-card--dark .pp-card__pitch {
+  color: #9aa1ac;
+}
+
+.pp-card--dark .pp-card__inherits {
+  border-top-color: rgba(255, 255, 255, 0.12);
+  color: #6b7280;
+}
+
+.pp-card--dark .pp-card__group-title {
+  color: #6b7280;
+}
+
+.pp-card--dark .pp-card__list li {
+  color: #d3d7de;
+}
+
+.pp-card--dark .pp-card__list li::before {
+  background: #ffffff;
+}
+
+.pp-card--dark .pp-card__foot {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+
+.pp-card--dark .pp-card__cta {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #14161a;
+}
+
+.pp-card--dark .pp-card__cta:hover {
+  background: #e8eaee;
+  border-color: #e8eaee;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1100px) {
+  .pp-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: calc(var(--spacing-unit) * 2);
+  }
+}
+
+@media (max-width: 700px) {
+  .pp-section {
+    padding: calc(var(--spacing-unit) * 8) calc(var(--spacing-unit) * 2.5);
+  }
+
+  .pp-header {
+    margin-bottom: calc(var(--spacing-unit) * 5);
+  }
+
+  .pp-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pp-card {
+    padding: calc(var(--spacing-unit) * 3.5) calc(var(--spacing-unit) * 2.5);
+  }
+}
+
+/* ---------- Accessibilité : mouvement réduit ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-card,
+  .pp-card__cta {
+    transition: none;
+  }
+
+  .pp-card:hover,
+  .pp-card__cta:hover {
+    transform: none;
+  }
+}

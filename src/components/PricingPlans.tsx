@@ -1,264 +1,210 @@
-import React, { useState } from 'react';
-import useScreenWidth from '../hooks/useScreenWidth';
-import { Sprout, Award, Crown, Clapperboard, TrendingUp, Sparkles } from 'lucide-react';
+import React from 'react';
+import '../assets/styles/Pricing.css';
 
 interface Plan {
   id: string;
   name: string;
-  icon: React.ReactNode;
-  tagline: string;
-  badge: { text: string; color: string };
+  /** Accroche du PDF, citée telle quelle. */
+  pitch: string;
+  /** Ce que le palier ajoute au palier précédent. */
+  inherits?: string;
+  /** Les libellés suivent les sections du PDF, qui diffèrent par palier. */
+  groups: { title: string; items: string[] }[];
+  /** Met la carte en avant : fond sombre, pour le dernier palier. */
+  highlighted?: boolean;
   popular?: boolean;
-  features: {
-    content: string[];
-    strategy: string[];
-  };
-  advantage: string;
-  idealFor: string;
 }
 
+// Contenu repris de docs/netpub-business-plan.md (sections 06 à 09).
+// Les paliers sont cumulatifs : chaque niveau inclut le précédent.
+// Aucun prix n'est affiché ici, la prise de contact passe par le chatbot.
+const plans: Plan[] = [
+  {
+    id: 'presence',
+    name: 'Netpub Présence',
+    pitch: 'Votre marque doit être visible avant d’être choisie.',
+    groups: [
+      {
+        title: 'Contenu',
+        items: ['6 affiches / mois', '1 vidéo UGC / mois', 'Jusqu’à 12 contenus / mois'],
+      },
+      {
+        title: 'Présence & communauté',
+        items: [
+          'Audit initial et profil Facebook, Instagram, TikTok, Google Business',
+          'Calendrier éditorial mensuel',
+          'Gestion des réseaux sociaux et programmation des publications',
+          'Community management basique (modération)',
+          'Reporting mensuel et recommandations',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'acquisition',
+    name: 'Netpub Acquisition',
+    pitch: 'Ne vous contentez plus d’être visible. Générez des prospects.',
+    inherits: 'Netpub Présence + acquisition payante',
+    popular: true,
+    groups: [
+      {
+        title: 'Contenu',
+        items: [
+          '10 affiches / mois',
+          '4 vidéos UGC / mois',
+          '2 vidéos comédie / mois',
+          '1 podcast et 1 présentation produit / mois',
+        ],
+      },
+      {
+        title: 'Publicité & acquisition',
+        items: [
+          'Campagnes Meta Ads, TikTok Ads et Google Ads',
+          'Création des annonces, tests A/B, retargeting',
+          'CRM et parcours d’acquisition',
+          'Suivi des conversions et analyse du coût par prospect',
+          'Réunion stratégique mensuelle',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'performance',
+    name: 'Netpub Performance',
+    pitch: 'Votre contenu devient votre machine commerciale.',
+    inherits: 'Netpub Acquisition + équipe créative et production vidéo au complet',
+    groups: [
+      {
+        title: 'Contenu',
+        items: [
+          '12 affiches / mois',
+          '6 vidéos UGC / mois',
+          '4 vidéos comédie / mois',
+          '4 présentations produit et 2 podcasts / mois',
+          'Une séance de tournage par mois',
+        ],
+      },
+      {
+        title: 'Production & diffusion',
+        items: [
+          'Concepts publicitaires, scripts et storyboards',
+          'Tournage, direction artistique et comédiens',
+          'Montage, sous-titrage, formats TikTok / Reels / Shorts',
+          'Publicité Meta, TikTok et Google/YouTube Ads',
+          'Optimisation des créations selon les performances',
+          'Formation de l’équipe et reporting',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'business',
+    name: 'Netpub Business',
+    pitch: 'Nous construisons votre système marketing.',
+    inherits: 'Netpub Performance + extension de votre équipe marketing',
+    highlighted: true,
+    groups: [
+      {
+        title: 'Stratégie',
+        items: [
+          'Stratégie marketing globale et positionnement',
+          'Stratégie d’acquisition et de conversion',
+          'Plan marketing trimestriel',
+          'Réunion stratégique mensuelle',
+        ],
+      },
+      {
+        title: 'IA & automatisation',
+        items: [
+          'Assistant IA / chatbot site web, assistant WhatsApp',
+          'Réponses automatiques et FAQ automatisée',
+          'Qualification des prospects et collecte de leads',
+        ],
+      },
+      {
+        title: 'CRM & formation',
+        items: [
+          'Organisation du pipeline commercial et relances',
+          'Analyse du parcours client et orientation vers un commercial',
+          'Formation de l’équipe',
+          'Direction marketing externalisée',
+        ],
+      },
+    ],
+  },
+];
+
 const PricingPlans: React.FC = () => {
-  const screenWidth = useScreenWidth();
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const nextSlide = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % 3);
-  };
-
-  const prevSlide = () => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + 3) % 3);
-  };
-
-  // Plan data for cleaner code
-  const plans = [
-    {
-      id: 'elan',
-      name: 'Plan ÉLAN',
-      icon: <Sprout size={24} className="plan-icon" />,
-      tagline: 'Pour poser les bases de votre image',
-      badge: { text: 'Débuter fort', color: 'elan' },
-      features: {
-        content: [
-          '2 vidéos UGC créées à partir de votre univers produit',
-          '3 photos produits professionnelles',
-          '1 influenceur assigné à votre marque',
-          '1 mini spot publicitaire vertical (Reel/TikTok)'
-        ],
-        strategy: [
-          'Mini audit de votre marque et de votre audience',
-          'Accompagnement sur la stratégie de contenu',
-          'Gestion optionnelle des réseaux sociaux',
-          'Optimisation de la première campagne publicitaire'
-        ]
-      },
-      advantage: 'Une identité visuelle claire et un contenu impactant dès le départ, sans investissement lourd.',
-      idealFor: 'les e-commerçants, les entreprises locales et ceux qui débutent.'
-    },
-    {
-      id: 'marque',
-      name: 'Plan MARQUE',
-      icon: <Award size={24} className="plan-icon" />,
-      tagline: 'Pour développer votre notoriété',
-      badge: { text: 'Croissance & expansion', color: 'marque' },
-      popular: true,
-      features: {
-        content: [
-          '5 vidéos UGC orientées conversion',
-          '6 photos produits créatives',
-          '2 influenceurs dédiés selon votre niche',
-          '1 série complète de spots publicitaires cinématiques',
-          'Vidéos verticales multi-format'
-        ],
-        strategy: [
-          'Audit complet de votre marque',
-          'Stratégie marketing sur 3 mois',
-          'Gestion & automatisation des réseaux sociaux',
-          'Gestion publicitaire sur Meta Ads + TikTok',
-          'Suivi mensuel des performances et ajustements'
-        ]
-      },
-      advantage: 'Automatisation de vos réseaux sociaux pour une croissance régulière et mesurable, sans gestion quotidienne.',
-      idealFor: 'les marques en pleine croissance et en essor.'
-    },
-    {
-      id: 'entreprise',
-      name: 'Plan ENTREPRISE',
-      icon: <Crown size={24} className="plan-icon" />,
-      tagline: 'Pour s\'imposer durablement sur votre marché',
-      badge: { text: 'Luxe & performance', color: 'entreprise' },
-      features: {
-        content: [
-          '10 vidéos UGC 4K premium',
-          '12 photos produits artistiques',
-          '3 influenceurs stratégiques selon votre audience',
-          '1 série complète de spots publicitaires cinématiques',
-          'Captation drone + motion design avancé'
-        ],
-        strategy: [
-          'Audit approfondi de votre marque & de vos publicités',
-          'Stratégie marketing personnalisée sur 3 mois',
-          'Automatisation avancée & intelligence artificielle',
-          'Chatbot de support client intégré à vos réseaux sociaux et site web pour une assistance 24/7 et génération de leads.',
-          'Gestion publicitaire multi-plateforme',
-          'Analyse comportementale de l\'audience',
-          'Suivi hebdomadaire + optimisations continues'
-        ]
-      },
-      advantage: 'Une stratégie de contenu à la hauteur des grandes marques.',
-      idealFor: 'les grandes marques et les entreprises établies.'
-    }
-  ];
-
   const openChatbot = (planName: string) => {
     const chatbotButton = document.querySelector('.chatbot-toggler') as HTMLElement;
     if (chatbotButton) {
       chatbotButton.click();
       setTimeout(() => {
         const event = new CustomEvent('chatbotContext', {
-          detail: {
-            plan: planName,
-            message: `Je suis intéressé par le ${planName}`
-          }
+          detail: { plan: planName, message: `Je suis intéressé par le ${planName}` },
         });
         window.dispatchEvent(event);
       }, 500);
     }
   };
 
-  const PricingCard = ({ plan, isPopular = false }: { plan: Plan, isPopular?: boolean }) => (
-    <div className={`pricing-card ${plan.id}-card ${isPopular ? 'popular' : ''}`}>
-      <div className={`pricing-badge ${plan.badge.color}-badge`}>
-        <span>{plan.badge.text}</span>
+  const PricingCard = ({ plan }: { plan: Plan }) => (
+    <article
+      className={[
+        'pp-card',
+        plan.highlighted ? 'pp-card--dark' : '',
+        plan.popular ? 'pp-card--featured' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      <header className="pp-card__head">
+        {plan.popular && <span className="pp-card__flag">Le plus choisi</span>}
+        <h3 className="pp-card__name">{plan.name}</h3>
+        <p className="pp-card__pitch">{plan.pitch}</p>
+        {plan.inherits && <p className="pp-card__inherits">{plan.inherits}</p>}
+      </header>
+
+      <div className="pp-card__groups">
+        {plan.groups.map((group) => (
+          <div className="pp-card__group" key={group.title}>
+            <h4 className="pp-card__group-title">{group.title}</h4>
+            <ul className="pp-card__list">
+              {group.items.map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
 
-      {isPopular && (
-        <div className="popular-badge">
-          <span>Populaire</span>
-        </div>
-      )}
-
-      <div className="pricing-card-content">
-        <div className="plan-header-row">
-          {plan.icon}
-          <h3>{plan.name}</h3>
-        </div>
-        <p className="plan-tagline">{plan.tagline}</p>
-
-        <div className="pricing-features">
-          <div className="feature-group">
-            <h4><Clapperboard size={18} /> Contenu :</h4>
-            <ul>
-              {plan.features.content.map((feature: string, index: number) => (
-                <li key={index}>{feature}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="feature-group">
-            <h4><TrendingUp size={18} /> Stratégie & analyse :</h4>
-            <ul>
-              {plan.features.strategy.map((feature: string, index: number) => (
-                <li key={index}>{feature}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="pricing-advantage">
-            <p><strong><Sparkles size={16} /> Avantage clé :</strong></p>
-            <p style={{ marginTop: '4px', marginBottom: '16px' }}>{plan.advantage}</p>
-            <p><strong>Idéal pour :</strong></p>
-            <p style={{ marginTop: '4px' }}>{plan.idealFor}</p>
-          </div>
-        </div>
-
+      <footer className="pp-card__foot">
         <button
-          className="pricing-cta-button"
+          type="button"
+          className="pp-card__cta"
           onClick={() => openChatbot(plan.name)}
         >
-          Choisir ce plan
+          {plan.highlighted ? 'Parler de mon projet' : 'Choisir cette offre'}
         </button>
-      </div>
-    </div>
+      </footer>
+    </article>
   );
 
   return (
-    <section className="pricing-plans-section">
-      <div className="pricing-plans-container">
-        <h2 className="pricing-plans-title">
-          Choisissez l'expérience qui propulse votre image
-        </h2>
-        <p className="pricing-plans-subtitle">
-          Des solutions pensées pour chaque vision
-        </p>
+    <section className="pp-section">
+      <div className="pp-container">
+        <div className="pp-header">
+          <h2 className="pp-title">Choisissez l’expérience qui propulse votre image</h2>
+          <p className="pp-subtitle">
+            Quatre offres cumulatives : chaque niveau inclut tous les précédents
+          </p>
+        </div>
 
-        {screenWidth >= 769 ? (
-          // Desktop: Grid statique
-          <div className="pricing-plans-grid">
-            {plans.map((plan) => (
-              <PricingCard
-                key={plan.id}
-                plan={plan}
-                isPopular={plan.popular}
-              />
-            ))}
-          </div>
-        ) : (
-          // Mobile: Carousel fonctionnel
-          <div className="pricing-plans-mobile-carousel">
-            <div className="carousel-wrapper">
-              <div
-                className="pricing-cards-track"
-                style={{
-                  transform: `translateX(-${currentIndex * 100}%)`,
-                  transition: 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
-                }}
-              >
-                {plans.map((plan) => (
-                  <div key={plan.id} className="carousel-slide">
-                    <PricingCard
-                      plan={plan}
-                      isPopular={plan.popular}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Navigation buttons for mobile carousel */}
-            <div className="carousel-navigation">
-              <button
-                className="carousel-nav-btn prev"
-                onClick={prevSlide}
-                aria-label="Plan précédent"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-
-              <div className="carousel-indicators">
-                {plans.map((_, idx) => (
-                  <button
-                    key={idx}
-                    className={`indicator ${idx === currentIndex ? 'active' : ''}`}
-                    onClick={() => setCurrentIndex(idx)}
-                    aria-label={`Aller au plan ${idx + 1}`}
-                  />
-                ))}
-              </div>
-
-              <button
-                className="carousel-nav-btn next"
-                onClick={nextSlide}
-                aria-label="Plan suivant"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        )}
+        <div className="pp-grid">
+          {plans.map((plan) => (
+            <PricingCard key={plan.id} plan={plan} />
+          ))}
+        </div>
       </div>
     </section>
   );
