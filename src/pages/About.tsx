@@ -35,16 +35,16 @@ const About: React.FC = () => {
                 </div>
                 <div className="intro-image-pills-container">
                     <div className="image-pill pill-1">
-                        <img src="/images/9.png" alt="Image 9" />
+                        <img src="/webp-images/hero/9.webp" alt="Image 9" />
                     </div>
                     <div className="image-pill pill-2">
-                        <img src="/images/15.png" alt="Image 15" />
+                        <img src="/webp-images/hero/15.webp" alt="Image 15" />
                     </div>
                     <div className="image-pill pill-3">
-                        <img src="/images/8.png" alt="Image 8" />
+                        <img src="/webp-images/hero/8.webp" alt="Image 8" />
                     </div>
                     <div className="image-pill pill-4">
-                        <img src="/images/14.png" alt="Image 14" />
+                        <img src="/webp-images/hero/14.webp" alt="Image 14" />
                     </div>
                 </div>
             </section>

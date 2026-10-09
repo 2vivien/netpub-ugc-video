@@ -12,10 +12,10 @@ const subtitles = [
 ];
 
 const trailMedia: { url: string; type: 'image' | 'video' }[] = [
-    { url: '/images/1.png', type: 'image' }, { url: '/images/2.png', type: 'image' }, { url: '/images/3.png', type: 'image' }, { url: '/images/4.png', type: 'image' },
-    { url: '/images/5.png', type: 'image' }, { url: '/images/6.png', type: 'image' }, { url: '/images/7.png', type: 'image' }, { url: '/images/8.png', type: 'image' },
-    { url: '/images/9.png', type: 'image' }, { url: '/images/10.png', type: 'image' }, { url: '/images/11.png', type: 'image' }, { url: '/images/12.png', type: 'image' },
-    { url: '/images/13.png', type: 'image' }, { url: '/images/14.png', type: 'image' }, { url: '/images/15.png', type: 'image' }, { url: '/images/16.png', type: 'image' },
+    { url: '/webp-images/hero/1.webp', type: 'image' }, { url: '/webp-images/hero/2.webp', type: 'image' }, { url: '/webp-images/hero/3.webp', type: 'image' }, { url: '/webp-images/hero/4.webp', type: 'image' },
+    { url: '/webp-images/hero/5.webp', type: 'image' }, { url: '/webp-images/hero/6.webp', type: 'image' }, { url: '/webp-images/hero/7.webp', type: 'image' }, { url: '/webp-images/hero/8.webp', type: 'image' },
+    { url: '/webp-images/hero/9.webp', type: 'image' }, { url: '/webp-images/hero/10.webp', type: 'image' }, { url: '/webp-images/hero/11.webp', type: 'image' }, { url: '/webp-images/hero/12.webp', type: 'image' },
+    { url: '/webp-images/hero/13.webp', type: 'image' }, { url: '/webp-images/hero/14.webp', type: 'image' }, { url: '/webp-images/hero/15.webp', type: 'image' }, { url: '/webp-images/hero/16.webp', type: 'image' },
     { url: '/video-mode/Design sans titre (1).mp4', type: 'video' },
     { url: '/video-mode/Design sans titre (2).mp4', type: 'video' },
     { url: '/video-mode/Design sans titre (3).mp4', type: 'video' },
