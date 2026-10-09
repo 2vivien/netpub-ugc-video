@@ -160,14 +160,25 @@
   color: #565d68;
 }
 
-/* Prix : affiché uniquement sur le dernier palier */
+/* Prix */
 .pp-card__price {
   margin-top: 16px;
   font-family: var(--font-sans);
-  font-size: 1.5rem;
+  font-size: 1.32rem;
   font-weight: 600;
   letter-spacing: -0.02em;
+  line-height: 1.2;
   color: #14161a;
+}
+
+.pp-card__price-period {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9aa1ac;
 }
 
 /* Mention d'héritage : chaque palier inclut tous les précédents */
@@ -207,6 +218,34 @@
 .pp-card--dark .pp-card__groups::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.25);
   border-radius: 4px;
+}
+
+/* Enveloppe des groupes : occupe l'espace restant pour que le bouton
+   de chaque carte reste aligné en bas de la grille. */
+.pp-card__scroll {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Fondu bas : signale qu'il reste des prestations à faire défiler */
+.pp-card--dark .pp-card__scroll {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.pp-card--dark .pp-card__scroll::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 3rem;
+  pointer-events: none;
+  background: linear-gradient(to top, #14161a 15%, rgba(20, 22, 26, 0) 100%);
 }
 
 .pp-card__group-title {
@@ -290,6 +329,10 @@
 
 .pp-card--dark .pp-card__price {
   color: #ffffff;
+}
+
+.pp-card--dark .pp-card__price-period {
+  color: #6b7280;
 }
 
 .pp-card--dark .pp-card__inherits {

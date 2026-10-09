@@ -8,10 +8,13 @@ interface Plan {
   pitch: string;
   /** Ce que le palier ajoute au palier précédent. */
   inherits?: string;
-  /** Seul le dernier palier affiche un prix. Absent = aucun prix affiché. */
-  priceLabel?: string;
+  
   /** Les libellés suivent les sections du PDF, qui diffèrent par palier. */
   groups: { title: string; items: string[] }[];
+  /** Montant affiché sous le nom. « Sur devis » sur le dernier palier. */
+  priceLabel: string;
+  /** Période affichée en petit sous le montant. Absent pour « Sur devis ». */
+  pricePeriod?: string;
   /** Met la carte en avant : fond sombre, pour le dernier palier. */
   highlighted?: boolean;
   popular?: boolean;
@@ -25,6 +28,8 @@ const plans: Plan[] = [
     id: 'presence',
     name: 'Netpub Présence',
     pitch: 'Votre marque doit être visible avant d’être choisie.',
+    priceLabel: '150 000 FCFA',
+    pricePeriod: 'par mois',
     groups: [
       {
         title: 'Contenu',
@@ -47,6 +52,8 @@ const plans: Plan[] = [
     name: 'Netpub Acquisition',
     pitch: 'Ne vous contentez plus d’être visible. Générez des prospects.',
     inherits: 'Netpub Présence + acquisition payante',
+    priceLabel: '250 000 FCFA',
+    pricePeriod: 'par mois',
     popular: true,
     groups: [
       {
@@ -75,6 +82,8 @@ const plans: Plan[] = [
     name: 'Netpub Performance',
     pitch: 'Votre contenu devient votre machine commerciale.',
     inherits: 'Netpub Acquisition + équipe créative et production vidéo au complet',
+    priceLabel: '450 000 FCFA',
+    pricePeriod: 'par mois',
     groups: [
       {
         title: 'Contenu',
@@ -188,22 +197,26 @@ const PricingPlans: React.FC = () => {
         {plan.popular && <span className="pp-card__flag">Le plus choisi</span>}
         <h3 className="pp-card__name">{plan.name}</h3>
         <p className="pp-card__pitch">{plan.pitch}</p>
-        {/* Seul le dernier palier affiche un prix, sous forme de devis */}
-        {plan.priceLabel && <p className="pp-card__price">{plan.priceLabel}</p>}
+        <p className="pp-card__price">
+          {plan.priceLabel}
+          {plan.pricePeriod && <span className="pp-card__price-period">{plan.pricePeriod}</span>}
+        </p>
         {plan.inherits && <p className="pp-card__inherits">{plan.inherits}</p>}
       </header>
 
-      <div className="pp-card__groups">
-        {plan.groups.map((group) => (
-          <div className="pp-card__group" key={group.title}>
-            <h4 className="pp-card__group-title">{group.title}</h4>
-            <ul className="pp-card__list">
-              {group.items.map((item, i) => (
-                <li key={i}>{item}</li>
-              ))}
-            </ul>
-          </div>
-        ))}
+      <div className="pp-card__scroll">
+        <div className="pp-card__groups">
+          {plan.groups.map((group) => (
+            <div className="pp-card__group" key={group.title}>
+              <h4 className="pp-card__group-title">{group.title}</h4>
+              <ul className="pp-card__list">
+                {group.items.map((item, i) => (
+                  <li key={i}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
       </div>
 
       <footer className="pp-card__foot">
