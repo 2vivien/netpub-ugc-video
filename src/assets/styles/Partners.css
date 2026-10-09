@@ -994,3 +994,282 @@
 .tier-chart-bonus {
   margin-top: auto;
 }
+
+/* ============================================================
+   ÉTAPES — format editorial (numéro en haut, titre au centre)
+   ============================================================ */
+
+.partner-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--pnk-line);
+}
+
+.partner-step {
+  position: relative;
+  border-left: 1px solid var(--pnk-line);
+  /* La ligne verticale s'efface sur les bords du bloc */
+  transition: background 0.5s ease;
+}
+
+.partner-step:last-child {
+  border-right: 1px solid var(--pnk-line);
+}
+
+.partner-step-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: calc(var(--spacing-unit) * 10);
+  min-height: 380px;
+  padding: calc(var(--spacing-unit) * 3.5) calc(var(--spacing-unit) * 3)
+    calc(var(--spacing-unit) * 4);
+}
+
+.partner-step-tag {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
+  font-family: var(--font-sans);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--pnk-ink);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+
+.partner-step-tag em {
+  font-style: normal;
+  color: #ff4d2e;
+}
+
+/* Barre verticale qui grandit quand la carte est à l'écran.
+   pilotée par --step-progress (0 → 1) depuis GSAP. */
+.partner-step::after {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: 0;
+  width: 2px;
+  height: calc(var(--step-progress, 0) * 100%);
+  background: var(--pnk-ink);
+  z-index: 2;
+}
+
+.partner-step-body {
+  will-change: transform, opacity;
+}
+
+.partner-step-body h3 {
+  font-family: var(--font-serif);
+  font-size: 1.55rem;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: var(--pnk-ink);
+  margin-bottom: calc(var(--spacing-unit) * 2);
+  text-wrap: balance;
+}
+
+.partner-step-body p {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--pnk-grey);
+  max-width: 30ch;
+}
+
+/* ============================================================
+   AVANTAGES — liste éditoriale (diffère des cartes)
+   ============================================================ */
+
+.partner-benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: calc(var(--spacing-unit) * 10);
+  row-gap: 0;
+  border-top: 1px solid var(--pnk-line);
+}
+
+.partner-benefit-card {
+  position: relative;
+  display: flex;
+  gap: calc(var(--spacing-unit) * 2.5);
+  padding: calc(var(--spacing-unit) * 3.5) 0;
+  border-bottom: 1px solid var(--pnk-line);
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  border-radius: 0;
+  transition: padding-left 0.35s ease;
+}
+
+.partner-benefit-card:hover {
+  transform: none;
+  border-color: var(--pnk-line);
+  box-shadow: none;
+  padding-left: calc(var(--spacing-unit) * 1.5);
+}
+
+.partner-benefit-icon {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--pnk-surface-alt);
+  color: var(--pnk-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0;
+  transition: background 0.35s ease, color 0.35s ease, transform 0.35s ease;
+}
+
+.partner-benefit-card:hover .partner-benefit-icon {
+  background: var(--pnk-ink);
+  color: #fff;
+  transform: rotate(-8deg);
+}
+
+.partner-benefit-card h3 {
+  font-size: 1rem;
+  margin-bottom: 6px;
+}
+
+.partner-benefit-card p {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--pnk-grey);
+  max-width: 46ch;
+}
+
+/* ============================================================
+   BOUCLE — rail horizontal entrant par la droite
+   ============================================================ */
+
+.loop-rail {
+  position: relative;
+  overflow: hidden;
+  padding: calc(var(--spacing-unit) * 1.5) 0;
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 9%,
+    #000 91%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 9%,
+    #000 91%,
+    transparent 100%
+  );
+}
+
+.loop-rail-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.loop-rail-block {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing-unit) * 2);
+  padding-right: calc(var(--spacing-unit) * 2);
+}
+
+.loop-rail-node {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing-unit) * 1.5);
+  padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 3);
+  border: 1px solid var(--pnk-line);
+  border-radius: 999px;
+  background: var(--pnk-surface);
+  color: var(--pnk-ink);
+  font-size: 0.92rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.loop-rail-arrow {
+  font-size: 1.15rem;
+  color: var(--pnk-ink);
+  opacity: 0.3;
+  flex-shrink: 0;
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 1024px) {
+  .partner-steps-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .partner-steps-grid .partner-step:nth-child(3) {
+    border-right: 1px solid var(--pnk-line);
+  }
+  .partner-steps-grid .partner-step:nth-child(n + 3) {
+    border-top: 1px solid var(--pnk-line);
+  }
+}
+
+@media (max-width: 768px) {
+  .partner-benefits-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .partner-steps-grid {
+    grid-template-columns: 1fr;
+  }
+  .partner-steps-grid .partner-step {
+    border-right: 1px solid var(--pnk-line);
+  }
+  .partner-step-inner {
+    min-height: 0;
+    gap: calc(var(--spacing-unit) * 3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loop-rail-track {
+    transform: none !important;
+  }
+  .partner-step::after {
+    transition: none;
+  }
+}
+
+/* Titres sur une seule ligne : le titre passe sous l'icône
+   et la description occupe toute la largeur de la colonne. */
+.partner-benefit-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    'icon title'
+    '.    text';
+  column-gap: calc(var(--spacing-unit) * 2.25);
+  row-gap: calc(var(--spacing-unit) * 1.25);
+  align-items: center;
+}
+
+.partner-benefit-icon {
+  grid-area: icon;
+  align-self: start;
+  margin-top: 2px;
+}
+
+.partner-benefit-card h3 {
+  grid-area: title;
+  align-self: center;
+  margin-bottom: 0;
+  text-wrap: balance;
+}
+
+.partner-benefit-card p {
+  grid-area: text;
+  max-width: 52ch;
+}
