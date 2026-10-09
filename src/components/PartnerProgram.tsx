@@ -162,20 +162,15 @@ const PartnerProgram: React.FC = () => {
           </h2>
           <p className="partner-example-text">
             Vous recommandez une PME qui signe un contrat{' '}
-            <strong>Performance à 450 000 FCFA/mois</strong>, au statut Stratégique.
+            <strong>Performance ferme de 12 mois</strong> à 450 000 FCFA/mois.
           </p>
         </div>
 
         <div className="partner-example-calc">
           <div className="partner-example-operands">
             <div>
-              <span className="partner-example-op-value">450 000</span>
-              <span className="partner-example-op-label">FCFA / mois</span>
-            </div>
-            <span className="partner-example-op">×</span>
-            <div>
-              <span className="partner-example-op-value">12</span>
-              <span className="partner-example-op-label">mois</span>
+              <span className="partner-example-op-value">5 400 000</span>
+              <span className="partner-example-op-label">FCFA / an</span>
             </div>
             <span className="partner-example-op">×</span>
             <div>
@@ -188,7 +183,8 @@ const PartnerProgram: React.FC = () => {
 
           <p className="partner-example-note">
             Partenaire Stratégique — le taux le plus élevé du programme.
-            Payable à l’encaissement du premier paiement du client recommandé.
+            La commission est versée en une fois, sur le contrat annuel,
+            dès règlement de la facture du client recommandé.
           </p>
         </div>
       </section>
